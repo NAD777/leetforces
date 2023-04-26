@@ -6,7 +6,6 @@ import sqlalchemy.ext.declarative as dec
 SqlAlchemyBase = dec.declarative_base()
 PASSWORD = "postgres"
 
-
 __factory = None
 
 
@@ -25,7 +24,6 @@ def global_init(db_file):
 
     from time import sleep
     sleep(2)
-
     engine = sa.create_engine(conn_str, echo=False)
     __factory = orm.sessionmaker(bind=engine)
 

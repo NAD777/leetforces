@@ -13,8 +13,9 @@ global_init("backbase")
 PERMITTED_EXTENSIONS = ['py', 'java']
 ORCHESTRATOR_URL = "http://orchestrator:5000"
 BOT_URL = "http://bot:8081"
-# BOT_URL = "http://localhost:8080"
 
+
+# BOT_URL = "http://localhost:8080"
 
 @app.route("/")
 def hello_world():
@@ -46,10 +47,10 @@ def submit():
         "task_no": task_no,
         "source_file": file,
         "extension": extension,
-        "file_name" : filename
+        "file_name": filename
     }
 
-    Thread(target=lambda : requests.post(f"{ORCHESTRATOR_URL}/run", json=data)).start()
+    Thread(target=lambda: requests.post(f"{ORCHESTRATOR_URL}/run", json=data)).start()
     # TODO: handle rEsponse from ORCHESTRATOR
 
     return jsonify({"status": "File submitted", "code": 0, "submission_id": submission_id}), 200
@@ -202,5 +203,22 @@ def create_sample_problems():
 
 
 create_sample_problems()
+
+@app.route("/register", methods=["POST", "DELETE"])
+def register():
+    chat_id = request.args.get("chat_id")
+    session = create_session()
+    print(request.method)
+    if request.method == "POST":
+        chat = Chat(chat_id=chat_id)
+        session.add(chat)
+        session.commit()
+    elif request.method == "DELETE":
+        chat = session.query(Chat).filter(Chat.chat_id == chat_id).first()
+        session.delete(chat)
+        session.commit()
+    return "Done"
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8000)
