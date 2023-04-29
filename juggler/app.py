@@ -4,6 +4,8 @@ from database.all_models import *
 from sqlalchemy.exc import NoResultFound, DataError
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from threading import Thread
+from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm.exc import UnmappedInstanceError
 import base64
 import requests
 
@@ -208,16 +210,32 @@ create_sample_problems()
 def register():
     chat_id = request.args.get("chat_id")
     session = create_session()
-    print(request.method)
-    if request.method == "POST":
-        chat = Chat(chat_id=chat_id)
-        session.add(chat)
-        session.commit()
-    elif request.method == "DELETE":
-        chat = session.query(Chat).filter(Chat.chat_id == chat_id).first()
-        session.delete(chat)
-        session.commit()
-    return "Done"
+    # print(request.method)
+    code = 200
+    response = {
+        'status': None,
+        'code': 0
+    }
+    try:
+        if request.method == "POST":
+            if len(session.query(Chat).filter(Chat.chat_id == chat_id).all()) != 0:
+                response["status"] = "User already present"
+                response['code'] = 1
+            else:
+                chat = Chat(chat_id=chat_id)
+                session.add(chat)
+                session.commit()
+                response["status"] = "User added"
+        elif request.method == "DELETE":
+            chat = session.query(Chat).filter(Chat.chat_id == chat_id).first()
+            session.delete(chat)
+            session.commit()
+            response["status"] = "User deleted"
+    except (NoResultFound, UnmappedInstanceError):
+        response["status"] = "Error occurred"
+        code = 404
+        response['code'] = 2
+    return jsonify(response), code
 
 
 if __name__ == '__main__':
