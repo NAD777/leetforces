@@ -24,20 +24,20 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-configuration-processor")
-    implementation("org.springframework:spring-context-indexer")
-    implementation("org.springframework:spring-webflux")
+    implementation("org.springframework:spring-context-indexer:6.0.6")
+    implementation("org.springframework:spring-webflux:6.0.6")
     implementation("com.github.pengrad:java-telegram-bot-api:6.6.0")
 
-    compileOnly("org.projectlombok:lombok")
+    compileOnly("org.projectlombok:lombok:1.18.26")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok:1.18.26")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.mockito:mockito-core")
-    testImplementation("junit:junit")
+    testImplementation("org.mockito:mockito-core:5.2.0")
+    testImplementation("junit:junit:4.13.2")
 }
 
 tasks.withType<Test> {
