@@ -27,6 +27,7 @@ class Task(SqlAlchemyBase):
 
     task_id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     task_name = sqlalchemy.Column(sqlalchemy.String, unique=False, nullable=False)
+    task_path = sqlalchemy.Column(sqlalchemy.String, unique=False, nullable=False)
 
     def __repr__(self):
         return '<Task {} {}>'.format(self.task_id, self.task_name)
