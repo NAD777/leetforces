@@ -1,24 +1,17 @@
-import json
-import sys
+from __future__ import annotations
+import os
 
-sys.path.append('../../problem_set/master_solutions')
+from xmlrpc.client import ServerProxy
 
-from task_1 import Task1
-from solution import Solution
-
-def generate_data(solution: Solution) -> None:
-    test_data = open(f"../runners/test_data/task_{solution.task_id}.json", "w")
-    for _ in range(solution.tests_no):
-        test = {}
-
-        data = solution.gen_sample()
-        test['in'] = solution.last_generated_test
-        test['out'] = solution.run(*data)
-
-        json.dump(test, test_data)
-        test_data.write('\n')
-
-
-if __name__ == '__main__':
-    t1 = Task1()
-    generate_data(t1)
+# it just receives data from the runner generator container, it does not generate anything by itself
+class DataGenerator:
+    # TODO: optimize
+    def generate_data(self, task_id: int, ext: str) -> None:
+        path = f"../runners/test_data/task_{task_id}.json"
+        if not os.path.exists(path):
+            #TODO: add conditional contatiner starting/stopping
+            with ServerProxy('http://172.17.0.2:31337') as node:
+                data = node.generate_test_data(task_id, ext).data.decode('utf-8')
+                test_data = open(path, 'w')
+                test_data.write(data)
+                test_data.close()
