@@ -6,7 +6,6 @@
 #   task_no : <task_no>
 #   extension : <ext>
 # }
-# run child docker container for executing the user submission
 #
 from flask import Flask, request
 import logging
@@ -17,12 +16,6 @@ from test_data_generator import DataGenerator
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-
-
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
-
 
 @app.route("/run", methods=["POST"])
 def run():
@@ -41,10 +34,10 @@ def run():
     print(f'Got request with: {task_id=}')
     print(f'Got request with: {ext=}')
 
-    with open(f"../runners/{submission_id}.{ext}", 'w') as f:
+    with open(f"{submission_id}.{ext}", 'w') as f:
         f.write(str(source_file))
 
     gen = DataGenerator()
-    gen.generate_data(task_id, ext)
+    gen.generate_data(task_id)
 
     return "Done"

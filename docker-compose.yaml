@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+
+  orchestrator:
+    build: 
+      context: ./orchestrator/
+      dockerfile: ./orchestrator/Dockerfile
+    networks: 
+      - internal
+    container_name: orchestrator
+    command: flask run -h 0.0.0.0 -p 5000
+    depends_on:
+      - test_generator
+
+  test_generator:
+    build: 
+      dockerfile: ./orchestrator/runners/Dockerfile
+      context: .
+    networks: 
+      - internal
+    command: python gen_tests.py
+
+networks:
+  internal:
