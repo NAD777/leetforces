@@ -22,7 +22,6 @@ def hello_world():
 @app.route("/submit", methods=["POST"])
 def submit():
     chat_id = request.args.get("chat_id")
-    print(chat_id)
     filename = request.form.get("name")
     task_no = request.form.get("task_no")
     file = request.files.get("source_file")
@@ -79,19 +78,19 @@ def report():
 
 @app.route("/list", methods=["GET"])
 def get_list():
-    chat_id = request.args.get("chat_id")
+    # chat_id = request.args.get("chat_id")
     session = create_session()
     tasks = session.query(Task).all()
     tasks_dict = {
         "list": [{"task_id": task.task_id, "task_name": task.task_name} for task in tasks],
-        "chat_id": chat_id
+        # "chat_id": chat_id
     }
     return jsonify(tasks_dict)
 
 
 @app.route("/get_task", methods=["GET"])
 def get_task():
-    chat_id = request.args.get("chat_id")
+    # chat_id = request.args.get("chat_id")
     task_id = request.args.get("task_id")
     session = create_session()
     task = None
@@ -103,7 +102,7 @@ def get_task():
     with open(f"test_files/{task.task_path}", 'rb') as file:
         file_content = str(base64.b64encode(file.read()))[2:-1]
     task_dict = {
-        "chat_id": chat_id,
+        # "chat_id": chat_id,
         "task_id": task_id,
         "task_name": task.task_name,
         "task_file": file_content
@@ -115,7 +114,6 @@ def get_task():
 def register():
     chat_id = request.args.get("chat_id")
     session = create_session()
-    # print(request.method)
     code = 200
     response = {
         'status': None,
