@@ -5,9 +5,11 @@ import com.github.nad777.bot.client.responses.ListTasksResponse;
 import com.github.nad777.bot.client.responses.SubmitTaskResponse;
 import com.github.nad777.bot.client.responses.TaskFileResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Component
 @RequiredArgsConstructor
@@ -37,22 +39,36 @@ public class JugglerClient {
     }
 
     public ListTasksResponse getTasks() {
-        return jugglerWebClient.get()
-                .uri("/list")
-                .retrieve()
-                .bodyToMono(ListTasksResponse.class)
-                .block();
+        try {
+            return jugglerWebClient.get()
+                    .uri("/list")
+                    .retrieve()
+                    .bodyToMono(ListTasksResponse.class)
+                    .block();
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode() != HttpStatus.NOT_FOUND) {
+                throw e;
+            }
+            return new ListTasksResponse(null);
+        }
     }
 
     public TaskFileResponse getTaskById(String taskId) {
-        return jugglerWebClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .pathSegment("get_task")
-                        .queryParam("task-id", taskId)
-                        .build())
-                .retrieve()
-                .bodyToMono(TaskFileResponse.class)
-                .block();
+        try {
+            return jugglerWebClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .pathSegment("get_task")
+                            .queryParam("task_id", taskId)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(TaskFileResponse.class)
+                    .block();
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode() != HttpStatus.NOT_FOUND) {
+                throw e;
+            }
+            return new TaskFileResponse(null, null);
+        }
     }
 
     public SubmitTaskResponse submitTask(long id, SubmitTaskRequest request) {

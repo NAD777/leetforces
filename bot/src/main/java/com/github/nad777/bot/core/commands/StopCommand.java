@@ -5,7 +5,9 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Component
 @RequiredArgsConstructor
@@ -29,7 +31,14 @@ public class StopCommand implements Command {
     @Override
     public SendMessage handle(@NotNull Update update) {
         long chatId = update.message().chat().id();
-        jugglerClient.deleteChat(chatId);
-        return new SendMessage(chatId, MESSAGE);
+        try {
+            jugglerClient.deleteChat(chatId);
+            return new SendMessage(chatId, MESSAGE);
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode() != HttpStatus.NOT_FOUND) {
+                throw e;
+            }
+            return null;
+        }
     }
 }

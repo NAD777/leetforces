@@ -39,6 +39,10 @@ public class TaskCommand implements Command {
         String taskId = update.message().text().substring(COMMAND.length());
         TaskFileResponse response = jugglerClient.getTaskById(taskId);
 
+        if (response.taskId() == null) {
+            return new SendMessage(chatId, "There is no such task");
+        }
+
         SendDocument sendDocument = new SendDocument(chatId, response.taskFile());
         telegramBot.execute(sendDocument);
 
