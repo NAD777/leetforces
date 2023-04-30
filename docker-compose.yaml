@@ -1,7 +1,6 @@
 version: "3.9"
 
 services:
-
   postgres:
     build:
       dockerfile: ./Postgres/Dockerfile
@@ -13,7 +12,6 @@ services:
       POSTGRES_PASSWORD: "postgres"
     volumes:
       - .:/docker-entrypoint-initdb.d
-  
   juggler:
     build:
       context: ./juggler
@@ -77,4 +75,3 @@ networks:
   internal:
   bot_backend:
   orchestrator_backend:
-
