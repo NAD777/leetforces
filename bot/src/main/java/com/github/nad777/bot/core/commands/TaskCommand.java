@@ -20,7 +20,8 @@ public class TaskCommand implements Command {
 
     private static final String COMMAND = "/task_no_";
     private static final String DESCRIPTION = "Command to get task by task id";
-    private static final String MESSAGE = "Here is your file with task description. You can submit task solution in the next message. Only .py or .java files are supported";
+    private static final String MESSAGE =
+            "Here is your file with task description. You can submit task solution in the next message. Only __.py__ or __.java__ files are supported";
 
     @Override
     public String command() {
@@ -47,6 +48,8 @@ public class TaskCommand implements Command {
 
     @Override
     public boolean supports(@NotNull Update update) {
-        return update.message().text().startsWith(COMMAND) && update.message().text().split(" ").length == 1;
+        return update.message().text().startsWith(COMMAND)
+                && update.message().text().length() > COMMAND.length()
+                && update.message().text().split(" ").length == 1;
     }
 }

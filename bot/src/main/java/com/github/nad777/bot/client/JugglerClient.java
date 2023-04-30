@@ -2,6 +2,7 @@ package com.github.nad777.bot.client;
 
 import com.github.nad777.bot.client.requests.SubmitTaskRequest;
 import com.github.nad777.bot.client.responses.ListTasksResponse;
+import com.github.nad777.bot.client.responses.SubmitTaskResponse;
 import com.github.nad777.bot.client.responses.TaskFileResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -48,15 +49,15 @@ public class JugglerClient {
                 .block();
     }
 
-    public void submitTask(long id, SubmitTaskRequest request) {
-        jugglerWebClient.post()
+    public SubmitTaskResponse submitTask(long id, SubmitTaskRequest request) {
+        return jugglerWebClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .pathSegment("submit")
                         .queryParam("chat-id", id)
                         .build())
                 .bodyValue(BodyInserters.fromValue(request))
                 .retrieve()
-                .bodyToMono(Void.class)
+                .bodyToMono(SubmitTaskResponse.class)
                 .block();
     }
 }

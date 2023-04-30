@@ -2,6 +2,7 @@ package com.github.nad777.bot.core;
 
 import com.github.nad777.bot.client.JugglerClient;
 import com.github.nad777.bot.client.requests.SubmitTaskRequest;
+import com.github.nad777.bot.client.responses.SubmitTaskResponse;
 import com.github.nad777.bot.core.commands.Command;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Document;
@@ -26,7 +27,7 @@ public class UserMessageProcessor {
     private final static String UNSUPPORTED_COMMAND = "Sorry, I don't understand you. Try /help to see list of commands";
     private final static String FILE_EXPECTED = "File with solution expected!";
     private final static String LARGE_FILE = "File is too large.";
-    private final static String SUBMITTED_FILE = "You've submitted file.";
+    private final static String SUBMITTED_FILE = "You've submitted file.\n";
     private final static long MAX_FILE_SIZE = 2 * 1024 * 1024;
 
     @Autowired
@@ -84,8 +85,9 @@ public class UserMessageProcessor {
                 // send file to juggler
                 String taskId = previousCommand.substring("/task_no_".length());
                 SubmitTaskRequest request = new SubmitTaskRequest(fileName, taskId, fileBytes);
-                jugglerClient.submitTask(chatId, request);
-                return new SendMessage(chatId, SUBMITTED_FILE);
+                SubmitTaskResponse response = jugglerClient.submitTask(chatId, request);
+                // send status to user
+                return new SendMessage(chatId, SUBMITTED_FILE + response.toString());
             }
         }
 
