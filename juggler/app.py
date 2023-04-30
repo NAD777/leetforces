@@ -26,7 +26,7 @@ def hello_world():
 
 @app.route("/submit", methods=["POST"])
 def submit():
-    json_payload = request.get_json()
+    json_payload = request.json
     chat_id = request.args.get("chat_id")
     filename = json_payload["name"]
     task_no = json_payload["task_no"]
