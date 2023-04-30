@@ -16,7 +16,10 @@ public class JugglerClient {
 
     public void registerChat(long id) {
         jugglerWebClient.post()
-                .uri("/chat/{id}", id)
+                .uri(uriBuilder -> uriBuilder
+                        .pathSegment("chat")
+                        .queryParam("chat_id", id)
+                        .build())
                 .retrieve()
                 .bodyToMono(Void.class)
                 .block();
@@ -24,7 +27,10 @@ public class JugglerClient {
 
     public void deleteChat(long id) {
         jugglerWebClient.delete()
-                .uri("/chat/{id}", id)
+                .uri(uriBuilder -> uriBuilder
+                        .pathSegment("chat")
+                        .queryParam("chat_id", id)
+                        .build())
                 .retrieve()
                 .bodyToMono(Void.class)
                 .block();
@@ -41,7 +47,7 @@ public class JugglerClient {
     public TaskFileResponse getTaskById(String taskId) {
         return jugglerWebClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .pathSegment("get-task")
+                        .pathSegment("get_task")
                         .queryParam("task-id", taskId)
                         .build())
                 .retrieve()
@@ -53,7 +59,7 @@ public class JugglerClient {
         return jugglerWebClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .pathSegment("submit")
-                        .queryParam("chat-id", id)
+                        .queryParam("chat_id", id)
                         .build())
                 .bodyValue(BodyInserters.fromValue(request))
                 .retrieve()
