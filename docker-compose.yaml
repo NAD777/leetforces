@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  postgres:
+    build:
+      dockerfile: ./Postgres/Dockerfile
+    networks:
+      - asd
+    environment:
+      POSTGRES_DB: "backbase"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+    volumes:
+      - .:/docker-entrypoint-initdb.d
+
+
+
+  juggler:
+    build:
+      context: ./juggler
+      dockerfile: ./Dockerfile
+    networks:
+      - asd
+    container_name: juggler
+    command: flask run -h 0.0.0.0 -p 5001
+    depends_on:
+      - postgres
+    ports:
+      - "5001:5001"
+networks:
+  asd:
+    driver: bridge

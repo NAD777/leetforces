@@ -28,8 +28,6 @@ def submit():
     file = json_payload["source_file"]
 
     extension = filename.split('.')[-1]
-    if extension not in PERMITTED_EXTENSIONS:
-        return jsonify({"status": "Wrong file extension", "code": 1}), 415
 
     session = create_session()
     submission = Submission(chat_id=chat_id)
@@ -37,6 +35,9 @@ def submit():
     session.commit()
 
     submission_id = submission.submission_id
+
+    if extension not in PERMITTED_EXTENSIONS:
+        return jsonify({"status": "Wrong file extension", "code": 1, "submission_id": submission_id}), 415
 
     data = {
         "submission_id": submission_id,
@@ -48,13 +49,14 @@ def submit():
     r = requests.post(f"{ORCHESTRATOR_URL}/run", data=data)
     # TODO: handle rEsponse from ORCHESTRATOR
 
-    return jsonify({"status": "File submitted", "code": 0}), 200
+    return jsonify({"status": "File submitted", "code": 0, "submission_id": submission_id}), 200
 
 
 @app.route('/report', methods=["POST"])
 def report():
     json_payload = request.json
     status = json_payload["status"]
+    test_num = json_payload["test_num"]
     run_time = json_payload["run_time"]
     memory_used = json_payload["memory_used"]
     submit_id = json_payload["submit_id"]
@@ -68,6 +70,7 @@ def report():
 
     data = {
         "status": status,
+        "test_num": test_num,
         "run_time": run_time,
         "memory_used": memory_used,
         "submit_id": submit_id,
