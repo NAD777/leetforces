@@ -21,10 +21,11 @@ def hello_world():
 
 @app.route("/submit", methods=["POST"])
 def submit():
+    json_payload = request.json
     chat_id = request.args.get("chat_id")
-    filename = request.form.get("name")
-    task_no = request.form.get("task_no")
-    file = request.files.get("source_file")
+    filename = json_payload["name"]
+    task_no = json_payload["task_no"]
+    file = json_payload["source_file"]
 
     extension = filename.split('.')[-1]
     if extension not in PERMITTED_EXTENSIONS:
@@ -40,7 +41,7 @@ def submit():
     data = {
         "submission_id": submission_id,
         "task_no": task_no,
-        "source_file": str(base64.b64encode(file.read()))[2:-1],
+        "source_file": file,
         "extension": extension
     }
 
@@ -52,10 +53,11 @@ def submit():
 
 @app.route('/report', methods=["POST"])
 def report():
-    status = request.form.get("status")
-    run_time = request.form.get("run_time")
-    memory_used = request.form.get("memory_used")
-    submit_id = request.files.get("submit_id")
+    json_payload = request.json
+    status = json_payload["status"]
+    run_time = json_payload["run_time"]
+    memory_used = json_payload["memory_used"]
+    submit_id = json_payload["submit_id"]
 
     session = create_session()
     submission = None
