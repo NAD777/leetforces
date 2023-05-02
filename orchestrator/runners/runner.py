@@ -25,12 +25,7 @@ def resolve_compiler(ext: str) -> Dict[str, str]:
         except KeyError:
             raise ValueError("Wrong input file format in configuration.")
 
-def run(output, proc, stdin_data, time_limit):
-    try:
-        output.append(proc.communicate(input=stdin_data.encode("utf-8"), timeout=time_limit))
-    except TimeoutExpired:
-        output.append(status_codes["TLE"])
-    
+   
 def run_user_code(exec_string: str, time_limit: float, memory_limit: int, stdin_data: str = '') -> Dict[str, str]:
 
     MAX_VIRTUAL_MEMORY = int(memory_limit * 1024 * 1024)
