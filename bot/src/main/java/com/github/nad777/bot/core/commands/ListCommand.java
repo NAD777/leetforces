@@ -31,12 +31,12 @@ public class ListCommand implements Command {
     public SendMessage handle(@NotNull Update update) {
         long chatId = update.message().chat().id();
         ListTasksResponse response = jugglerClient.getTasks();
-        if (response.tasks() == null) {
+        if (response.list() == null) {
             return new SendMessage(chatId, "There are no available tasks at the moment");
         }
         StringBuilder builder = new StringBuilder();
         builder.append("Here is the list of available tasks:\n\n");
-        for (TaskResponse e : response.tasks()) {
+        for (TaskResponse e : response.list()) {
             builder.append(e.taskName()).append("\n");
             builder.append("/task_no_").append(e.taskId()).append("\n\n");
         }

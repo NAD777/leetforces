@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from database.db_session import create_session, global_init
 from database.all_models import *
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, DataError
 from sqlalchemy.orm.exc import UnmappedInstanceError
 import base64
 import requests
@@ -104,7 +104,7 @@ def get_task():
     task = None
     try:
         task = session.query(Task).filter(Task.task_id == task_id).one()
-    except NoResultFound:
+    except (NoResultFound, DataError):
         return [], 404
     file_content = None
     with open(f"{task.task_path}", 'rb') as file:
@@ -199,5 +199,5 @@ def create_sample_problems():
 
 
 if __name__ == '__main__':
-    create_sample_problems()
     app.run(host="0.0.0.0", port=8000)
+    create_sample_problems()
