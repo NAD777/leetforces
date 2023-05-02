@@ -206,6 +206,7 @@ def create_sample_problems():
 
 create_sample_problems()
 
+
 @app.route("/register", methods=["POST", "DELETE"])
 def register():
     chat_id = request.args.get("chat_id")
@@ -239,4 +240,5 @@ def register():
 
 
 if __name__ == '__main__':
+    create_sample_problems()
     app.run(host="0.0.0.0", port=8000)
