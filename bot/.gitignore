@@ -38,3 +38,5 @@ out/
 /.gradle/
 /build/
 /gradle/wrapper/
+/gradlew
+/gradlew.bat
