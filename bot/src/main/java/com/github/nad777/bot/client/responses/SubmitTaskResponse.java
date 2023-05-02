@@ -8,6 +8,6 @@ public record SubmitTaskResponse(String status, int code, long id) {
     @Contract(pure = true)
     @Override
     public String toString() {
-        return "\nSTATUS CODE: " + code + "\nSTATUS DESCRIPTION: " + status + "\n SUBMISSION ID: " + id;
+        return "\nSTATUS CODE: " + code + "\nSTATUS DESCRIPTION: " + status + "\nSUBMISSION ID: " + id;
     }
 }

@@ -22,7 +22,7 @@ def hello_world():
 
 @app.route("/submit", methods=["POST"])
 def submit():
-    json_payload = request.json
+    json_payload = request.get_json()
     chat_id = request.args.get("chat_id")
     filename = json_payload["name"]
     task_no = json_payload["task_no"]
@@ -44,10 +44,11 @@ def submit():
         "submission_id": submission_id,
         "task_no": task_no,
         "source_file": file,
-        "extension": extension
+        "extension": extension,
+        "file_name" : filename
     }
 
-    r = requests.post(f"{ORCHESTRATOR_URL}/run", data=data)
+    r = requests.post(f"{ORCHESTRATOR_URL}/run", json=data)
     # TODO: handle rEsponse from ORCHESTRATOR
 
     return jsonify({"status": "File submitted", "code": 0, "submission_id": submission_id}), 200
