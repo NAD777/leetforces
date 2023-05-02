@@ -11,7 +11,8 @@ app.config.from_object(__name__)
 global_init("backbase")
 PERMITTED_EXTENSIONS = ['py', 'java']
 ORCHESTRATOR_URL = "http://orchestrator:5000"
-BOT_URL = "http://bot:5000"
+# BOT_URL = "http://bot:5000"
+BOT_URL = "http://localhost:8080"
 
 
 @app.route("/")
@@ -86,10 +87,12 @@ def get_list():
     # chat_id = request.args.get("chat_id")
     session = create_session()
     tasks = session.query(Task).all()
+    print(tasks)
     tasks_dict = {
         "list": [{"task_id": task.task_id, "task_name": task.task_name} for task in tasks],
         # "chat_id": chat_id
     }
+    print(tasks_dict)
     return jsonify(tasks_dict)
 
 
@@ -104,10 +107,9 @@ def get_task():
     except NoResultFound:
         return [], 404
     file_content = None
-    with open(f"test_files/{task.task_path}", 'rb') as file:
+    with open(f"{task.task_path}", 'rb') as file:
         file_content = str(base64.b64encode(file.read()))[2:-1]
     task_dict = {
-        # "chat_id": chat_id,
         "task_id": task_id,
         "task_name": task.task_name,
         "task_file": file_content
@@ -146,5 +148,56 @@ def register():
     return jsonify(response), code
 
 
+@app.route("/get_task_info")
+def func():
+    task_id = request.args.get("task_id")
+    session = create_session()
+    task = None
+    try:
+        task = session.query(Task).filter(Task.task_id == task_id).one()
+    except NoResultFound:
+        return jsonify({'status': "Task does not exists", 'code': 1}), 404
+    response = {
+        "master_filename": task.master_filename,
+        "master_file": task.master_file,
+        "amount_test": task.amount_test,
+        "memory_limit": task.memory_limit,
+        "time_limit": task.time_limit,
+        'code': 0
+    }
+    return jsonify(response), 200
+
+
+def create_sample_problems():
+    samples = [
+        {
+            "task_name": 'A+B',
+            'task_path': 'problems_conditions/aPlusB.pdf',
+            'master_filename': 'masterAPlusB.py',
+            'master_file': 'master_solutions/masterAPlusB.py',
+            'amount_test': 10,
+            'memory_limit': 16,
+            'time_limit': 1
+        }
+    ]
+    session = create_session()
+    for sample in samples:
+        with open(f"{sample['master_file']}", "rb") as master:
+            # with open(f"{sample['task_path']}", "rb") as condition:
+            task = Task(
+                task_name=sample['task_name'],
+                task_path=sample['task_path'],
+                master_filename=sample['master_filename'],
+                master_file=str(base64.b64encode(master.read()))[2:-1],
+                amount_test=sample['amount_test'],
+                memory_limit=sample['memory_limit'],
+                time_limit=sample['time_limit']
+            )
+            session.add(task)
+    session.commit()
+    print(session.query(Task).all())
+
+
 if __name__ == '__main__':
+    create_sample_problems()
     app.run(host="0.0.0.0", port=8000)
