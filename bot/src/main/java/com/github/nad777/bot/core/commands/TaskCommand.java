@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.Base64;
+
 @Component
 @RequiredArgsConstructor
 public class TaskCommand implements Command {
@@ -42,8 +44,8 @@ public class TaskCommand implements Command {
         if (response.taskId() == null) {
             return new SendMessage(chatId, "There is no such task");
         }
-
-        SendDocument sendDocument = new SendDocument(chatId, response.taskFile());
+        byte[] file = Base64.getDecoder().decode(response.taskFile());
+        SendDocument sendDocument = new SendDocument(chatId, file);
         telegramBot.execute(sendDocument);
 
         UserMessageProcessor.setState(State.WAITING_FOR_FILE);
