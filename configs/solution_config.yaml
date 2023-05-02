@@ -1,0 +1,5 @@
+task_1:
+  solution_source: "task_1.py"
+  tests_no: 5
+  time_limit: 1
+  memory_limit: 128

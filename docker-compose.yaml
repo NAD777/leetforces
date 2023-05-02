@@ -1,32 +1,79 @@
 version: "3.9"
 
 services:
+
   postgres:
     build:
       dockerfile: ./Postgres/Dockerfile
     networks:
-      - asd
+      - bot_backend
     environment:
       POSTGRES_DB: "backbase"
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
     volumes:
       - .:/docker-entrypoint-initdb.d
-
-
-
+  
   juggler:
     build:
       context: ./juggler
       dockerfile: ./Dockerfile
     networks:
-      - asd
+      - orchestrator_backend
     container_name: juggler
     command: python -u -m flask run -h 0.0.0.0 -p 5001
     depends_on:
       - postgres
+      - orchestrator
     ports:
       - "5001:5001"
+  
+  orchestrator:
+    build: 
+      context: ./orchestrator/
+      dockerfile: ./orchestrator/Dockerfile
+    networks: 
+      - internal
+      - orchestrator_backend
+    container_name: orchestrator
+    command: python -u -m flask run -h 0.0.0.0 -p 5000
+    depends_on:
+      - test_generator
+      - runner
+  
+  runner:
+    build: 
+      dockerfile: ./orchestrator/runners/Dockerfile
+      context: .
+    networks: 
+      - internal
+    command: python -u runner.py run_tests
+    depends_on:
+      - test_generator
+
+  test_generator:
+    build: 
+      dockerfile: ./orchestrator/runners/Dockerfile
+      context: .
+    networks: 
+      - internal
+    command: python -u runner.py generate
+    
+  bot:
+    build:
+      context: ./bot
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:8080"
+    restart: always
+    networks:
+      - bot_backend
+    depends_on:
+      - juggler
+    
+
 networks:
-  asd:
-    driver: bridge
+  internal:
+  bot_backend:
+  orchestrator_backend:
+
