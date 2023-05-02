@@ -8,6 +8,7 @@ services:
       dockerfile: ./orchestrator/Dockerfile
     networks: 
       - internal
+      - orchestrator_backend
     container_name: orchestrator
     command: python -u -m flask run -h 0.0.0.0 -p 5000
     depends_on:
@@ -30,6 +31,18 @@ services:
     networks: 
       - internal
     command: python -u runner.py generate
+    
+  bot:
+    build:
+      context: ./bot
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:8080"
+    restart: always
+    networks:
+      - bot_backend
 
 networks:
   internal:
+  bot_backend:
+  orchestrator_backend:
