@@ -60,17 +60,17 @@ services:
       - internal
     command: python -u runner.py generate
     
-#  bot:
-#    build:
-#      context: ./bot
-#      dockerfile: ./Dockerfile
-#    ports:
-#      - "8080:8080"
-#    restart: always
-#    networks:
-#      - bot_backend
-#    depends_on:
-#      - juggler
+  bot:
+    build:
+      context: ./bot
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:8080"
+    restart: always
+    networks:
+      - bot_backend
+    depends_on:
+      - juggler
     
 
 networks:
