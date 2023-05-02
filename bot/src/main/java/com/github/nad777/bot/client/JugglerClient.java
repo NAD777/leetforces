@@ -67,7 +67,7 @@ public class JugglerClient {
             if (e.getStatusCode() != HttpStatus.NOT_FOUND) {
                 throw e;
             }
-            return new TaskFileResponse(null, null, null);
+            return new TaskFileResponse(null, null, null, null);
         }
     }
 

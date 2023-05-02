@@ -112,6 +112,7 @@ def get_task():
     task_dict = {
         "task_id": task_id,
         "task_name": task.task_name,
+        "filename": task.task_path.split('/')[-1],
         "task_file": file_content
     }
     return jsonify(task_dict)
@@ -198,6 +199,6 @@ def create_sample_problems():
     print(session.query(Task).all())
 
 
+create_sample_problems()
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8000)
-    create_sample_problems()

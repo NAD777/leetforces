@@ -39,5 +39,5 @@ def run():
     runner = TestRunner(task_id, submission_id, ext)
     report = runner.run(filename, source_file)
     # TODO: if report["status"] == "Internal error"
-    # post("http://juggler:5000/report", json=report)
+    post("http://juggler:5001/report", json=report)
     return "Done"

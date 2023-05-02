@@ -6,12 +6,16 @@ import com.github.nad777.bot.core.State;
 import com.github.nad777.bot.core.UserMessageProcessor;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.InputFile;
 import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
+import java.io.*;
 import java.util.Base64;
 
 @Component
@@ -41,10 +45,16 @@ public class TaskCommand implements Command {
         String taskId = update.message().text().substring(COMMAND.length());
         TaskFileResponse response = jugglerClient.getTaskById(taskId);
 
-        if (response.taskId() == null) {
+        if (response.task_id() == null) {
             return new SendMessage(chatId, "There is no such task");
         }
-        byte[] file = Base64.getDecoder().decode(response.taskFile());
+        byte[] fileBytes = Base64.getDecoder().decode(response.task_file());
+        File file = new File(response.filename());
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            outputStream.write(fileBytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         SendDocument sendDocument = new SendDocument(chatId, file);
         telegramBot.execute(sendDocument);
 
