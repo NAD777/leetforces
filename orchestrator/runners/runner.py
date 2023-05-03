@@ -54,7 +54,6 @@ def run_user_code(exec_string: str, time_limit: float, memory_limit: int, stdin_
     # If we got right output from /usr/bin/time
     max_mem, real_time = -1, -1
     
-    # print(output_dec[1])
     if stdin_data != '':
         max_mem, real_time = output_dec[1].split('\n')[:-1][-1].split()
     if stdin_data != '' and len(output_dec[1].split()) == 2:
@@ -73,13 +72,13 @@ def run_user_code(exec_string: str, time_limit: float, memory_limit: int, stdin_
 
 def run_tests(submission_id: int, ext: str, source_file: str, test_data: str, task_id: int, filename: str):
     report = {
-        "submission_id": int,
+        "submit_id": int,
         "status": str,
         "test_num": int,
         "memory_used": int,
         "run_time": int,
     }
-    report["submission_id"] = submission_id
+    report["submit_id"] = submission_id
 
     config = safe_load(open("configs/solution_config.yaml", 'r'))[f"task_{task_id}"]
     compiler_options = resolve_compiler(ext)
@@ -93,6 +92,7 @@ def run_tests(submission_id: int, ext: str, source_file: str, test_data: str, ta
     makedirs("submissions", exist_ok=True)
     open(f"./submissions/{filename}", "w").write(source_file)
 
+    makedirs("test_data", exist_ok=True)
     dump(test_data, open(f"./test_data/{task_id}.json", "w"))
     tests = load(open(f"./test_data/{task_id}.json", "r"))
 

@@ -2,6 +2,7 @@ import os
 from xmlrpc.client import ServerProxy, Fault
 from typing import Dict, Tuple
 from json import dump, load
+from os import makedirs
 
 class TestRunner:
 
@@ -13,6 +14,7 @@ class TestRunner:
         self.task_id = task_id
         self.submission_id = submission_id
         self.extension = extension
+        makedirs("test_data", exist_ok=True)
 
     # TODO: optimize
     def generate_data(self) -> str:

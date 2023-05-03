@@ -11,8 +11,8 @@ app.config.from_object(__name__)
 global_init("backbase")
 PERMITTED_EXTENSIONS = ['py', 'java']
 ORCHESTRATOR_URL = "http://orchestrator:5000"
-# BOT_URL = "http://bot:5000"
-BOT_URL = "http://localhost:8080"
+BOT_URL = "http://bot:8081"
+# BOT_URL = "http://localhost:8080"
 
 
 @app.route("/")

@@ -11,6 +11,7 @@
 from flask import Flask, request
 from requests import post
 from test_runner import TestRunner
+from base64 import b64decode
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -33,11 +34,10 @@ def run():
     print(f'Got request with: {task_id=}')
     print(f'Got request with: {ext=}')
 
-    with open(f"{submission_id}.{ext}", 'w') as f:
-        f.write(str(source_file))
+    source_file_decoded = b64decode(source_file).decode("utf-8")
 
     runner = TestRunner(task_id, submission_id, ext)
-    report = runner.run(filename, source_file)
+    report = runner.run(filename, source_file_decoded)
     # TODO: if report["status"] == "Internal error"
     post("http://juggler:5001/report", json=report)
     return "Done"
