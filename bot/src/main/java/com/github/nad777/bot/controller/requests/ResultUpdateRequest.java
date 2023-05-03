@@ -1,4 +1,5 @@
 package com.github.nad777.bot.controller.requests;
 
-public record ResultUpdateRequest(long chatId, String status, Integer test, String time, String memory, long submissionId) {
+public record ResultUpdateRequest(Long chat_id, String status, Integer test_num, Integer run_time, Integer memory_used,
+                                  Long submit_id) {
 }

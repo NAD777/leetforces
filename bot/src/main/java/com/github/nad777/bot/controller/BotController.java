@@ -16,13 +16,15 @@ public class BotController {
     @PostMapping("/update")
     public void processUpdate(@NotNull @RequestBody ResultUpdateRequest request) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SUBMISSION ID: ").append(request.submissionId());
+        stringBuilder.append("SUBMISSION ID: ").append(request.submit_id());
         stringBuilder.append("\nSTATUS: ").append(request.status());
-        if (request.test() != null && request.test() != -1) {
-            stringBuilder.append("\nTEST FAILED: ").append(request.test());
-            stringBuilder.append("\nTIME: ").append(request.time());
-            stringBuilder.append("\nMEMORY: ").append(request.memory());
+        if (request.test_num() != -1) {
+            stringBuilder.append("\nTEST FAILED: ").append(request.test_num());
         }
-        bot.processUpdate(request.chatId(), stringBuilder.toString());
+        if (request.run_time() != -1) {
+            stringBuilder.append("\nTIME: ").append(request.run_time());
+            stringBuilder.append("\nMEMORY: ").append(request.memory_used());
+        }
+        bot.processUpdate(request.chat_id(), stringBuilder.toString());
     }
 }
