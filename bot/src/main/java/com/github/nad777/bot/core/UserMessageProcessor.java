@@ -15,14 +15,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class UserMessageProcessor {
     private final TelegramBot telegramBot;
     private final JugglerClient jugglerClient;
     private static List<? extends Command> commandList;
-    private static State currentState = State.WAITING_FOR_COMMAND;
+    private static final Map<Long, State> stateMap = new HashMap<>();
     private static String previousCommand;
     private final static String UNSUPPORTED_COMMAND = "Sorry, I don't understand you. Try /help to see list of commands";
     private final static String FILE_EXPECTED = "File with solution expected!";
@@ -46,55 +48,54 @@ public class UserMessageProcessor {
             return null;
         }
         long chatId = update.message().chat().id();
-        switch (currentState) {
-            case WAITING_FOR_COMMAND -> {
-                if (update.message().text() == null) {
-                    return new SendMessage(chatId, UNSUPPORTED_COMMAND);
-                }
-                String command = update.message().text();
-                if (command.startsWith("/")) {
-                    for (Command c : commands()) {
-                        if (c.supports(update)) {
-                            previousCommand = command;
-                            return c.handle(update);
-                        }
+        State state = stateMap.get(chatId);
+        if (state == null || state == State.WAITING_FOR_COMMAND) {
+            if (update.message().text() == null) {
+                return new SendMessage(chatId, UNSUPPORTED_COMMAND);
+            }
+            String command = update.message().text();
+            if (command.startsWith("/")) {
+                for (Command c : commands()) {
+                    if (c.supports(update)) {
+                        previousCommand = command;
+                        return c.handle(update);
                     }
                 }
             }
-            case WAITING_FOR_FILE -> {
-                if (update.message().document() == null) {
-                    currentState = State.WAITING_FOR_COMMAND;
-                    return new SendMessage(chatId, FILE_EXPECTED);
-                }
-                // get document
-                Document document = update.message().document();
-                //check if it isn't too large
-                if (document.fileSize() > MAX_FILE_SIZE) {
-                    return new SendMessage(chatId, LARGE_FILE);
-                }
-                String fileName = document.fileName();
-                String fileId = document.fileId();
-                GetFile getFile = new GetFile(fileId);
-                File file = telegramBot.execute(getFile).file();
-                byte[] fileBytes;
-                try {
-                    fileBytes = telegramBot.getFileContent(file);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                // send file to juggler
-                String taskId = previousCommand.substring("/task_no_".length());
-                SubmitTaskRequest request = new SubmitTaskRequest(fileName, taskId, fileBytes);
-                SubmitTaskResponse response = jugglerClient.submitTask(chatId, request);
-                // send status to user
-                return new SendMessage(chatId, SUBMITTED_FILE + response.toString());
+        } else if (state == State.WAITING_FOR_FILE) {
+            if (update.message().document() == null) {
+                stateMap.remove(chatId);
+                return new SendMessage(chatId, FILE_EXPECTED);
             }
+            // get document
+            Document document = update.message().document();
+            //check if it isn't too large
+            if (document.fileSize() > MAX_FILE_SIZE) {
+                return new SendMessage(chatId, LARGE_FILE);
+            }
+            String fileName = document.fileName();
+            String fileId = document.fileId();
+            GetFile getFile = new GetFile(fileId);
+            File file = telegramBot.execute(getFile).file();
+            byte[] fileBytes;
+            try {
+                fileBytes = telegramBot.getFileContent(file);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            // send file to juggler
+            String taskId = previousCommand.substring("/task_no_".length());
+            SubmitTaskRequest request = new SubmitTaskRequest(fileName, taskId, fileBytes);
+            SubmitTaskResponse response = jugglerClient.submitTask(chatId, request);
+            // send status to user
+            stateMap.remove(chatId);
+            return new SendMessage(chatId, SUBMITTED_FILE + response.toString());
         }
 
         return new SendMessage(chatId, UNSUPPORTED_COMMAND);
     }
 
-    public static void setState(State state) {
-        currentState = state;
+    public static void setState(Long chatId, State state) {
+        stateMap.put(chatId, state);
     }
 }

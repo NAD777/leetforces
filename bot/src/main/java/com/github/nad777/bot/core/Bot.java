@@ -26,8 +26,8 @@ public class Bot implements AutoCloseable, UpdatesListener {
 
     @PostConstruct
     public void start() {
-        telegramBot.setUpdatesListener(this);
         setCommands();
+        telegramBot.setUpdatesListener(this);
     }
 
     @Override

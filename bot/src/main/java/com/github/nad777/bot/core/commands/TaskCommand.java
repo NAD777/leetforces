@@ -57,7 +57,7 @@ public class TaskCommand implements Command {
         SendDocument sendDocument = new SendDocument(chatId, file);
         telegramBot.execute(sendDocument);
 
-        UserMessageProcessor.setState(State.WAITING_FOR_FILE);
+        UserMessageProcessor.setState(chatId, State.WAITING_FOR_FILE);
         return new SendMessage(chatId, MESSAGE);
     }
 
