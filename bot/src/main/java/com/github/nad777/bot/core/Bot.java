@@ -5,6 +5,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
 import com.pengrad.telegrambot.response.BaseResponse;
@@ -35,6 +36,7 @@ public class Bot implements AutoCloseable, UpdatesListener {
         updates.forEach(update -> {
             SendMessage message = userMessageProcessor.process(update);
             if (message != null) {
+                message.parseMode(ParseMode.MarkdownV2);
                 BaseResponse response = telegramBot.execute(message);
                 if (!response.isOk()) {
                     System.out.println(ERROR + response.description());
@@ -50,7 +52,8 @@ public class Bot implements AutoCloseable, UpdatesListener {
     }
 
     public void processUpdate(long chatId, String description) {
-        SendMessage message = new SendMessage(chatId, description);
+        SendMessage message = new SendMessage(chatId, MarkdownProcessor.process(description));
+        message.parseMode(ParseMode.MarkdownV2);
         BaseResponse response = telegramBot.execute(message);
         if (!response.isOk()) {
             System.out.println(ERROR + response.description());

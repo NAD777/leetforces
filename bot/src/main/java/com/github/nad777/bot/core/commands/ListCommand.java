@@ -3,6 +3,7 @@ package com.github.nad777.bot.core.commands;
 import com.github.nad777.bot.client.JugglerClient;
 import com.github.nad777.bot.client.responses.ListTasksResponse;
 import com.github.nad777.bot.client.responses.TaskResponse;
+import com.github.nad777.bot.core.MarkdownProcessor;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,6 @@ public class ListCommand implements Command {
             builder.append(e.task_name()).append("\n");
             builder.append("/task_no_").append(e.task_id()).append("\n\n");
         }
-        return new SendMessage(chatId, builder.toString());
+        return new SendMessage(chatId, MarkdownProcessor.process(builder.toString()));
     }
 }

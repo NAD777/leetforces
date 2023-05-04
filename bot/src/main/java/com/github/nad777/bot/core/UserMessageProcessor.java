@@ -51,7 +51,7 @@ public class UserMessageProcessor {
         State state = stateMap.get(chatId);
         if (state == null || state == State.WAITING_FOR_COMMAND) {
             if (update.message().text() == null) {
-                return new SendMessage(chatId, UNSUPPORTED_COMMAND);
+                return new SendMessage(chatId, MarkdownProcessor.process(UNSUPPORTED_COMMAND));
             }
             String command = update.message().text();
             if (command.startsWith("/")) {
@@ -65,13 +65,13 @@ public class UserMessageProcessor {
         } else if (state == State.WAITING_FOR_FILE) {
             if (update.message().document() == null) {
                 stateMap.remove(chatId);
-                return new SendMessage(chatId, FILE_EXPECTED);
+                return new SendMessage(chatId, MarkdownProcessor.process(FILE_EXPECTED));
             }
             // get document
             Document document = update.message().document();
             //check if it isn't too large
             if (document.fileSize() > MAX_FILE_SIZE) {
-                return new SendMessage(chatId, LARGE_FILE);
+                return new SendMessage(chatId, MarkdownProcessor.process(LARGE_FILE));
             }
             String fileName = document.fileName();
             String fileId = document.fileId();
@@ -89,10 +89,10 @@ public class UserMessageProcessor {
             SubmitTaskResponse response = jugglerClient.submitTask(chatId, request);
             // send status to user
             stateMap.remove(chatId);
-            return new SendMessage(chatId, SUBMITTED_FILE + response.toString());
+            return new SendMessage(chatId, MarkdownProcessor.process(SUBMITTED_FILE + response.toString()));
         }
 
-        return new SendMessage(chatId, UNSUPPORTED_COMMAND);
+        return new SendMessage(chatId, MarkdownProcessor.process(UNSUPPORTED_COMMAND));
     }
 
     public static void setState(Long chatId, State state) {
