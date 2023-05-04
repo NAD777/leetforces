@@ -3,6 +3,7 @@ from database.db_session import create_session, global_init
 from database.all_models import *
 from sqlalchemy.exc import NoResultFound, DataError
 from sqlalchemy.orm.exc import UnmappedInstanceError
+from threading import Thread
 import base64
 import requests
 
@@ -48,7 +49,7 @@ def submit():
         "file_name" : filename
     }
 
-    r = requests.post(f"{ORCHESTRATOR_URL}/run", json=data)
+    Thread(target=lambda : requests.post(f"{ORCHESTRATOR_URL}/run", json=data)).start()
     # TODO: handle rEsponse from ORCHESTRATOR
 
     return jsonify({"status": "File submitted", "code": 0, "submission_id": submission_id}), 200
@@ -79,7 +80,7 @@ def report():
         "chat_id": submission.chat_id
     }
 
-    r = requests.post(f"{BOT_URL}/updates", data=data)
+    r = requests.post(f"{BOT_URL}/update", json=data)
     return jsonify({"status": "Submitted to bot", "code": 0}), 200
 
 
