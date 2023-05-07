@@ -1,5 +1,3 @@
-import kotlin.reflect.jvm.internal.impl.util.Check
-
 plugins {
     java
     checkstyle

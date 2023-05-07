@@ -24,7 +24,7 @@ public class UserMessageProcessor {
     private final TelegramBot telegramBot;
     private final JugglerClient jugglerClient;
     private static List<? extends Command> commandList;
-    private static final Map<Long, State> stateMap = new HashMap<>();
+    private static final Map<Long, State> STATE_MAP = new HashMap<>();
     private static String previousCommand;
     private final static String UNSUPPORTED_COMMAND = "Sorry, I don't understand you. Try /help to see list of commands";
     private final static String FILE_EXPECTED = "File with solution expected!";
@@ -48,7 +48,7 @@ public class UserMessageProcessor {
             return null;
         }
         long chatId = update.message().chat().id();
-        State state = stateMap.get(chatId);
+        State state = STATE_MAP.get(chatId);
         if (state == null || state == State.WAITING_FOR_COMMAND) {
             if (update.message().text() == null) {
                 return new SendMessage(chatId, MarkdownProcessor.process(UNSUPPORTED_COMMAND));
@@ -64,7 +64,7 @@ public class UserMessageProcessor {
             }
         } else if (state == State.WAITING_FOR_FILE) {
             if (update.message().document() == null) {
-                stateMap.remove(chatId);
+                STATE_MAP.remove(chatId);
                 return new SendMessage(chatId, MarkdownProcessor.process(FILE_EXPECTED));
             }
             // get document
@@ -88,7 +88,7 @@ public class UserMessageProcessor {
             SubmitTaskRequest request = new SubmitTaskRequest(fileName, taskId, fileBytes);
             SubmitTaskResponse response = jugglerClient.submitTask(chatId, request);
             // send status to user
-            stateMap.remove(chatId);
+            STATE_MAP.remove(chatId);
             return new SendMessage(chatId, MarkdownProcessor.process(SUBMITTED_FILE + response.toString()));
         }
 
@@ -96,6 +96,6 @@ public class UserMessageProcessor {
     }
 
     public static void setState(Long chatId, State state) {
-        stateMap.put(chatId, state);
+        STATE_MAP.put(chatId, state);
     }
 }

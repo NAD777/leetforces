@@ -45,10 +45,10 @@ public class TaskCommand implements Command {
         String taskId = update.message().text().substring(COMMAND.length());
         TaskFileResponse response = jugglerClient.getTaskById(taskId);
 
-        if (response.task_id() == null) {
+        if (response.taskId() == null) {
             return new SendMessage(chatId, "There is no such task");
         }
-        byte[] fileBytes = Base64.getDecoder().decode(response.task_file());
+        byte[] fileBytes = Base64.getDecoder().decode(response.taskFile());
         File file = new File(response.filename());
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(fileBytes);

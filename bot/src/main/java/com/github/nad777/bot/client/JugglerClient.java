@@ -14,12 +14,14 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 @RequiredArgsConstructor
 public class JugglerClient {
     private final WebClient jugglerWebClient;
+    private final static String PATH_SEGMENT = "chat";
+    private final static String QUERY_PARAM = "chat_id";
 
     public void registerChat(long id) {
         jugglerWebClient.post()
                 .uri(uriBuilder -> uriBuilder
-                        .pathSegment("chat")
-                        .queryParam("chat_id", id)
+                        .pathSegment(PATH_SEGMENT)
+                        .queryParam(QUERY_PARAM, id)
                         .build())
                 .retrieve()
                 .bodyToMono(Void.class)
@@ -29,8 +31,8 @@ public class JugglerClient {
     public void deleteChat(long id) {
         jugglerWebClient.delete()
                 .uri(uriBuilder -> uriBuilder
-                        .pathSegment("chat")
-                        .queryParam("chat_id", id)
+                        .pathSegment(PATH_SEGMENT)
+                        .queryParam(QUERY_PARAM, id)
                         .build())
                 .retrieve()
                 .bodyToMono(Void.class)
@@ -74,7 +76,7 @@ public class JugglerClient {
         return jugglerWebClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .pathSegment("submit")
-                        .queryParam("chat_id", id)
+                        .queryParam(QUERY_PARAM, id)
                         .build())
                 .bodyValue(request)
                 .retrieve()
