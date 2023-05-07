@@ -28,7 +28,6 @@ dependencies {
     implementation("org.springframework:spring-context-indexer:6.0.6")
     implementation("org.springframework:spring-webflux:6.0.6")
     implementation("com.github.pengrad:java-telegram-bot-api:6.6.0")
-
     compileOnly("org.projectlombok:lombok:1.18.26")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")

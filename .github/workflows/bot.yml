@@ -11,7 +11,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: NAD777/codetest_bot-bot
+  IMAGE_NAME: nad777/codetest_bot-bot
 
 jobs:
   build:
@@ -34,7 +34,7 @@ jobs:
           cache: gradle
 
       - name: Run checkstyle
-        run: gradle -p bot checkstyleMain --no-daemon
+        run: gradle -p bot checkstyleMain
 
       - name: Upload checkstyle report
         uses: actions/upload-artifact@v3
@@ -43,7 +43,7 @@ jobs:
           path: bot/build/reports/checkstyle/main.html
 
       - name: Build with Gradle
-        run: gradle -p bot build --no-daemon
+        run: gradle -p bot build
 
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@v2
