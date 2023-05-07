@@ -3,6 +3,7 @@ package com.github.nad777.bot.core.commands;
 import com.github.nad777.bot.client.JugglerClient;
 import com.github.nad777.bot.client.responses.ListTasksResponse;
 import com.github.nad777.bot.client.responses.TaskResponse;
+import com.github.nad777.bot.core.MarkdownProcessor;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
@@ -31,15 +32,15 @@ public class ListCommand implements Command {
     public SendMessage handle(@NotNull Update update) {
         long chatId = update.message().chat().id();
         ListTasksResponse response = jugglerClient.getTasks();
-        if (response.tasks() == null) {
+        if (response.list() == null || response.list().isEmpty()) {
             return new SendMessage(chatId, "There are no available tasks at the moment");
         }
         StringBuilder builder = new StringBuilder();
         builder.append("Here is the list of available tasks:\n\n");
-        for (TaskResponse e : response.tasks()) {
-            builder.append(e.taskName()).append("\n");
-            builder.append("/task_no_").append(e.taskId()).append("\n\n");
+        for (TaskResponse e : response.list()) {
+            builder.append(e.task_name()).append("\n");
+            builder.append("/task_no_").append(e.task_id()).append("\n\n");
         }
-        return new SendMessage(chatId, builder.toString());
+        return new SendMessage(chatId, MarkdownProcessor.process(builder.toString()));
     }
 }
