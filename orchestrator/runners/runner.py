@@ -9,12 +9,12 @@ from resource import setrlimit, RLIMIT_AS, RLIM_INFINITY
 from shlex import split
 
 status_codes = {
-    "OK": "OK",   # done
-    "RE": "RE",   # done
-    "WA": "WA",   # done
-    "CE": "CE",   # done
-    "MLE": "MLE", # done
-    "TLE": "TLE", # done
+    "OK": "OK",  
+    "RE": "RE",  
+    "WA": "WA",  
+    "CE": "CE",  
+    "MLE": "MLE",
+    "TLE": "TLE",
 }
 
 
@@ -99,13 +99,17 @@ def run_tests(submission_id: int, ext: str, source_file: str, test_data: str, ta
     # Check for CE
     input, _ = tests["0"]
     result = run_user_code(exec_string, time_limit, memory_limit, input)
-    if ce in result["output"][1]:
-        report["test_num"] = 0
-        report["status"] = status_codes["CE"]
+    
 
     for test_num, (input, desired_output) in tests.items():
         result = run_user_code(exec_string, time_limit, memory_limit, input)
         output = result["output"]
+
+        # Check for CE
+        if ce in result["output"][1]:
+            report["test_num"] = test_num
+            report["status"] = status_codes["CE"]
+            break
 
         # Check for TLE
         if result["error_status"] == status_codes["TLE"]:
@@ -113,9 +117,8 @@ def run_tests(submission_id: int, ext: str, source_file: str, test_data: str, ta
             report["status"] = status_codes["TLE"]
             break
         
-        print(output[1].lower())
         # Check for MLE
-        if "memory" in output[1].lower():
+        if "memory" in output[1]:
             report["test_num"] = test_num
             report["status"] = status_codes["MLE"]
             break
