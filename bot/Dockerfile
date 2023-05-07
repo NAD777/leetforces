@@ -1,6 +1,7 @@
 FROM gradle:8.1.1-jdk17 AS build
 WORKDIR /bot
 COPY build.gradle.kts .
+COPY checkstyle.xml .
 COPY src ./src
 RUN gradle build --no-daemon
 
