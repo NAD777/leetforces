@@ -1,6 +1,6 @@
 py: 
   compiler_string: "/usr/bin/python -u"
-  ce: "SyntaxError"
+  ce: "syntaxerror"
 java: 
   compiler_string: "javac Main.java && java Main"
   ce: "compilation failed"

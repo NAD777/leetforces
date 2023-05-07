@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify
 from database.db_session import create_session, global_init
 from database.all_models import *
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, DataError
 from sqlalchemy.orm.exc import UnmappedInstanceError
+from threading import Thread
 import base64
 import requests
 
@@ -11,8 +12,8 @@ app.config.from_object(__name__)
 global_init("backbase")
 PERMITTED_EXTENSIONS = ['py', 'java']
 ORCHESTRATOR_URL = "http://orchestrator:5000"
-# BOT_URL = "http://bot:5000"
-BOT_URL = "http://localhost:8080"
+BOT_URL = "http://bot:8081"
+# BOT_URL = "http://localhost:8080"
 
 
 @app.route("/")
@@ -22,7 +23,7 @@ def hello_world():
 
 @app.route("/submit", methods=["POST"])
 def submit():
-    json_payload = request.json
+    json_payload = request.get_json()
     chat_id = request.args.get("chat_id")
     filename = json_payload["name"]
     task_no = json_payload["task_no"]
@@ -44,10 +45,11 @@ def submit():
         "submission_id": submission_id,
         "task_no": task_no,
         "source_file": file,
-        "extension": extension
+        "extension": extension,
+        "file_name" : filename
     }
 
-    r = requests.post(f"{ORCHESTRATOR_URL}/run", data=data)
+    Thread(target=lambda : requests.post(f"{ORCHESTRATOR_URL}/run", json=data)).start()
     # TODO: handle rEsponse from ORCHESTRATOR
 
     return jsonify({"status": "File submitted", "code": 0, "submission_id": submission_id}), 200
@@ -78,7 +80,7 @@ def report():
         "chat_id": submission.chat_id
     }
 
-    r = requests.post(f"{BOT_URL}/updates", data=data)
+    r = requests.post(f"{BOT_URL}/update", json=data)
     return jsonify({"status": "Submitted to bot", "code": 0}), 200
 
 
@@ -104,7 +106,7 @@ def get_task():
     task = None
     try:
         task = session.query(Task).filter(Task.task_id == task_id).one()
-    except NoResultFound:
+    except (NoResultFound, DataError):
         return [], 404
     file_content = None
     with open(f"{task.task_path}", 'rb') as file:
@@ -112,6 +114,7 @@ def get_task():
     task_dict = {
         "task_id": task_id,
         "task_name": task.task_name,
+        "filename": task.task_path.split('/')[-1],
         "task_file": file_content
     }
     return jsonify(task_dict)
@@ -198,6 +201,6 @@ def create_sample_problems():
     print(session.query(Task).all())
 
 
+create_sample_problems()
 if __name__ == '__main__':
-    create_sample_problems()
     app.run(host="0.0.0.0", port=8000)

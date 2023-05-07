@@ -1,5 +1,6 @@
 package com.github.nad777.bot.core.commands;
 
+import com.github.nad777.bot.core.MarkdownProcessor;
 import com.github.nad777.bot.core.UserMessageProcessor;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
@@ -30,6 +31,6 @@ public class HelpCommand implements Command {
             builder.append(c.description());
             builder.append("\n");
         }
-        return new SendMessage(update.message().chat().id(), builder.toString());
+        return new SendMessage(update.message().chat().id(), MarkdownProcessor.process(builder.toString()));
     }
 }

@@ -2,6 +2,7 @@ package com.github.nad777.bot.core.commands;
 
 import com.github.nad777.bot.client.JugglerClient;
 import com.github.nad777.bot.client.responses.TaskFileResponse;
+import com.github.nad777.bot.core.MarkdownProcessor;
 import com.github.nad777.bot.core.State;
 import com.github.nad777.bot.core.UserMessageProcessor;
 import com.pengrad.telegrambot.TelegramBot;
@@ -12,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Base64;
 
 @Component
@@ -23,7 +27,7 @@ public class TaskCommand implements Command {
     private static final String COMMAND = "/task_no_";
     private static final String DESCRIPTION = "Command to get task by task id";
     private static final String MESSAGE =
-            "Here is your file with task description. You can submit task solution in the next message. Only __.py__ or __.java__ files are supported";
+            "Here is your file with task description. You can submit task solution in the next message. Only *.py* or *.java* files are supported";
 
     @Override
     public String command() {
@@ -41,15 +45,21 @@ public class TaskCommand implements Command {
         String taskId = update.message().text().substring(COMMAND.length());
         TaskFileResponse response = jugglerClient.getTaskById(taskId);
 
-        if (response.taskId() == null) {
+        if (response.task_id() == null) {
             return new SendMessage(chatId, "There is no such task");
         }
-        byte[] file = Base64.getDecoder().decode(response.taskFile());
+        byte[] fileBytes = Base64.getDecoder().decode(response.task_file());
+        File file = new File(response.filename());
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            outputStream.write(fileBytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         SendDocument sendDocument = new SendDocument(chatId, file);
         telegramBot.execute(sendDocument);
 
-        UserMessageProcessor.setState(State.WAITING_FOR_FILE);
-        return new SendMessage(chatId, MESSAGE);
+        UserMessageProcessor.setState(chatId, State.WAITING_FOR_FILE);
+        return new SendMessage(chatId, MarkdownProcessor.process(MESSAGE));
     }
 
     @Override

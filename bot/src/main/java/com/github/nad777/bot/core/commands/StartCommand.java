@@ -1,6 +1,7 @@
 package com.github.nad777.bot.core.commands;
 
 import com.github.nad777.bot.client.JugglerClient;
+import com.github.nad777.bot.core.MarkdownProcessor;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,6 @@ public class StartCommand implements Command {
     public SendMessage handle(@NotNull Update update) {
         long chatId = update.message().chat().id();
         jugglerClient.registerChat(chatId);
-        return new SendMessage(chatId, WELCOME);
+        return new SendMessage(chatId, MarkdownProcessor.process(WELCOME));
     }
 }

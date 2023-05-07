@@ -1,6 +1,7 @@
 package com.github.nad777.bot.core.commands;
 
 import com.github.nad777.bot.client.JugglerClient;
+import com.github.nad777.bot.core.MarkdownProcessor;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class StopCommand implements Command {
         long chatId = update.message().chat().id();
         try {
             jugglerClient.deleteChat(chatId);
-            return new SendMessage(chatId, MESSAGE);
+            return new SendMessage(chatId, MarkdownProcessor.process(MESSAGE));
         } catch (WebClientResponseException e) {
             if (e.getStatusCode() != HttpStatus.NOT_FOUND) {
                 throw e;
