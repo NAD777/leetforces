@@ -17,6 +17,7 @@ public final class MarkdownProcessor {
         s = s.replaceAll("}", "\\\\}");
         s = s.replaceAll("_", "\\\\_");
         s = s.replaceAll("\\+", "\\\\+");
+        s = s.replaceAll("#", "\\\\#");
         return s;
     }
 }

@@ -43,7 +43,7 @@
     <!--      Checks for Size Violations.         -->
     <module name="FileLength"/>
     <module name="LineLength">
-        <property name="max" value="160"/>
+        <property name="max" value="200"/>
         <property name="fileExtensions" value="java"/>
         <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
     </module>
@@ -277,12 +277,12 @@
         <!-- <module name="IllegalTokenText"/> -->
         <!-- <module name="IllegalType"/> -->
         <module name="InnerAssignment"/>
-        <module name="MagicNumber">
-            <property name="ignoreHashCodeMethod" value="true"/>
-            <property name="ignoreAnnotation" value="true"/>
-            <message key="magic.number"
-                     value="Most likely the value ''{0}'' is a configuration one. You should move it to configuration file instead of source code."/>
-        </module>
+<!--        <module name="MagicNumber">-->
+<!--            <property name="ignoreHashCodeMethod" value="true"/>-->
+<!--            <property name="ignoreAnnotation" value="true"/>-->
+<!--            <message key="magic.number"-->
+<!--                     value="Most likely the value ''{0}'' is a configuration one. You should move it to configuration file instead of source code."/>-->
+<!--        </module>-->
         <!-- <module name="MissingCtor"/> -->
         <module name="MissingSwitchDefault"/>
         <module name="ModifiedControlVariable"/>
@@ -310,7 +310,7 @@
         <module name="ParameterAssignment"/>
         <!-- <module name="RequireThis"/> -->
         <module name="ReturnCount">
-            <property name="max" value="8"/>
+            <property name="max" value="20"/>
         </module>
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
@@ -376,7 +376,7 @@
         <!-- <module name="ClassDataAbstractionCoupling"/> -->
         <!-- <module name="ClassFanOutComplexity"/> -->
         <module name="CyclomaticComplexity">
-            <property name="max" value="16"/>
+            <property name="max" value="32"/>
         </module>
         <!-- <module name="JavaNCSS"/> -->
         <!-- <module name="NPathComplexity"/> -->

@@ -23,8 +23,8 @@ public class BotController {
             stringBuilder.append("\nTEST FAILED: ***").append(request.testNum()).append(STARS);
         }
         if (request.runTime() != -1) {
-            stringBuilder.append("\nTIME: ***").append(request.runTime()).append(STARS);
-            stringBuilder.append("\nMEMORY: ***").append(request.memoryUsed()).append(STARS);
+            stringBuilder.append("\nTIME: ***").append(request.runTime()).append(" ms").append(STARS);
+            stringBuilder.append("\nMEMORY: ***").append(request.memoryUsed()).append(" MB").append(STARS);
         }
         bot.processUpdate(request.chatId(), stringBuilder.toString());
     }

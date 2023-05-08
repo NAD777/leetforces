@@ -26,6 +26,7 @@ public class Bot implements AutoCloseable, UpdatesListener {
     private final UserMessageProcessor userMessageProcessor;
 
     private final static String ERROR = "Error while sending message: ";
+    private final static String UNSUPPORTED_COMMAND = "Sorry, I don't understand you. Try /help to see list of commands";
 
     @PostConstruct
     public void start() {
@@ -36,7 +37,12 @@ public class Bot implements AutoCloseable, UpdatesListener {
     @Override
     public int process(@NotNull List<Update> updates) {
         updates.forEach(update -> {
-            SendMessage message = userMessageProcessor.process(update);
+            SendMessage message;
+            try {
+                message = userMessageProcessor.process(update);
+            } catch (UnsupportedOperationException e) {
+                message = new SendMessage(update.message().chat().id(), MarkdownProcessor.process(UNSUPPORTED_COMMAND));
+            }
             if (message != null) {
                 message.parseMode(ParseMode.MarkdownV2);
                 BaseResponse response = telegramBot.execute(message);

@@ -39,7 +39,7 @@ public class ListCommand implements Command {
         builder.append("Here is the list of available tasks:\n\n");
         for (TaskResponse e : response.list()) {
             builder.append(e.taskName()).append("\n");
-            builder.append("/task_no_").append(e.taskId()).append("\n\n");
+            builder.append("/get_task_").append(e.taskId()).append("\n\n");
         }
         return new SendMessage(chatId, MarkdownProcessor.process(builder.toString()));
     }
