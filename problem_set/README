@@ -1,8 +1,0 @@
-##### MASTER SOLUTION CONVENTIONS #####
-Each master solution must obey the following rules:
-    - master solution must be wrapped in class and implement methods according to the Solution interface (located in master_colutions/solution.*)
-    - master solution executable file must parse 1 argument which determines if data generator wants to generate sample or run the solution
-    - master solution uses stdin and stdout as input and output stream correspondingly
-
-##### FILE LOCATION ASSUMPTIONS ##### 
-    - There are only files with problem descriptions in ./problem_descriptions/ folder, a file for each problem in the set
