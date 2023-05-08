@@ -10,4 +10,3 @@ WORKDIR /app
 ADD ./orchestrator/runners/runner.py ./
 ADD ./orchestrator/runners/run.sh ./
 ADD ./problem_set/master_solutions/ ./solutions/
-ADD ./configs/ ./configs/

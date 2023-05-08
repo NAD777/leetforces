@@ -31,8 +31,8 @@ services:
   
   orchestrator:
     build: 
-      context: ./orchestrator/
-      dockerfile: ./orchestrator/Dockerfile
+      context: .
+      dockerfile: ./orchestrator/orchestrator/Dockerfile
     networks: 
       - internal
       - orchestrator_backend
@@ -41,6 +41,8 @@ services:
     depends_on:
       - test_generator
       - runner
+    environment:
+      - JUGGLER=http://juggler:5001
   
   runner:
     build: 
@@ -48,7 +50,7 @@ services:
       context: .
     networks: 
       - internal
-    command: python -u runner.py run_tests
+    command: python -u runner.py
     depends_on:
       - test_generator
 
@@ -58,7 +60,7 @@ services:
       context: .
     networks: 
       - internal
-    command: python -u runner.py generate
+    command: python -u runner.py
     
   bot:
     build:
