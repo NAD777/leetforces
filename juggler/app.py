@@ -3,9 +3,6 @@ from database.db_session import create_session, global_init
 from database.all_models import *
 from sqlalchemy.exc import NoResultFound, DataError
 from sqlalchemy.orm.exc import UnmappedInstanceError
-from threading import Thread
-from sqlalchemy.exc import NoResultFound
-from sqlalchemy.orm.exc import UnmappedInstanceError
 import base64
 import requests
 from threading import Thread
@@ -217,6 +214,7 @@ def create_sample_problems():
         {
             "task_name": 'A+B',
             'task_file': 'problems_conditions/aPlusB.pdf',
+            'task_filename': 'aPlusB.pdf',
             'master_filename': 'masterAPlusB.py',
             'master_file': 'master_solutions/masterAPlusB.py',
             'amount_test': 10,
@@ -231,6 +229,7 @@ def create_sample_problems():
                 task = Task(
                     task_name=sample['task_name'],
                     task_file=str(base64.b64encode(condition.read()))[2:-1],
+                    task_filename=sample['task_filename'],
                     master_filename=sample['master_filename'],
                     master_file=str(base64.b64encode(master.read()))[2:-1],
                     amount_test=sample['amount_test'],
@@ -244,37 +243,37 @@ def create_sample_problems():
 
 create_sample_problems()
 
-
-@app.route("/register", methods=["POST", "DELETE"])
-def register():
-    chat_id = request.args.get("chat_id")
-    session = create_session()
-    # print(request.method)
-    code = 200
-    response = {
-        'status': None,
-        'code': 0
-    }
-    try:
-        if request.method == "POST":
-            if len(session.query(Chat).filter(Chat.chat_id == chat_id).all()) != 0:
-                response["status"] = "User already present"
-                response['code'] = 1
-            else:
-                chat = Chat(chat_id=chat_id)
-                session.add(chat)
-                session.commit()
-                response["status"] = "User added"
-        elif request.method == "DELETE":
-            chat = session.query(Chat).filter(Chat.chat_id == chat_id).first()
-            session.delete(chat)
-            session.commit()
-            response["status"] = "User deleted"
-    except (NoResultFound, UnmappedInstanceError):
-        response["status"] = "Error occurred"
-        code = 404
-        response['code'] = 2
-    return jsonify(response), code
+#
+# @app.route("/register", methods=["POST", "DELETE"])
+# def register():
+#     chat_id = request.args.get("chat_id")
+#     session = create_session()
+#     # print(request.method)
+#     code = 200
+#     response = {
+#         'status': None,
+#         'code': 0
+#     }
+#     try:
+#         if request.method == "POST":
+#             if len(session.query(Chat).filter(Chat.chat_id == chat_id).all()) != 0:
+#                 response["status"] = "User already present"
+#                 response['code'] = 1
+#             else:
+#                 chat = Chat(chat_id=chat_id)
+#                 session.add(chat)
+#                 session.commit()
+#                 response["status"] = "User added"
+#         elif request.method == "DELETE":
+#             chat = session.query(Chat).filter(Chat.chat_id == chat_id).first()
+#             session.delete(chat)
+#             session.commit()
+#             response["status"] = "User deleted"
+#     except (NoResultFound, UnmappedInstanceError):
+#         response["status"] = "Error occurred"
+#         code = 404
+#         response['code'] = 2
+#     return jsonify(response), code
 
 
 if __name__ == '__main__':
