@@ -66,6 +66,13 @@ public class UserMessageProcessor {
         StateInfo stateInfo = STATE_MAP.get(chatId);
         String text = update.message().text();
 
+        if (text != null) {
+            log.info("Get user message: \"" + text + "\"");
+        }
+        if (update.message().document() != null) {
+            log.info("Get document from user");
+        }
+
         if (text != null && text.equals("/cancel")) {
             ADD_TASK_REQUEST_MAP.remove(chatId);
             STATE_MAP.remove(chatId);
@@ -94,6 +101,7 @@ public class UserMessageProcessor {
             // Send file to juggler
             SubmitTaskRequest request = new SubmitTaskRequest(fileName, stateInfo.getTaskId(), file);
             SubmitTaskResponse response = jugglerClient.submitTask(chatId, request);
+            log.info(response.toString());
 
             return new SendMessage(chatId, MarkdownProcessor.process(SUBMITTED_FILE + response.toString()));
         } else if (stateInfo.getState() == State.WAITING_FOR_TASK_INFO) {
@@ -141,6 +149,7 @@ public class UserMessageProcessor {
             ADD_TASK_REQUEST_MAP.get(chatId).setMasterFile(file);
 
             AddTaskResponse response = jugglerClient.addTask(chatId, ADD_TASK_REQUEST_MAP.get(chatId));
+            log.info(response.toString());
 
             STATE_MAP.remove(chatId);
             ADD_TASK_REQUEST_MAP.remove(chatId);
