@@ -1,7 +1,6 @@
 version: "3.9"
 
 services:
-
   postgres:
     build:
       dockerfile: ./Postgres/Dockerfile
@@ -13,7 +12,6 @@ services:
       POSTGRES_PASSWORD: "postgres"
     volumes:
       - .:/docker-entrypoint-initdb.d
-  
   juggler:
     build:
       context: ./juggler
@@ -28,6 +26,9 @@ services:
       - orchestrator
     ports:
       - "5001:5001"
+    environment:
+      - ORCHESTRATOR=http://orchestrator:5000
+      - BOT=http://bot:8081
   
   orchestrator:
     build: 
@@ -84,4 +85,3 @@ networks:
   internal:
   bot_backend:
   orchestrator_backend:
-
