@@ -1,6 +1,8 @@
 package com.github.nad777.bot.client;
 
+import com.github.nad777.bot.client.requests.AddTaskRequest;
 import com.github.nad777.bot.client.requests.SubmitTaskRequest;
+import com.github.nad777.bot.client.responses.AddTaskResponse;
 import com.github.nad777.bot.client.responses.ListTasksResponse;
 import com.github.nad777.bot.client.responses.SubmitTaskResponse;
 import com.github.nad777.bot.client.responses.TaskFileResponse;
@@ -14,23 +16,25 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 @RequiredArgsConstructor
 public class JugglerClient {
     private final WebClient jugglerWebClient;
+    private final static String PATH_SEGMENT = "chat";
+    private final static String QUERY_PARAM = "chat_id";
 
-    public void registerChat(long id) {
+    public void registerChat(long chatId) {
         jugglerWebClient.post()
                 .uri(uriBuilder -> uriBuilder
-                        .pathSegment("chat")
-                        .queryParam("chat_id", id)
+                        .pathSegment(PATH_SEGMENT)
+                        .queryParam(QUERY_PARAM, chatId)
                         .build())
                 .retrieve()
                 .bodyToMono(Void.class)
                 .block();
     }
 
-    public void deleteChat(long id) {
+    public void deleteChat(long chatId) {
         jugglerWebClient.delete()
                 .uri(uriBuilder -> uriBuilder
-                        .pathSegment("chat")
-                        .queryParam("chat_id", id)
+                        .pathSegment(PATH_SEGMENT)
+                        .queryParam(QUERY_PARAM, chatId)
                         .build())
                 .retrieve()
                 .bodyToMono(Void.class)
@@ -74,11 +78,23 @@ public class JugglerClient {
         return jugglerWebClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .pathSegment("submit")
-                        .queryParam("chat_id", id)
+                        .queryParam(QUERY_PARAM, id)
                         .build())
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(SubmitTaskResponse.class)
+                .block();
+    }
+
+    public AddTaskResponse addTask(long chatId, AddTaskRequest request) {
+        return jugglerWebClient.post()
+                .uri(uriBuilder -> uriBuilder
+                        .pathSegment("add_task")
+                        .queryParam(QUERY_PARAM, chatId)
+                        .build())
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(AddTaskResponse.class)
                 .block();
     }
 }

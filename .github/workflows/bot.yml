@@ -1,0 +1,76 @@
+name: Build Bot
+
+on:
+  push:
+    paths:
+      - 'bot/**'
+    branches: [ "main", "bot" ]
+  pull_request:
+    branches: [ "main" ]
+
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: nad777/codetest_bot-bot
+
+jobs:
+  build:
+
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Run checkstyle
+        run: gradle -p bot checkstyleMain
+
+      - name: Upload checkstyle report
+        uses: actions/upload-artifact@v3
+        with:
+          name: checkstyle-bot-report
+          path: bot/build/reports/checkstyle/main.html
+
+      - name: Build with Gradle
+        run: gradle -p bot build
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to the Registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker Metadata
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v4
+        with:
+          context: bot
+          file: ./bot/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          #          tags: ${{ steps.meta.outputs.tags }}
+          tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha, mode=max

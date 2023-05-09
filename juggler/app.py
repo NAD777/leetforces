@@ -164,7 +164,7 @@ def get_task_info():
     try:
         task = session.query(Task).filter(Task.task_id == task_id).one()
     except NoResultFound:
-        return jsonify({'status': "Task does not exists", 'code': 1}), 404
+        return jsonify({'status': "Task does not exist", 'code': 1}), 404
     response = {
         "master_filename": task.master_filename,
         "master_file": task.master_file,

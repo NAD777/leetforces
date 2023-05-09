@@ -1,8 +1,9 @@
 FROM gradle:8.1.1-jdk17 AS build
 WORKDIR /bot
 COPY build.gradle.kts .
+COPY checkstyle.xml .
 COPY src ./src
-RUN gradle clean bootJar --no-daemon
+RUN gradle build --no-daemon
 
 FROM openjdk:17-oracle
 WORKDIR /bot
