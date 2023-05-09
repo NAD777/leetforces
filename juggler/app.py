@@ -1,20 +1,21 @@
 from flask import Flask, request, jsonify
 from database.db_session import create_session, global_init
-from database.all_models import *
+from database.all_models import Submission, Task, Chat
 from sqlalchemy.exc import NoResultFound, DataError
 from sqlalchemy.orm.exc import UnmappedInstanceError
-from threading import Thread
-import base64
 import requests
+from threading import Thread
+from os import environ
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 global_init("backbase")
 PERMITTED_EXTENSIONS = ['py', 'java']
-ORCHESTRATOR_URL = "http://orchestrator:5000"
-BOT_URL = "http://bot:8081"
-# BOT_URL = "http://localhost:8080"
+ORCHESTRATOR_URL = environ['ORCHESTRATOR']
+BOT_URL = environ['BOT']
 
+
+# BOT_URL = "http://localhost:8080"
 
 @app.route("/")
 def hello_world():
@@ -23,7 +24,8 @@ def hello_world():
 
 @app.route("/submit", methods=["POST"])
 def submit():
-    json_payload = request.get_json()
+    json_payload = request.json
+    assert json_payload is not None
     chat_id = request.args.get("chat_id")
     filename = json_payload["name"]
     task_no = json_payload["task_no"]
@@ -32,7 +34,7 @@ def submit():
     extension = filename.split('.')[-1]
 
     session = create_session()
-    submission = Submission(chat_id=chat_id)
+    submission = Submission(chat_id=chat_id, task_id=task_no)
     session.add(submission)
     session.commit()
 
@@ -46,10 +48,11 @@ def submit():
         "task_no": task_no,
         "source_file": file,
         "extension": extension,
-        "file_name" : filename
+        "file_name": filename
     }
 
-    Thread(target=lambda : requests.post(f"{ORCHESTRATOR_URL}/run", json=data)).start()
+    Thread(target=lambda: requests.post(
+        f"{ORCHESTRATOR_URL}/run", json=data)).start()
     # TODO: handle rEsponse from ORCHESTRATOR
 
     return jsonify({"status": "File submitted", "code": 0, "submission_id": submission_id}), 200
@@ -58,6 +61,7 @@ def submit():
 @app.route('/report', methods=["POST"])
 def report():
     json_payload = request.json
+    assert json_payload is not None
     status = json_payload["status"]
     test_num = json_payload["test_num"]
     run_time = json_payload["run_time"]
@@ -66,8 +70,12 @@ def report():
 
     session = create_session()
     submission = None
+    submission_task = None
     try:
-        submission = session.query(Submission).filter(Submission.submission_id == submit_id).one()
+        submission = session.query(Submission).filter(
+            Submission.submission_id == submit_id).one()
+        submission_task = session.query(Task).filter(
+            Task.task_id == submission.task_id).one()
     except NoResultFound:
         return jsonify({"status": "No such submission", "code": 1}), 200
 
@@ -77,10 +85,11 @@ def report():
         "run_time": run_time,
         "memory_used": memory_used,
         "submit_id": submit_id,
-        "chat_id": submission.chat_id
+        "chat_id": submission.chat_id,
+        "task_name": submission_task.task_name
     }
 
-    r = requests.post(f"{BOT_URL}/update", json=data)
+    requests.post(f"{BOT_URL}/update", json=data)
     return jsonify({"status": "Submitted to bot", "code": 0}), 200
 
 
@@ -108,14 +117,14 @@ def get_task():
         task = session.query(Task).filter(Task.task_id == task_id).one()
     except (NoResultFound, DataError):
         return [], 404
-    file_content = None
-    with open(f"{task.task_path}", 'rb') as file:
-        file_content = str(base64.b64encode(file.read()))[2:-1]
+    # file_content = None
+    # with open(f"{task.task_file}", 'rb') as file:
+    #     file_content = str(base64.b64encode(file.read()))[2:-1]
     task_dict = {
         "task_id": task_id,
         "task_name": task.task_name,
-        "filename": task.task_path.split('/')[-1],
-        "task_file": file_content
+        "filename": task.task_filename,
+        "task_file": task.task_file
     }
     return jsonify(task_dict)
 
@@ -152,14 +161,14 @@ def register():
 
 
 @app.route("/get_task_info")
-def func():
+def get_task_info():
     task_id = request.args.get("task_id")
     session = create_session()
     task = None
     try:
         task = session.query(Task).filter(Task.task_id == task_id).one()
     except NoResultFound:
-        return jsonify({'status': "Task does not exists", 'code': 1}), 404
+        return jsonify({'status': "Task does not exist", 'code': 1}), 404
     response = {
         "master_filename": task.master_filename,
         "master_file": task.master_file,
@@ -171,36 +180,39 @@ def func():
     return jsonify(response), 200
 
 
-def create_sample_problems():
-    samples = [
-        {
-            "task_name": 'A+B',
-            'task_path': 'problems_conditions/aPlusB.pdf',
-            'master_filename': 'masterAPlusB.py',
-            'master_file': 'master_solutions/masterAPlusB.py',
-            'amount_test': 10,
-            'memory_limit': 16,
-            'time_limit': 1
+@app.route("/add_task", methods=["POST"])
+def add_task():
+    author_id = request.args.get("chat_id")
+
+    json_payload = request.json
+    assert json_payload is not None
+    task = Task(
+        task_name=json_payload['task_name'],
+        task_file=json_payload['task_file'],
+        task_filename=json_payload['task_filename'],
+        master_filename=json_payload['master_filename'],
+        master_file=json_payload['master_file'],
+        amount_test=json_payload['amount_test'],
+        memory_limit=json_payload['memory_limit'],
+        time_limit=json_payload['time_limit'],
+        author_id=author_id
+    )
+    try:
+        session = create_session()
+        session.add(task)
+        session.commit()
+        response = {
+            'status': "Fine",
+            'code': 0
         }
-    ]
-    session = create_session()
-    for sample in samples:
-        with open(f"{sample['master_file']}", "rb") as master:
-            # with open(f"{sample['task_path']}", "rb") as condition:
-            task = Task(
-                task_name=sample['task_name'],
-                task_path=sample['task_path'],
-                master_filename=sample['master_filename'],
-                master_file=str(base64.b64encode(master.read()))[2:-1],
-                amount_test=sample['amount_test'],
-                memory_limit=sample['memory_limit'],
-                time_limit=sample['time_limit']
-            )
-            session.add(task)
-    session.commit()
-    print(session.query(Task).all())
+        return jsonify(response)
+    except BaseException:
+        response = {
+            'status': "Error",
+            'code': 1
+        }
+        return jsonify(response)
 
 
-create_sample_problems()
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8000)

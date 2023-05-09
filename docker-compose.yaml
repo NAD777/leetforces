@@ -1,7 +1,6 @@
 version: "3.9"
 
 services:
-
   postgres:
     build:
       dockerfile: ./Postgres/Dockerfile
@@ -13,7 +12,6 @@ services:
       POSTGRES_PASSWORD: "postgres"
     volumes:
       - .:/docker-entrypoint-initdb.d
-  
   juggler:
     build:
       context: ./juggler
@@ -28,11 +26,14 @@ services:
       - orchestrator
     ports:
       - "5001:5001"
+    environment:
+      - ORCHESTRATOR=http://orchestrator:5000
+      - BOT=http://bot:8081
   
   orchestrator:
     build: 
-      context: ./orchestrator/
-      dockerfile: ./orchestrator/Dockerfile
+      context: .
+      dockerfile: ./orchestrator/orchestrator/Dockerfile
     networks: 
       - internal
       - orchestrator_backend
@@ -41,6 +42,9 @@ services:
     depends_on:
       - test_generator
       - runner
+    environment:
+      - JUGGLER=http://juggler:5001
+    restart: unless-stopped
   
   runner:
     build: 
@@ -48,9 +52,10 @@ services:
       context: .
     networks: 
       - internal
-    command: python -u runner.py run_tests
+    command: python -u runner.py
     depends_on:
       - test_generator
+    restart: unless-stopped
 
   test_generator:
     build: 
@@ -58,7 +63,8 @@ services:
       context: .
     networks: 
       - internal
-    command: python -u runner.py generate
+    command: python -u runner.py
+    restart: unless-stopped
     
   bot:
     build:
@@ -71,10 +77,11 @@ services:
       - bot_backend
     depends_on:
       - juggler
+    env_file:
+      - ./bot/env.properties
     
 
 networks:
   internal:
   bot_backend:
   orchestrator_backend:
-

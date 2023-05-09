@@ -3,13 +3,12 @@ package com.github.nad777.bot.core.commands;
 import com.github.nad777.bot.client.JugglerClient;
 import com.github.nad777.bot.client.responses.TaskFileResponse;
 import com.github.nad777.bot.core.MarkdownProcessor;
-import com.github.nad777.bot.core.State;
-import com.github.nad777.bot.core.UserMessageProcessor;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -18,16 +17,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-public class TaskCommand implements Command {
+public class GetTaskCommand implements Command {
     private final TelegramBot telegramBot;
     private final JugglerClient jugglerClient;
 
-    private static final String COMMAND = "/task_no_";
+    private static final String COMMAND = "/get_task_";
     private static final String DESCRIPTION = "Command to get task by task id";
-    private static final String MESSAGE =
-            "Here is your file with task description. You can submit task solution in the next message. Only *.py* or *.java* files are supported";
+    private static final String MESSAGE = "Here is your file with task description. To submit your solution, use command /submit_";
 
     @Override
     public String command() {
@@ -44,11 +43,11 @@ public class TaskCommand implements Command {
         long chatId = update.message().chat().id();
         String taskId = update.message().text().substring(COMMAND.length());
         TaskFileResponse response = jugglerClient.getTaskById(taskId);
-
-        if (response.task_id() == null) {
+        if (response.taskId() == null) {
             return new SendMessage(chatId, "There is no such task");
         }
-        byte[] fileBytes = Base64.getDecoder().decode(response.task_file());
+        log.info(response.toString());
+        byte[] fileBytes = Base64.getDecoder().decode(response.taskFile());
         File file = new File(response.filename());
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(fileBytes);
@@ -58,8 +57,7 @@ public class TaskCommand implements Command {
         SendDocument sendDocument = new SendDocument(chatId, file);
         telegramBot.execute(sendDocument);
 
-        UserMessageProcessor.setState(chatId, State.WAITING_FOR_FILE);
-        return new SendMessage(chatId, MarkdownProcessor.process(MESSAGE));
+        return new SendMessage(chatId, MarkdownProcessor.process(MESSAGE + taskId));
     }
 
     @Override

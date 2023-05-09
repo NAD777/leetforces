@@ -5,9 +5,11 @@ import com.github.nad777.bot.core.MarkdownProcessor;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class StartCommand implements Command {
@@ -31,6 +33,7 @@ public class StartCommand implements Command {
     public SendMessage handle(@NotNull Update update) {
         long chatId = update.message().chat().id();
         jugglerClient.registerChat(chatId);
+        log.info("User with id=" + chatId + " registered");
         return new SendMessage(chatId, MarkdownProcessor.process(WELCOME));
     }
 }

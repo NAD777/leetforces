@@ -1,7 +1,8 @@
 from random import randint
-#from solution import Solution
+# from solution import Solution
 
 import argparse
+
 
 class Solution:
     def gen_sample(self):

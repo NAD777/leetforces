@@ -1,5 +1,10 @@
 package com.github.nad777.bot.controller.requests;
 
-public record ResultUpdateRequest(Long chat_id, String status, Integer test_num, Integer run_time, Integer memory_used,
-                                  Long submit_id) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record ResultUpdateRequest(@JsonProperty("chat_id") Long chatId, String status,
+                                  @JsonProperty("test_num") Integer testNum, @JsonProperty("run_time") Integer runTime,
+                                  @JsonProperty("memory_used") Integer memoryUsed,
+                                  @JsonProperty("submit_id") Long submitId,
+                                  @JsonProperty("task_name") String taskName) {
 }

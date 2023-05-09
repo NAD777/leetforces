@@ -12,19 +12,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class BotController {
     private final Bot bot;
+    private final static String STARS = "***";
 
     @PostMapping("/update")
     public void processUpdate(@NotNull @RequestBody ResultUpdateRequest request) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Results for submission ID: ***").append(request.submit_id()).append("***\n");
-        stringBuilder.append("\nSTATUS: ***").append(request.status()).append("***");
-        if (request.test_num() != -1) {
-            stringBuilder.append("\nTEST FAILED: ***").append(request.test_num()).append("***");
+        stringBuilder.append("Results for submission ID: ***").append(request.submitId()).append("***\n");
+        stringBuilder.append("\nTASK NAME: ***").append(request.taskName()).append(STARS);
+        stringBuilder.append("\nSTATUS: ***").append(request.status()).append(STARS);
+        if (request.testNum() != -1) {
+            stringBuilder.append("\nTEST FAILED: ***").append(request.testNum()).append(STARS);
         }
-        if (request.run_time() != -1) {
-            stringBuilder.append("\nTIME: ***").append(request.run_time()).append("***");
-            stringBuilder.append("\nMEMORY: ***").append(request.memory_used()).append("***");
+        if (request.runTime() != -1) {
+            stringBuilder.append("\nTIME: ***").append(request.runTime()).append(" ms").append(STARS);
+            stringBuilder.append("\nMEMORY: ***").append(request.memoryUsed()).append(" MB").append(STARS);
         }
-        bot.processUpdate(request.chat_id(), stringBuilder.toString());
+        bot.processUpdate(request.chatId(), stringBuilder.toString());
     }
 }
