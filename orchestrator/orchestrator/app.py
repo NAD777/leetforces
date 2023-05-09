@@ -19,12 +19,13 @@ JUGGLER = environ["JUGGLER"]
 app = Flask(__name__)
 app.config.from_object(__name__)
 
-@app.route("/run", methods=["POST"]) #type: ignore
+
+@app.route("/run", methods=["POST"])  # type: ignore
 def run():
     body = request.get_json()
-    
+
     assert body is not None
-    
+
     submission_id = body['submission_id']
     source_file = body['source_file']
     task_id = body['task_no']
@@ -38,7 +39,7 @@ def run():
     print(f'Got request with: {ext=}')
 
     source_file_decoded = b64decode(source_file).decode("utf-8")
-    
+
     try:
         runner = TestRunner(task_id, ext)
         report = runner.run(submission_id, filename, source_file_decoded)

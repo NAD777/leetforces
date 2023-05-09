@@ -36,21 +36,21 @@ class Runner:
             Popen(prepared).communicate()
 
         MAX_VIRTUAL_MEMORY = int((memory_limit + default_memory) * 1024 * 1024)
-        
+
         prepared_executable = executable.split("/")[2]
 
         if "java" in executable:
             MAX_VIRTUAL_MEMORY = RLIM_INFINITY
             prepared_executable = executable.split("/")[2].split(".")[0]
-        
+
         folder = executable.split('/')[1]
         chdir(f'./{folder}/')
-            
+
         if stdin_data != '':
             cmd = f"sh ../test.sh '{stdin_data}' '{execution_string} {prepared_executable}'"
         else:
             cmd = f"{execution_string} {prepared_executable}"
-        
+
         if stdin_data != '' and "solutions" not in executable:
             cmd = f"sh ../run.sh '{stdin_data}' '{execution_string} {prepared_executable}'"
 
