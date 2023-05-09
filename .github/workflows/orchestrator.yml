@@ -6,6 +6,8 @@ on:
       - 'orchestrator/orchestrator/**'
     branches: [ "main" ]
   pull_request:
+    paths:
+      - 'orchestrator/orchestrator/**'
     branches: [ "main" ]
 
 
