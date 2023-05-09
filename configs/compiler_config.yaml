@@ -1,6 +1,11 @@
 py: 
-  compiler_string: "/usr/bin/python -u"
+  interpretable: 1
+  execution_string: "/usr/bin/python -u"
   ce: "syntaxerror"
-java: 
-  compiler_string: "javac Main.java && java Main"
+  default_memory: 20
+java:
+  interpretable: 0
+  compiler_string: "javac"
+  execution_string: "java"
   ce: "compilation failed"
+  default_memory: 50

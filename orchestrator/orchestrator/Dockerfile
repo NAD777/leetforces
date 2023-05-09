@@ -4,5 +4,6 @@ RUN pip install flask pyyaml requests
 
 WORKDIR /app
 
-ADD ./orchestrator/app.py .
-ADD ./orchestrator/test_runner.py .
+ADD ./orchestrator/orchestrator/app.py .
+ADD ./orchestrator/orchestrator/test_runner.py .
+ADD ./configs/ ./configs/
