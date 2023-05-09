@@ -1,4 +1,7 @@
 package com.github.nad777.bot.client.responses;
 
-public record TaskFileResponse(String task_name, String task_id, String filename, String task_file) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record TaskFileResponse(@JsonProperty("task_name") String taskName, @JsonProperty("task_id") String taskId,
+                               String filename, @JsonProperty("task_file") String taskFile) {
 }

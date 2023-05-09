@@ -1,5 +1,6 @@
 plugins {
     java
+    checkstyle
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
 }
@@ -38,6 +39,12 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito:mockito-core:5.2.0")
     testImplementation("junit:junit:4.13.2")
+
+    checkstyle("com.puppycrawl.tools:checkstyle:10.10.0")
+}
+
+checkstyle {
+    configFile = rootProject.file("checkstyle.xml")
 }
 
 tasks.withType<Test> {
