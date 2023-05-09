@@ -48,3 +48,4 @@ out/
 /bot/gradlew.bat
 /bot/gradlew
 /bot/gradle/
+/bot/env.properties

@@ -145,7 +145,7 @@ public class UserMessageProcessor {
             STATE_MAP.remove(chatId);
             ADD_TASK_REQUEST_MAP.remove(chatId);
 
-            return new SendMessage(chatId, MarkdownProcessor.process(response.status()));
+            return new SendMessage(chatId, MarkdownProcessor.process("STATUS: " + response.status()));
         }
 
         throw new UnsupportedOperationException(UNSUPPORTED_COMMAND);

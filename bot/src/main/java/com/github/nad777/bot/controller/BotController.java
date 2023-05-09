@@ -18,6 +18,7 @@ public class BotController {
     public void processUpdate(@NotNull @RequestBody ResultUpdateRequest request) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Results for submission ID: ***").append(request.submitId()).append("***\n");
+        stringBuilder.append("\nTASK NAME: ***").append(request.taskName()).append(STARS);
         stringBuilder.append("\nSTATUS: ***").append(request.status()).append(STARS);
         if (request.testNum() != -1) {
             stringBuilder.append("\nTEST FAILED: ***").append(request.testNum()).append(STARS);
