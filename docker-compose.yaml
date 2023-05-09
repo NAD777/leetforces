@@ -2,8 +2,7 @@ version: "3.9"
 
 services:
   postgres:
-    build:
-      dockerfile: ./Postgres/Dockerfile
+    image: postgres
     networks:
       - bot_backend
     environment:
