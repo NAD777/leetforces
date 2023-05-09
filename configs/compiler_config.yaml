@@ -6,6 +6,6 @@ py:
 java:
   interpretable: 0
   compiler_string: "javac"
-  execution_string: "java run"
+  execution_string: "java"
   ce: "compilation failed"
   default_memory: 50

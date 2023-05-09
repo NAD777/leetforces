@@ -43,6 +43,7 @@ services:
       - runner
     environment:
       - JUGGLER=http://juggler:5001
+    restart: unless-stopped
   
   runner:
     build: 
@@ -53,6 +54,7 @@ services:
     command: python -u runner.py
     depends_on:
       - test_generator
+    restart: unless-stopped
 
   test_generator:
     build: 
@@ -61,6 +63,7 @@ services:
     networks: 
       - internal
     command: python -u runner.py
+    restart: unless-stopped
     
   bot:
     build:

@@ -6,5 +6,6 @@ RUN pip install pyyaml
 WORKDIR /app
 
 ADD ./orchestrator/runners/runner.py ./
+
 ADD ./orchestrator/runners/run.sh ./
 ADD ./orchestrator/runners/test.sh ./

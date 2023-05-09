@@ -1,9 +1,8 @@
 from xmlrpc.server import SimpleXMLRPCServer
-from subprocess import Popen, PIPE, TimeoutExpired, check_output
-from yaml import safe_load
+from subprocess import Popen, PIPE, TimeoutExpired
 from json import dump, load
 from typing import Dict, Tuple, Any
-from os import makedirs
+from os import makedirs, chdir
 from resource import setrlimit, RLIMIT_AS, RLIM_INFINITY
 from shlex import split
 
@@ -18,13 +17,6 @@ class Runner:
         "MLE": "MLE",
         "TLE": "TLE",
     }
-
-    def resolve_compiler(self, ext: str) -> Dict[str, str]:
-        with open("configs/compiler_config.yaml") as file:
-            try:
-                return safe_load(file)[ext]
-            except KeyError:
-                raise ValueError("Wrong input file format in configuration.")
 
     def run_user_code(self, executable: str, configurations: Dict[str, Any], stdin_data: str = '') -> Dict[str, str]:
         try:
@@ -42,17 +34,25 @@ class Runner:
             compiler_string = lang_configs["compiler_string"]
             prepared = split(f"{compiler_string} {executable}")
             Popen(prepared).communicate()
-        
+
         MAX_VIRTUAL_MEMORY = int((memory_limit + default_memory) * 1024 * 1024)
+        
+        prepared_executable = executable.split("/")[2]
+
         if "java" in executable:
             MAX_VIRTUAL_MEMORY = RLIM_INFINITY
-            executable = executable.split(".")[0]
+            prepared_executable = executable.split("/")[2].split(".")[0]
+        
+        folder = executable.split('/')[1]
+        chdir(f'./{folder}/')
+            
         if stdin_data != '':
-            cmd = f"sh test.sh '{stdin_data}' '{execution_string} {executable}'"
+            cmd = f"sh ../test.sh '{stdin_data}' '{execution_string} {prepared_executable}'"
         else:
-            cmd = f"{execution_string} {executable}"
+            cmd = f"{execution_string} {prepared_executable}"
+        
         if stdin_data != '' and "solutions" not in executable:
-            cmd = f"sh run.sh '{stdin_data}' '{execution_string} {executable}'"
+            cmd = f"sh ../run.sh '{stdin_data}' '{execution_string} {prepared_executable}'"
 
         prepared = split(cmd)
         proc = Popen(prepared, stdout=PIPE, stdin=PIPE, stderr=PIPE,
@@ -62,7 +62,7 @@ class Runner:
             output = proc.communicate(timeout=time_limit + 3)
         except TimeoutExpired:
             output = Runner.status_codes["TLE"]
-        
+
         tle_result = {
             "error_status": Runner.status_codes["TLE"],
             "output": ('', ''),
@@ -87,15 +87,16 @@ class Runner:
             output_dec = (output_dec[0], '')
 
         time = int(float(real_time)*1000) if float(real_time) >= 0 else -1
-        max_mem = int(max_mem) // 1024 - default_memory
+        max_mem = max(int(max_mem) // 1024 - default_memory, 0)
 
         result = {
             "output": output_dec,
             "time": time,
-            "max_mem": default_memory,
+            "max_mem": max_mem,
             "error_status": None
         }
         print(result)
+        chdir('..')
         return result
 
     def run_tests(self, submission_id: int, task_id: int, test_details: Dict[str, str]) -> Dict[str, int | str]:
@@ -108,9 +109,8 @@ class Runner:
         }
         report["submit_id"] = submission_id
 
-
         compiler = test_details["compiler"]
-        ce = compiler["ce"]                                     #type: ignore
+        ce = compiler["ce"]  # type: ignore
         test_data = test_details["test_data"]
         filename = test_details["filename"]
         source_file = test_details["source_file"]
@@ -125,7 +125,8 @@ class Runner:
 
         result = {}
         for test_num, (input, desired_output) in tests.items():
-            result = self.run_user_code(executable, test_details, stdin_data=input)
+            result = self.run_user_code(
+                executable, test_details, stdin_data=input)
             output = result["output"]
 
             # Check for CE
@@ -163,7 +164,7 @@ class Runner:
         else:
             report["status"] = Runner.status_codes["OK"]
             report["test_num"] = -1
-        
+
         report["memory_used"] = result["max_mem"]
         report["run_time"] = result["time"]
 
@@ -181,8 +182,10 @@ class Runner:
         test_data = {}
         executable = f"./solutions/{filename}"
         for test in range(tests_no):
-            input_data = self.run_user_code(executable + " sample", config)["output"][0]
-            output_data = self.run_user_code(executable + " test", config, stdin_data=input_data)["output"]
+            input_data = self.run_user_code(
+                executable + " sample", config)["output"][0]
+            output_data = self.run_user_code(
+                executable + " test", config, stdin_data=input_data)["output"]
             test_data[str(test)] = (input_data, output_data)
 
         return test_data
