@@ -34,7 +34,7 @@ def submit():
     extension = filename.split('.')[-1]
 
     session = create_session()
-    submission = Submission(chat_id=chat_id, task_no=task_no)
+    submission = Submission(chat_id=chat_id, task_id=task_no)
     session.add(submission)
     session.commit()
 
@@ -176,7 +176,7 @@ def get_task_info():
     return jsonify(response), 200
 
 
-@app.route("/add_task")
+@app.route("/add_task", methods=["POST"])
 def add_task():
     author_id = request.args.get("chat_id")
 
