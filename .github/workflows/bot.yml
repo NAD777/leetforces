@@ -6,6 +6,8 @@ on:
       - 'bot/**'
     branches: [ "main" ]
   pull_request:
+    paths:
+      - 'bot/**'
     branches: [ "main" ]
 
 

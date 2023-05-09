@@ -6,6 +6,8 @@ on:
       - 'juggler/**'
     branches: [ "main" ]
   pull_request:
+    paths:
+      - 'juggler/**'
     branches: [ "main" ]
 
 
