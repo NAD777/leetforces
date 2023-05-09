@@ -1,4 +1,4 @@
-name: Build Bot
+name: Build Orchestrator
 
 on:
   push:
