@@ -1,9 +1,8 @@
 from flask import Flask, request, jsonify
 from database.db_session import create_session, global_init
-from database.all_models import *
+from database.all_models import Submission, Task, Chat
 from sqlalchemy.exc import NoResultFound, DataError
 from sqlalchemy.orm.exc import UnmappedInstanceError
-import base64
 import requests
 from threading import Thread
 from os import environ
@@ -26,6 +25,7 @@ def hello_world():
 @app.route("/submit", methods=["POST"])
 def submit():
     json_payload = request.json
+    assert json_payload is not None
     chat_id = request.args.get("chat_id")
     filename = json_payload["name"]
     task_no = json_payload["task_no"]
@@ -51,7 +51,8 @@ def submit():
         "file_name": filename
     }
 
-    Thread(target=lambda: requests.post(f"{ORCHESTRATOR_URL}/run", json=data)).start()
+    Thread(target=lambda: requests.post(
+        f"{ORCHESTRATOR_URL}/run", json=data)).start()
     # TODO: handle rEsponse from ORCHESTRATOR
 
     return jsonify({"status": "File submitted", "code": 0, "submission_id": submission_id}), 200
@@ -60,6 +61,7 @@ def submit():
 @app.route('/report', methods=["POST"])
 def report():
     json_payload = request.json
+    assert json_payload is not None
     status = json_payload["status"]
     test_num = json_payload["test_num"]
     run_time = json_payload["run_time"]
@@ -70,8 +72,10 @@ def report():
     submission = None
     submission_task = None
     try:
-        submission = session.query(Submission).filter(Submission.submission_id == submit_id).one()
-        submission_task = session.query(Task).filter(Task.task_id == submission.task_id).one()
+        submission = session.query(Submission).filter(
+            Submission.submission_id == submit_id).one()
+        submission_task = session.query(Task).filter(
+            Task.task_id == submission.task_id).one()
     except NoResultFound:
         return jsonify({"status": "No such submission", "code": 1}), 200
 
@@ -85,7 +89,7 @@ def report():
         "task_name": submission_task.task_name
     }
 
-    r = requests.post(f"{BOT_URL}/update", json=data)
+    requests.post(f"{BOT_URL}/update", json=data)
     return jsonify({"status": "Submitted to bot", "code": 0}), 200
 
 
@@ -181,7 +185,7 @@ def add_task():
     author_id = request.args.get("chat_id")
 
     json_payload = request.json
-
+    assert json_payload is not None
     task = Task(
         task_name=json_payload['task_name'],
         task_file=json_payload['task_file'],
