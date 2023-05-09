@@ -26,6 +26,9 @@ services:
       - orchestrator
     ports:
       - "5001:5001"
+    environment:
+      - ORCHESTRATOR=http://orchestrator:5000
+      - BOT=http://bot:8081
   
   orchestrator:
     build: 

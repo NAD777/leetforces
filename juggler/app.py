@@ -6,13 +6,14 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 import base64
 import requests
 from threading import Thread
+from os import environ
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 global_init("backbase")
 PERMITTED_EXTENSIONS = ['py', 'java']
-ORCHESTRATOR_URL = "http://orchestrator:5000"
-BOT_URL = "http://bot:8081"
+ORCHESTRATOR_URL = environ['ORCHESTRATOR']
+BOT_URL = environ['BOT']
 
 
 # BOT_URL = "http://localhost:8080"
@@ -118,7 +119,7 @@ def get_task():
     task_dict = {
         "task_id": task_id,
         "task_name": task.task_name,
-        "filename": task.task_name,
+        "filename": task.task_filename,
         "task_file": task.task_file
     }
     return jsonify(task_dict)
@@ -209,39 +210,39 @@ def add_task():
         return jsonify(response)
 
 
-def create_sample_problems():
-    samples = [
-        {
-            "task_name": 'A+B',
-            'task_file': 'problems_conditions/aPlusB.pdf',
-            'task_filename': 'aPlusB.pdf',
-            'master_filename': 'masterAPlusB.py',
-            'master_file': 'master_solutions/masterAPlusB.py',
-            'amount_test': 10,
-            'memory_limit': 16,
-            'time_limit': 1
-        }
-    ]
-    session = create_session()
-    for sample in samples:
-        with open(f"{sample['master_file']}", "rb") as master:
-            with open(f"{sample['task_file']}", "rb") as condition:
-                task = Task(
-                    task_name=sample['task_name'],
-                    task_file=str(base64.b64encode(condition.read()))[2:-1],
-                    task_filename=sample['task_filename'],
-                    master_filename=sample['master_filename'],
-                    master_file=str(base64.b64encode(master.read()))[2:-1],
-                    amount_test=sample['amount_test'],
-                    memory_limit=sample['memory_limit'],
-                    time_limit=sample['time_limit']
-                )
-            session.add(task)
-    session.commit()
-    print(session.query(Task).all())
+# def create_sample_problems():
+#     samples = [
+#         {
+#             "task_name": 'A+B',
+#             'task_file': 'problems_conditions/aPlusB.pdf',
+#             'task_filename': 'aPlusB.pdf',
+#             'master_filename': 'masterAPlusB.py',
+#             'master_file': 'master_solutions/masterAPlusB.py',
+#             'amount_test': 10,
+#             'memory_limit': 16,
+#             'time_limit': 1
+#         }
+#     ]
+#     session = create_session()
+#     for sample in samples:
+#         with open(f"{sample['master_file']}", "rb") as master:
+#             with open(f"{sample['task_file']}", "rb") as condition:
+#                 task = Task(
+#                     task_name=sample['task_name'],
+#                     task_file=str(base64.b64encode(condition.read()))[2:-1],
+#                     task_filename=sample['task_filename'],
+#                     master_filename=sample['master_filename'],
+#                     master_file=str(base64.b64encode(master.read()))[2:-1],
+#                     amount_test=sample['amount_test'],
+#                     memory_limit=sample['memory_limit'],
+#                     time_limit=sample['time_limit']
+#                 )
+#             session.add(task)
+#     session.commit()
+#     print(session.query(Task).all())
 
 
-create_sample_problems()
+# create_sample_problems()
 
 #
 # @app.route("/register", methods=["POST", "DELETE"])
