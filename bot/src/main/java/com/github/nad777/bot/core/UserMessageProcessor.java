@@ -191,7 +191,7 @@ public class UserMessageProcessor {
             request.setMemoryLimit(Integer.parseInt(list[2]));
             request.setTimeLimit(Float.parseFloat(list[3].replaceAll(",", ".")));
             return request;
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             return null;
         }
     }
