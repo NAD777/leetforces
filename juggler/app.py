@@ -6,23 +6,39 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 import requests
 from threading import Thread
 from os import environ
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app, group_by='endpoint')
 app.config.from_object(__name__)
 global_init("backbase")
 PERMITTED_EXTENSIONS = ['py', 'java']
 ORCHESTRATOR_URL = environ['ORCHESTRATOR']
 BOT_URL = environ['BOT']
 
+#common_counter = metrics.counter(
+#    'by_endpoint_counter', 'Request count by endpoints',
+#    labels={'endpoint': lambda: request.endpoint}
+#)
+
+metrics.register_default(
+    metrics.counter(
+        'by_path_counter', 'Request count by request paths',
+        labels={'path': lambda: request.path}
+    )
+)
+
 
 # BOT_URL = "http://localhost:8080"
 
 @app.route("/")
+#@common_counter
 def hello_world():
     return "<p>Hello, World!</p>"
 
 
 @app.route("/submit", methods=["POST"])
+#@common_counter
 def submit():
     json_payload = request.json
     assert json_payload is not None
@@ -59,6 +75,7 @@ def submit():
 
 
 @app.route('/report', methods=["POST"])
+#@common_counter
 def report():
     json_payload = request.json
     assert json_payload is not None
@@ -94,6 +111,7 @@ def report():
 
 
 @app.route("/list", methods=["GET"])
+#@common_counter
 def get_list():
     # chat_id = request.args.get("chat_id")
     session = create_session()
@@ -108,6 +126,7 @@ def get_list():
 
 
 @app.route("/get_task", methods=["GET"])
+#@common_counter
 def get_task():
     # chat_id = request.args.get("chat_id")
     task_id = request.args.get("task_id")
@@ -130,6 +149,7 @@ def get_task():
 
 
 @app.route("/chat", methods=["POST", "DELETE"])
+#@common_counter
 def register():
     chat_id = request.args.get("chat_id")
     session = create_session()
@@ -161,6 +181,7 @@ def register():
 
 
 @app.route("/get_task_info")
+#@common_counter
 def get_task_info():
     task_id = request.args.get("task_id")
     session = create_session()
@@ -181,6 +202,7 @@ def get_task_info():
 
 
 @app.route("/add_task", methods=["POST"])
+#@common_counter
 def add_task():
     author_id = request.args.get("chat_id")
 

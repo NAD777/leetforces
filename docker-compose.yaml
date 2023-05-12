@@ -1,6 +1,28 @@
 version: "3.9"
 
 services:
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./configs:/etc/prometheus/
+    container_name: prometheus
+    hostname: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yaml
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - bot_backend
+
+  grafana:
+    image: grafana/grafana-enterprise
+    networks:
+      - bot_backend
+    ports:
+     - "3000:3000"
+    restart: unless-stopped
+
   postgres:
     image: postgres
     networks:
@@ -11,6 +33,7 @@ services:
       POSTGRES_PASSWORD: "postgres"
     volumes:
       - .:/docker-entrypoint-initdb.d
+  
   juggler:
     build:
       context: ./juggler
