@@ -50,7 +50,6 @@ out/
 /bot/gradle/
 
 env/
-.idea
 .DS_Store
 problem_template/
 juggler/database/__pycache__/
