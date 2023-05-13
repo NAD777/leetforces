@@ -48,4 +48,10 @@ out/
 /bot/gradlew.bat
 /bot/gradlew
 /bot/gradle/
+
+env/
+.DS_Store
+problem_template/
+juggler/database/__pycache__/
 /bot/env.properties
+

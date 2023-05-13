@@ -8,6 +8,7 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class GetTaskCommand implements Command {
@@ -41,10 +43,10 @@ public class GetTaskCommand implements Command {
         long chatId = update.message().chat().id();
         String taskId = update.message().text().substring(COMMAND.length());
         TaskFileResponse response = jugglerClient.getTaskById(taskId);
-
         if (response.taskId() == null) {
             return new SendMessage(chatId, "There is no such task");
         }
+        log.info(response.toString());
         byte[] fileBytes = Base64.getDecoder().decode(response.taskFile());
         File file = new File(response.filename());
         try (FileOutputStream outputStream = new FileOutputStream(file)) {

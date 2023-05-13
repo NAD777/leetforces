@@ -16,7 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -66,6 +68,13 @@ public class UserMessageProcessor {
         StateInfo stateInfo = STATE_MAP.get(chatId);
         String text = update.message().text();
 
+        if (text != null) {
+            log.info("Get user message: \"" + text + "\"");
+        }
+        if (update.message().document() != null) {
+            log.info("Get document from user");
+        }
+
         if (text != null && text.equals("/cancel")) {
             ADD_TASK_REQUEST_MAP.remove(chatId);
             STATE_MAP.remove(chatId);
@@ -93,9 +102,16 @@ public class UserMessageProcessor {
             byte[] file = getFileFromDocument(document);
             // Send file to juggler
             SubmitTaskRequest request = new SubmitTaskRequest(fileName, stateInfo.getTaskId(), file);
-            SubmitTaskResponse response = jugglerClient.submitTask(chatId, request);
-
-            return new SendMessage(chatId, MarkdownProcessor.process(SUBMITTED_FILE + response.toString()));
+            try {
+                SubmitTaskResponse response = jugglerClient.submitTask(chatId, request);
+                log.info(response.toString());
+                return new SendMessage(chatId, MarkdownProcessor.process(SUBMITTED_FILE + response));
+            } catch (WebClientResponseException e) {
+                if (e.getStatusCode() != HttpStatus.UNSUPPORTED_MEDIA_TYPE) {
+                    throw e;
+                }
+                return new SendMessage(chatId, MarkdownProcessor.process(WRONG_FORMAT));
+            }
         } else if (stateInfo.getState() == State.WAITING_FOR_TASK_INFO) {
             if (text == null) {
                 throw new UnsupportedOperationException(UNSUPPORTED_COMMAND);
@@ -141,6 +157,7 @@ public class UserMessageProcessor {
             ADD_TASK_REQUEST_MAP.get(chatId).setMasterFile(file);
 
             AddTaskResponse response = jugglerClient.addTask(chatId, ADD_TASK_REQUEST_MAP.get(chatId));
+            log.info(response.toString());
 
             STATE_MAP.remove(chatId);
             ADD_TASK_REQUEST_MAP.remove(chatId);
@@ -174,7 +191,7 @@ public class UserMessageProcessor {
             request.setMemoryLimit(Integer.parseInt(list[2]));
             request.setTimeLimit(Float.parseFloat(list[3].replaceAll(",", ".")));
             return request;
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             return null;
         }
     }

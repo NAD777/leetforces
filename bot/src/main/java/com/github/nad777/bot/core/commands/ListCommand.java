@@ -7,9 +7,11 @@ import com.github.nad777.bot.core.MarkdownProcessor;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ListCommand implements Command {
@@ -32,6 +34,7 @@ public class ListCommand implements Command {
     public SendMessage handle(@NotNull Update update) {
         long chatId = update.message().chat().id();
         ListTasksResponse response = jugglerClient.getTasks();
+        log.info(response.toString());
         if (response.list() == null || response.list().isEmpty()) {
             return new SendMessage(chatId, "There are no available tasks at the moment");
         }

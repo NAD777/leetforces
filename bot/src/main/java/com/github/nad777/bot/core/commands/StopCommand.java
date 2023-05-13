@@ -5,11 +5,13 @@ import com.github.nad777.bot.core.MarkdownProcessor;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class StopCommand implements Command {
@@ -34,11 +36,13 @@ public class StopCommand implements Command {
         long chatId = update.message().chat().id();
         try {
             jugglerClient.deleteChat(chatId);
+            log.info("User with id=" + chatId + " deleted");
             return new SendMessage(chatId, MarkdownProcessor.process(MESSAGE));
         } catch (WebClientResponseException e) {
             if (e.getStatusCode() != HttpStatus.NOT_FOUND) {
                 throw e;
             }
+            log.warn("User does not exist! id=" + chatId);
             return null;
         }
     }
