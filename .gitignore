@@ -31,7 +31,6 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-### NetBeans ###
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -50,7 +49,6 @@ out/
 /bot/gradle/
 
 env/
-.idea
 .DS_Store
 problem_template/
 juggler/database/__pycache__/
