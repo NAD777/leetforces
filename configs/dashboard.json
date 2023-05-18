@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 4,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -212,7 +212,7 @@
         "type": "prometheus",
         "uid": "${data_source}"
       },
-      "description": "",
+      "description": "JVM used bytes in bot module",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -271,7 +271,7 @@
         "x": 0,
         "y": 8
       },
-      "id": 3,
+      "id": 1,
       "options": {
         "legend": {
           "calcs": [],
@@ -291,13 +291,25 @@
             "uid": "${data_source}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(http_server_requests_seconds_sum[5m])) by (job) / sum(rate(http_server_requests_seconds_count[5m])) by (job)",
+          "expr": "sum by (area) (jvm_memory_used_bytes)",
           "legendFormat": "__auto",
           "range": true,
-          "refId": "Average http response time"
+          "refId": "JVM Used bytes by area"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${data_source}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (id) (jvm_memory_used_bytes)",
+          "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "JVM Used bytes by id"
         }
       ],
-      "title": "Average HTTP response time",
+      "title": "JVM used bytes",
       "type": "timeseries"
     },
     {
@@ -392,111 +404,6 @@
       ],
       "title": "GC allocations speed",
       "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${data_source}"
-      },
-      "description": "JVM used bytes in bot module",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 16
-      },
-      "id": 1,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${data_source}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (area) (jvm_memory_used_bytes)",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "JVM Used bytes by area"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${data_source}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (id) (jvm_memory_used_bytes)",
-          "hide": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "JVM Used bytes by id"
-        }
-      ],
-      "title": "JVM used bytes",
-      "type": "timeseries"
     }
   ],
   "refresh": "",
@@ -533,6 +440,6 @@
   "timezone": "",
   "title": "Metrics",
   "uid": "b88f4917-1d97-498f-9cfd-9e35fa642a12",
-  "version": 5,
+  "version": 3,
   "weekStart": ""
 }
