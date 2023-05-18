@@ -15,3 +15,9 @@ scrape_configs:
     scheme: http
     static_configs:
       - targets: [ 'juggler:5001' ]
+
+  - job_name: orchestrator
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: [ 'orchestrator:5000' ]

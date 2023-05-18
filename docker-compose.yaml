@@ -30,6 +30,7 @@ services:
     networks:
       metrics:
       bot_backend:
+      orchestrator_backend:
 
   grafana:
     image: grafana/grafana-oss
