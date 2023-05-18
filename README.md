@@ -46,6 +46,9 @@ As depicted above, the project consists of several modules:
 destination
     - Orchestrator - the service which manages test generation and user submission execution and checking
 
+## Technology stack
+Docker, docker-compose, github actions CI/CD, Prometheus, Grafana, postgreSQL, Java Spring boot, Python
+
 ## Installation
 - Install docker-compose and docker packages according to your operating systems guidelines first.
 - Acquire the Telegram API token for your bot
