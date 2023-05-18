@@ -49,6 +49,9 @@ destination
 ## Technology stack
 Docker, docker-compose, github actions CI/CD, Prometheus, Grafana, postgreSQL, Java Spring boot, Python
 
+## Deployment
+We have [deployed](https://github.com/users/NAD777/packages?repo_name=codetest_bot) containers to the Github Container registry using Github Actions.
+
 ## Installation
 - Install docker-compose and docker packages according to your operating systems guidelines first.
 - Acquire the Telegram API token for your bot
