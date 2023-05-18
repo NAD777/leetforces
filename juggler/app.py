@@ -16,10 +16,6 @@ PERMITTED_EXTENSIONS = ['py', 'java']
 ORCHESTRATOR_URL = environ['ORCHESTRATOR']
 BOT_URL = environ['BOT']
 
-#common_counter = metrics.counter(
-#    'by_endpoint_counter', 'Request count by endpoints',
-#    labels={'endpoint': lambda: request.endpoint}
-#)
 
 metrics.register_default(
     metrics.counter(
@@ -32,13 +28,11 @@ metrics.register_default(
 # BOT_URL = "http://localhost:8080"
 
 @app.route("/")
-#@common_counter
 def hello_world():
     return "<p>Hello, World!</p>"
 
 
 @app.route("/submit", methods=["POST"])
-#@common_counter
 def submit():
     json_payload = request.json
     assert json_payload is not None
@@ -69,13 +63,11 @@ def submit():
 
     Thread(target=lambda: requests.post(
         f"{ORCHESTRATOR_URL}/run", json=data)).start()
-    # TODO: handle rEsponse from ORCHESTRATOR
 
     return jsonify({"status": "File submitted", "code": 0, "submission_id": submission_id}), 200
 
 
 @app.route('/report', methods=["POST"])
-#@common_counter
 def report():
     json_payload = request.json
     assert json_payload is not None
@@ -111,7 +103,6 @@ def report():
 
 
 @app.route("/list", methods=["GET"])
-#@common_counter
 def get_list():
     # chat_id = request.args.get("chat_id")
     session = create_session()
@@ -126,7 +117,6 @@ def get_list():
 
 
 @app.route("/get_task", methods=["GET"])
-#@common_counter
 def get_task():
     # chat_id = request.args.get("chat_id")
     task_id = request.args.get("task_id")
@@ -149,7 +139,6 @@ def get_task():
 
 
 @app.route("/chat", methods=["POST", "DELETE"])
-#@common_counter
 def register():
     chat_id = request.args.get("chat_id")
     session = create_session()
@@ -181,7 +170,6 @@ def register():
 
 
 @app.route("/get_task_info")
-#@common_counter
 def get_task_info():
     task_id = request.args.get("task_id")
     session = create_session()
@@ -202,7 +190,6 @@ def get_task_info():
 
 
 @app.route("/add_task", methods=["POST"])
-#@common_counter
 def add_task():
     author_id = request.args.get("chat_id")
 

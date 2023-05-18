@@ -30,6 +30,7 @@ metrics.register_default(
     )
 )
 
+
 @app.route("/run", methods=["POST"])  # type: ignore
 def run():
     body = request.get_json()
