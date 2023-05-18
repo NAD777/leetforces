@@ -6,13 +6,23 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 import requests
 from threading import Thread
 from os import environ
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app, group_by='endpoint')
 app.config.from_object(__name__)
 global_init("backbase")
 PERMITTED_EXTENSIONS = ['py', 'java']
 ORCHESTRATOR_URL = environ['ORCHESTRATOR']
 BOT_URL = environ['BOT']
+
+
+metrics.register_default(
+    metrics.counter(
+        'by_path_counter', 'Request count by request paths',
+        labels={'path': lambda: request.path}
+    )
+)
 
 
 # BOT_URL = "http://localhost:8080"
@@ -53,7 +63,6 @@ def submit():
 
     Thread(target=lambda: requests.post(
         f"{ORCHESTRATOR_URL}/run", json=data)).start()
-    # TODO: handle rEsponse from ORCHESTRATOR
 
     return jsonify({"status": "File submitted", "code": 0, "submission_id": submission_id}), 200
 
