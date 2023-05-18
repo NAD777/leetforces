@@ -47,7 +47,6 @@ destination
     - Orchestrator - the service which manages test generation and user submission execution and checking
 
 ## Installation
-
 - Install docker-compose and docker packages according to your operating systems guidelines first.
 - Acquire the Telegram API token for your bot
 - Clone the project github repository
@@ -63,14 +62,17 @@ BOT_TOKEN=<insert_your_token_here>
 ```
 
 ## Usage
-
-To build & run the project run 
+To build & run the project run in the project root directory
 ```bash
 docker-compose up
 ```
 And then you can access the bot via Telegram
 
-## License
+## Metrics
+To access metrics, go to http://localhost:3000/ and log in to Grafana with credentials according to 
+`docker-compose.yaml`, and then add the Prometheus data source (Prometheus service is configured to run at port 9090) 
+and import the dashboard (dashboard configuration file is located in `/configs/dashboard.json`).
 
+## License
 Licensed under MIT open license.
 The codetest_bot team @ 2023.
