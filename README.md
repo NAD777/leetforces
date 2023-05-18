@@ -46,11 +46,24 @@ As depicted above, the project consists of several modules:
 destination
     - Orchestrator - the service which manages test generation and user submission execution and checking
 
+### Telegram Bot (bot) 
+Provides neat UI for end-user, as well as communicates with Telegram API for filename resolution, etc. Has several API
+routes to gather data from the user, as well as to accept submission testing results from the `Juggler`
+
+### Juggler (aka backend)
+Provides extensive API for task storing and retrieval, communicating with the database (postgreSQL) storage and
+forwarding user submissions to the `Orchestrator` service.
+
+### Orchestrator  (not k8s, haha)
+Has 2 container dependencies on `Test runner` and `Generator` which are responsible for running user submissions and 
+generating tests correspondigly. `Orchestrator` itself has only 1 route for accepting submissions.
+
 ## Technology stack
-Docker, docker-compose, github actions CI/CD, Prometheus, Grafana, postgreSQL, Java Spring boot, Python
+Docker, docker-compose, github actions CI/CD, Prometheus, Grafana, postgreSQL, Java Spring boot, Python, XMLRPC.
 
 ## Deployment
-We have [deployed](https://github.com/users/NAD777/packages?repo_name=codetest_bot) containers to the Github Container registry using Github Actions.
+We have [deployed](https://github.com/users/NAD777/packages?repo_name=codetest_bot) containers to the Github Container 
+registry using Github Actions.
 
 ## Installation
 - Install docker-compose and docker packages according to your operating systems guidelines first.
