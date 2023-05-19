@@ -5,7 +5,7 @@ This is the implementation of the demo-project for the course of System and Netw
 University Spring 2023 semester.
 
 **_Disclaimer:_** The codetest_bot team strongly recommends the developer not to use the project as a part of any 
-high-risc project as it might contain some vulnerabilities that we (the codetest_bot) did not encounter during 
+high-risc project as it might contain some vulnerabilities that we (the codetest_bot team) did not encounter during 
 the development phase.
 
 The project is an attempt to implement user submission testing system (e.g. CodeForces, CodinGame, etc.), but as 
@@ -17,7 +17,7 @@ problem set and test their submissions.
                                    +-----------------+
                                    |                 |
                                    |   Database      |
-                                   |  (PostgresSQL)  |
+                                   |  (PostgreSQL)   |
                                    |                 |
                                    +--------+--------+
                                             |
@@ -46,14 +46,14 @@ As depicted above, the project consists of several modules: \
 destination \
     - Orchestrator - the service which manages test generation and user submission execution and checking
 
-The links between services are to show how they communicate within project, in reality there are several
+The links between services are to show how they communicate within project, in reality, there are several
 distinct networks: one for `orchestrator` and its services, one for `orchestrator` and `juggler`, and one for 
 `juggler` and `bot`. Such complex network partitioning is made with considerations of security and logical
 separation.
 
 ### Telegram Bot (bot) 
 Provides neat UI for end-user, as well as communicates with Telegram API for filename resolution, etc. Has several API
-routes to gather data from the user, as well as to accept submission testing results from the `Juggler`
+routes to gather data from the user, as well as to accept submission testing results from the `Juggler`.
 
 ### Juggler (aka backend)
 Provides extensive API for task storing and retrieval, communicating with the database (postgreSQL) storage and
