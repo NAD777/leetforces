@@ -40,11 +40,16 @@ problem set and test their submissions.
 |              |       |              |
 +--------------+       +--------------+
 ```
-As depicted above, the project consists of several modules:
-    - Telegram Bot (bot) - the service which provides interaction with user
+As depicted above, the project consists of several modules: \
+    - Telegram Bot (bot) - the service which provides interaction with user \
     - Juggler (aka backend) - the service which handles requests from bot and forwards them according to their 
-destination
+destination \
     - Orchestrator - the service which manages test generation and user submission execution and checking
+
+The links between services are to show how they communicate within project, in reality there are several
+distinct networks: one for `orchestrator` and its services, one for `orchestrator` and `juggler`, and one for 
+`juggler` and `bot`. Such complex network partitioning is made with considerations of security and logical
+separation.
 
 ### Telegram Bot (bot) 
 Provides neat UI for end-user, as well as communicates with Telegram API for filename resolution, etc. Has several API
