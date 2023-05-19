@@ -12,6 +12,9 @@ The project is an attempt to implement user submission testing system (e.g. Code
 Telegram bot. The Telegram bot implementation offers neat UI for the end-user with abilities to add problems to the 
 problem set and test their submissions.
 
+As it is only a demo project, the project supports only Python and Java, as we wanted to show at least 1 interpretable
+and one compilable language.
+
 ## Reference architecture
 ```
                                    +-----------------+
