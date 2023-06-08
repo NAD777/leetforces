@@ -9,7 +9,7 @@ void main() {
   ));
 }
 
-const _brandColor = Colors.orange;
+const _brandColor = Colors.purple;
 
 class CodetestApp extends StatelessWidget {
   const CodetestApp({super.key});
