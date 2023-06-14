@@ -8,10 +8,12 @@ idna==3.4
 itsdangerous==2.1.2
 Jinja2==3.1.2
 MarkupSafe==2.1.2
+prometheus-client==0.17.0
+prometheus-flask-exporter==0.22.4
 psycopg2-binary==2.9.6
+PyJWT==2.7.0
 requests==2.29.0
 SQLAlchemy==2.0.10
 typing_extensions==4.5.0
 urllib3==1.26.15
 Werkzeug==2.3.0
-prometheus_flask_exporter

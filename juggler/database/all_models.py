@@ -1,7 +1,7 @@
 # import sqlalchemy
 from .db_session import SqlAlchemyBase
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, ForeignKey, UniqueConstraint
 from sqlalchemy import String, Boolean, Integer, Float, DateTime
 
 
@@ -9,11 +9,17 @@ class User(SqlAlchemyBase):
     __tablename__ = 'User'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    login = Column(String, unique=True, nullable=False)
     is_admin = Column(Boolean, nullable=False, unique=False)
-    email = Column(String, unique=False, nullable=False)
-    login = Column(String, unique=False, nullable=False)
+    email = Column(String, unique=True, nullable=False)
     password = Column(String, unique=False, nullable=False)
     chat_id = Column(String, unique=True, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint('login', name='unique_login'),
+        UniqueConstraint('email', name='unique_email'),
+        UniqueConstraint('chat_id', name='unique_telegram_chat_id')
+    )
 
     def __repr__(self):
         return '<User {} {}>'.format(self.id, self.login, self.is_admin, self.email, self.password, self.chat_id)
@@ -30,7 +36,7 @@ class Task(SqlAlchemyBase):
     amount_of_tests = Column(Integer, unique=False, nullable=False)
     master_filename = Column(String, unique=False, nullable=False)
     master_solution = Column(String, unique=False, nullable=False)
-    author = relationship("User", back_populates="Task")
+    author_id = Column(Integer, ForeignKey("User.id"))
 
     def __repr__(self):
         return '<Task {} {}>'.format(self.id, self.name)
