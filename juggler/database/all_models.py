@@ -3,6 +3,7 @@ from .db_session import SqlAlchemyBase
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, ForeignKey, UniqueConstraint
 from sqlalchemy import String, Boolean, Integer, Float, DateTime
+from datetime import datetime
 
 
 class User(SqlAlchemyBase):
@@ -49,9 +50,10 @@ class Submission(SqlAlchemyBase):
     user_id = Column(Integer, ForeignKey('User.id'))
     task_id = Column(Integer, ForeignKey("Task.id"))
     source_code = Column(String, unique=False, nullable=False)
-    status = Column(String, unique=False, nullable=False)
-    test_number = Column(Integer, unique=False, nullable=False)
-    submission_time = Column(DateTime, unique=False, nullable=False)
+    language = Column(String, unique=False, nullable=False)
+    status = Column(String, unique=False, nullable=True)
+    test_number = Column(Integer, unique=False, nullable=True)
+    submission_time = Column(DateTime, unique=False, nullable=False, default=datetime.now)
     memory = Column(Integer, unique=False, nullable=True)
     time = Column(Float, unique=False, nullable=True)
 

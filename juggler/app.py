@@ -4,6 +4,7 @@ from database.all_models import User, Task, Submission, ContestTask, Contest
 from sqlalchemy.exc import NoResultFound, DataError
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import update as sqlalchemy_update
 import requests
 from threading import Thread
 from os import environ
@@ -16,7 +17,7 @@ app = Flask(__name__)
 metrics = PrometheusMetrics(app, group_by='endpoint')
 app.config.from_object(__name__)
 global_init("backbase")
-PERMITTED_EXTENSIONS = ['py', 'java']
+PERMITTED_LANGUAGES = ['Python', 'Java']
 # ORCHESTRATOR_URL = environ['ORCHESTRATOR']
 # BOT_URL = environ['BOT']
 SECRET_KEY = os.environ.get('SECRET_KEY') or 'this is a secret'
@@ -82,9 +83,16 @@ def validate_login_and_password(login, password):
     return True
 
 
-def check_keys(given_keys, needed_keys):
+def require_keys(given_keys, needed_keys):
+    for key in needed_keys:
+        if key not in given_keys:
+            return key
+    return None
+
+
+def check_for_allowed_keys(given_keys, allowed_keys):
     for key in given_keys:
-        if key not in needed_keys:
+        if key not in allowed_keys:
             return key
     return None
 
@@ -136,7 +144,7 @@ def login_endpoint():
 
 # BOT_URL = "http://localhost:8080"
 
-@app.route("/register")
+@app.route("/register", methods=["POST"])
 def register():
     json_payload = request.json
     if 'email' not in json_payload:
@@ -191,10 +199,10 @@ def create_task(current_user):
             'message': 'You are not an admin'
         }), 403
     json_payload = dict(request.json)
-    if res := check_keys(json_payload.keys(),
-                         ['name', 'description', 'memory_limit', 'time_limit',
-                          'amount_of_tests', 'master_filename',
-                          'master_solution']):
+    if res := require_keys(json_payload.keys(),
+                           ['name', 'description', 'memory_limit', 'time_limit',
+                            'amount_of_tests', 'master_filename',
+                            'master_solution']):
         return jsonify({
             'status': 'Error',
             'message': f'No {res} was provided'
@@ -267,7 +275,7 @@ def get_task_list():
 @app.route('/get_task', methods=['GET'])
 def get_task():
     json_payload = dict(request.json)
-    if check := check_keys(json_payload.keys(), ['task_id']):
+    if check := require_keys(json_payload.keys(), ['task_id']):
         return jsonify({
             'status': 'Error',
             'message': f'No {check} was provided'
@@ -285,7 +293,7 @@ def get_task():
     return jsonify({
         'status': "Accepted",
         'task_id': task.id,
-        'task_name': task.name,
+        'name': task.name,
         'description': task.description,
         'memory_limit': task.memory_limit,
         'time_limit': task.time_limit,
@@ -294,14 +302,8 @@ def get_task():
 
 
 @app.route("/get_task_info")
-@token_required
-def get_task_info(current_user):
-    if not current_user.is_admin:
-        return jsonify({
-            'status': 'Error',
-            'message': 'You are not an admin'
-        }), 403
-    if check := check_keys(request.args.keys(), ['task_id']):
+def get_task_info():
+    if check := require_keys(request.args.keys(), ['task_id']):
         return jsonify({
             'status': 'Error',
             'message': f'No {check} was provided'
@@ -324,6 +326,87 @@ def get_task_info(current_user):
         "time_limit": task.time_limit,
         'code': 0
     }), 200
+
+
+@app.route('/submit', methods=["POST"])
+@token_required
+def submit(current_user):
+    json_payload = dict(request.json)
+    if check := require_keys(json_payload, ['task_id', 'source_code', 'language']):
+        return jsonify({
+            'status': 'Error',
+            'message': f'No {check} was provided'
+        }), 404
+    session = create_session()
+
+    task_id = json_payload['task_id']
+    if session.query(Task).filter(Task.id == task_id) is None:
+        return jsonify({
+            'status': 'Error',
+            'message': f'Task with id {task_id} does not exists'
+        }), 404
+    source_code = json_payload['source_code']
+    language = json_payload['language']
+    if language not in PERMITTED_LANGUAGES:
+        return jsonify({
+            'status': 'Error',
+            'message': f'Language {task_id} is not permitted only: {", ".join(PERMITTED_LANGUAGES)}'
+        }), 404
+    submission = Submission(
+        user_id=current_user.id,
+        task_id=task_id,
+        source_code=source_code,
+        language=language
+    )
+    session.add(submission)
+    session.commit()
+
+    # TODO: uncomment on merge
+    # requests.post(f"{ORCHESTRATOR_URL}/run", json=jsonify({
+    #     'submission_id': submission.id,
+    #     'task_id': task_id,
+    #     'source_code': source_code,
+    #     'language': language
+    # }))
+    return jsonify({
+        'status': 'Accepted',
+        'message': f'Submitted',
+        'submission_id': submission.id
+    })
+
+
+@app.route('/edit_task', methods=["POST"])
+@token_required
+def edit_task(current_user):
+    if not current_user.is_admin:
+        return jsonify({
+            'status': 'Error',
+            'message': 'You are not an admin'
+        }), 403
+    json_payload = dict(request.json)
+    if 'task_id' not in json_payload.keys():
+        return jsonify({
+            'status': 'Error',
+            'message': f'No task_id was provided'
+        }), 400
+    task_id = json_payload['task_id']
+    json_payload.pop('task_id')
+    if res := check_for_allowed_keys(json_payload.keys(),
+                                     ['name', 'description', 'memory_limit', 'time_limit',
+                                      'amount_of_tests', 'master_filename',
+                                      'master_solution']):
+        return jsonify({
+            'status': 'Error',
+            'message': f'{res} is unknown field'
+        }), 400
+    session = create_session()
+    session.query(Task).filter(Task.id == task_id).update(json_payload)
+    session.commit()
+
+    return jsonify({
+        'status': 'Accepted',
+        'message': f'Task successfully with id {task_id} edited',
+    })
 
 
 if __name__ == '__main__':
