@@ -33,6 +33,8 @@ metrics.register_default(
 
 @app.route("/run", methods=["POST"])  # type: ignore
 def run():
+    """/run route handler
+    """
     body = request.get_json()
 
     assert body is not None

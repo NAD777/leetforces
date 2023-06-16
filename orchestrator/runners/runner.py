@@ -8,7 +8,7 @@ from shlex import split
 
 
 class Runner:
-
+    """Class that is actually responsible for test running and generation"""
     status_codes = {
         "OK": "OK",
         "RE": "RE",
@@ -18,7 +18,27 @@ class Runner:
         "TLE": "TLE",
     }
 
-    def run_user_code(self, executable: str, configurations: Dict[str, Any], stdin_data: str = '') -> Dict[str, str]:
+    def run_user_code(self,
+                      executable: str,
+                      configurations: Dict[str, Any],
+                      stdin_data: str = ''
+                      ) -> Dict[str, str]:
+        """Execute user code
+
+        Keyword arguments:
+        executable      -- name of the executable
+        configurations  -- Python `dict` object with configurations
+        stdin_data      -- input data for the executable
+
+        Returns:
+        Python dict object with the approximate structure
+        result = {
+            "output": str,
+            "error_status": None,
+            ...
+        }
+        The actual result depends on the running status
+        """
         try:
             memory_limit = int(configurations["memory_limit"])
             time_limit = float(configurations["time_limit"])
@@ -47,16 +67,19 @@ class Runner:
         chdir(f'./{folder}/')
 
         if stdin_data != '':
-            cmd = f"sh ../test.sh '{stdin_data}' '{execution_string} {prepared_executable}'"
+            cmd = f"sh ../test.sh '{stdin_data}' '{execution_string} " + \
+                                                     f"{prepared_executable}'"
         else:
             cmd = f"{execution_string} {prepared_executable}"
 
         if stdin_data != '' and "solutions" not in executable:
-            cmd = f"sh ../run.sh '{stdin_data}' '{execution_string} {prepared_executable}'"
+            cmd = f"sh ../run.sh '{stdin_data}' '{execution_string} " + \
+                                                     f"{prepared_executable}'"
 
         prepared = split(cmd)
         proc = Popen(prepared, stdout=PIPE, stdin=PIPE, stderr=PIPE,
-                     preexec_fn=lambda: setrlimit(RLIMIT_AS, (MAX_VIRTUAL_MEMORY, RLIM_INFINITY)))
+                     preexec_fn=lambda: setrlimit(RLIMIT_AS,
+                                        (MAX_VIRTUAL_MEMORY, RLIM_INFINITY)))
 
         try:
             output = proc.communicate(timeout=time_limit + 3)
@@ -99,7 +122,30 @@ class Runner:
         chdir('..')
         return result
 
-    def run_tests(self, submission_id: int, task_id: int, test_details: Dict[str, str]) -> Dict[str, int | str]:
+    def run_tests(self,
+                  submission_id: int,
+                  task_id: int,
+                  test_details: Dict[str, str]
+                  ) -> Dict[str, int | str]:
+        """Wrapper function for running user code
+
+        Keyword arguments:
+        submission_id   -- submission id
+        task_id         -- task id
+        test_details    -- Python dict object with configurations
+
+        Returns:
+        Python dictionary containing report for running the user submission
+        with the following structure:
+
+        report = {
+            "submit_id": int,
+            "status": str,
+            "test_num": int,
+            "memory_used": int,
+            "run_time": int
+        }"""
+
         report = {
             "submit_id": int,
             "status": str,
@@ -110,7 +156,7 @@ class Runner:
         report["submit_id"] = submission_id
 
         compiler = test_details["compiler"]
-        ce = compiler["ce"]  # type: ignore
+        ce = compiler["ce"]                                     # type: ignore
         test_data = test_details["test_data"]
         filename = test_details["filename"]
         source_file = test_details["source_file"]
@@ -171,7 +217,16 @@ class Runner:
         print(report)
         return report
 
-    def generate_tests(self, config) -> Dict[int, Tuple[str, str]]:
+    def generate_tests(self,
+                       config : Dict[str, str]
+                       ) -> Dict[int, Tuple[str, str]]:
+        """Generate tests according to the configuration details
+
+        Keyword arguments:
+        config -- configuration details
+
+        Returns:
+        Python dictionary containing sample input and output data"""
         filename = config["master_filename"]
 
         makedirs("solutions", exist_ok=True)
@@ -181,16 +236,28 @@ class Runner:
 
         test_data = {}
         executable = f"./solutions/{filename}"
-        for test in range(tests_no):
-            input_data = self.run_user_code(
-                executable + " sample", config)["output"][0]
-            output_data = self.run_user_code(
-                executable + " test", config, stdin_data=input_data)["output"]
+        for test in range(int(tests_no)):
+            input_data = self.run_user_code(executable + " sample",
+                                            config)["output"][0]
+
+            output_data = self.run_user_code(executable + " test",
+                                             config,
+                                             stdin_data=input_data)["output"]
             test_data[str(test)] = (input_data, output_data)
 
         return test_data
 
-    def generate_test_data(self, gen_details: Dict[str, str]) -> Dict[int, Tuple[str, str]]:
+    def generate_test_data(self,
+                           gen_details: Dict[str, str]
+                           ) -> Dict[int, Tuple[str, str]]:
+        """Wrapper function that is called from through RPC
+
+        Keyword arguments:
+        gen_details -- Python dict object configuration for test generation
+
+        Returns:
+        Python dictionary containing sample input and output data"""
+
         tests = self.generate_tests(gen_details)
         dump(tests, open("tests.json", 'w'))
 

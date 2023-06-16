@@ -8,14 +8,24 @@ from base64 import b64decode
 
 
 class TestRunner:
-
+    """Class wrapper for running code tests
+    """
     task_id: int
     submission_id: int
     extension: str
     gen_details: Dict[str, str]
     test_details: Dict[str, str]
 
-    def __init__(self, task_id, submission_ext):
+    def __init__(self,
+                 task_id : int,
+                 submission_ext : str
+                 ) -> None:
+        """Constructor method for TestRunner class
+
+        Keyword arguments:
+        task_id -- id of the task to run
+        submission_ext -- file extension of the user submission
+        """
 
         JUGGLER = environ["JUGGLER"]
         resp = get(f"{JUGGLER}/get_task_info", params={"task_id": task_id})
@@ -25,7 +35,8 @@ class TestRunner:
         except Exception as e:
             print(e)
             raise ValueError(
-                "Exception has occured while trying to retrieve the task configurations")
+                "Exception has occured while trying to retrieve the \
+                        task configurations")
 
         assert task_settings is not None
 
@@ -34,7 +45,8 @@ class TestRunner:
 
         self.gen_details = {                                    # type: ignore
             "amount_test": task_settings["amount_test"],
-            "master_solution": b64decode(task_settings["master_file"]).decode("utf-8"),
+            "master_solution": b64decode(task_settings["master_file"])
+                                                        .decode("utf-8"),
             "master_filename": task_settings["master_filename"],
             "compiler": {}
         }
@@ -52,7 +64,8 @@ class TestRunner:
 
         with open("configs/compiler_config.yaml") as file:
             try:
-                ext = self.gen_details["master_filename"].split(".")[-1]  # type: ignore
+                ext = self.gen_details["master_filename"]
+                                                .split(".")[-1]  # type: ignore
                 configs = safe_load(file)
                 self.gen_details["compiler"] = configs[ext]
                 self.test_details["compiler"] = configs[submission_ext]
@@ -61,8 +74,11 @@ class TestRunner:
 
         makedirs("test_data", exist_ok=True)
 
-    # TODO: optimize
     def generate_data(self) -> str:
+        """Generate test data through RPC if not already cached.
+        Returns:
+        Status message for generation
+        """
         tests_path = f"./test_data/task_{self.task_id}.json"
         if path.exists(tests_path):
             return f"Test data is already present for {self.task_id=}"
@@ -81,7 +97,29 @@ class TestRunner:
 
         return f"Test data generated for {self.task_id=}"
 
-    def run(self, submission_id, filename, source_file) -> Dict[int, Tuple[str, str]]:
+    def run(self,
+            submission_id : int,
+            filename : str,
+            source_file : str
+            )  -> Dict[int, Tuple[str, str]]:
+        """Run the tests through the RPC.
+
+        Keyword arguments:
+        submission_id -- unique submission number (id) from the user
+        filename -- name of the submitted file. Required for compiling some
+        languages.
+        source_file -- actual source code of the file to compile/run
+
+        Returns:
+        report in the format
+        report = {
+            "submit_id": int,
+            "status": str,
+            "test_num": int,
+            "memory_used": int,
+            "run_time": int
+        }
+        if no exceptions were caught, empty Python dict otherwise"""
         print(self.generate_data())
 
         try:
