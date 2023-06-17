@@ -64,8 +64,9 @@ class TestRunner:
 
         with open("configs/compiler_config.yaml") as file:
             try:
-                ext = self.gen_details["master_filename"]
-                                                .split(".")[-1]  # type: ignore
+                ext = self.gen_details["master_filename"] \
+                        .split(".")[-1]    # type: ignore
+
                 configs = safe_load(file)
                 self.gen_details["compiler"] = configs[ext]
                 self.test_details["compiler"] = configs[submission_ext]
@@ -85,6 +86,7 @@ class TestRunner:
 
         data = ''
         try:
+            #TODO add conditional container start/stop here
             node = ServerProxy('http://test_generator:31337')
             print(self.gen_details)
             data = node.generate_test_data(self.gen_details)

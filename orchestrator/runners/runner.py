@@ -39,10 +39,11 @@ class Runner:
         }
         The actual result depends on the running status
         """
+
         try:
             memory_limit = int(configurations["memory_limit"])
             time_limit = float(configurations["time_limit"])
-        except Exception:
+        except KeyError:
             memory_limit = 512
             time_limit = 10
 
