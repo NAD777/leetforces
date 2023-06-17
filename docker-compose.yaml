@@ -10,8 +10,6 @@ services:
       POSTGRES_DB: "backbase"
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
-    volumes:
-      - .:/docker-entrypoint-initdb.d
 
   prometheus:
     image: prom/prometheus:latest
@@ -70,7 +68,7 @@ services:
     build:
       context: .
       dockerfile: ./orchestrator/orchestrator/Dockerfile
-    networks: 
+    networks:
       - internal
       - orchestrator_backend
     command: python -u -m flask run -h 0.0.0.0 -p 5000
@@ -85,7 +83,7 @@ services:
     build:
       dockerfile: ./orchestrator/runners/Dockerfile
       context: .
-    networks: 
+    networks:
       - internal
     command: python -u runner.py
     depends_on:
@@ -96,7 +94,7 @@ services:
     build:
       dockerfile: ./orchestrator/runners/Dockerfile
       context: .
-    networks: 
+    networks:
       - internal
     command: python -u runner.py
     restart: unless-stopped
