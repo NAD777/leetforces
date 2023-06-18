@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from database.db_session import create_session, global_init
 from database.all_models import Submission, Task, Chat
 from sqlalchemy.exc import NoResultFound, DataError
@@ -26,11 +26,52 @@ metrics.register_default(
 
 
 # BOT_URL = "http://localhost:8080"
+from base64 import b64encode
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+master = b64encode(open('tests/master.py', 'rb').read()).decode('utf-8')
 
+task = Task(
+    task_name="A + B",
+    task_file="AA",
+    task_filename="apb.pdf",
+    master_filename="master.py",
+    master_file=master,
+    amount_test=10,
+    memory_limit=128,
+    time_limit=1,
+    author_id=0
+)
+
+session = create_session()
+session.add(task)
+session.commit()
+
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+
+    data = {
+        "submission_id": 1,
+        "task_no": 1,
+        "source_file": '',
+        "extension": 'py',
+        "file_name": ''
+    }
+    if request.method == 'POST':
+        val = request.form['py'].lower()
+        if not (2 <= len(val) <= 3):
+            print("something wrong")
+            return render_template("buttons.html")
+        print(f"{val}.py")
+        file = b64encode(open(f"tests/{val}.py", 'rb').read()).decode("utf-8")
+        data["file_name"] = f"{val}.py"
+        data["source_file"] = file
+
+
+
+        requests.post(f"{ORCHESTRATOR_URL}/run", json=data)
+
+    return render_template('buttons.html')
 
 @app.route("/submit", methods=["POST"])
 def submit():
