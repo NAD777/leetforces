@@ -58,7 +58,7 @@ class Submission(SqlAlchemyBase):
     time = Column(Float, unique=False, nullable=True)
 
     def __repr__(self):
-        return '<Submission {} {}>'.format(self.id, self.user, self.task, self.status)
+        return '<Submission {} {}>'.format(self.id, self.user_id, self.task_id, self.status)
 
 
 class Contest(SqlAlchemyBase):
@@ -67,6 +67,7 @@ class Contest(SqlAlchemyBase):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=False, nullable=False)
     description = Column(String, unique=False, nullable=False)
+    author_id = Column(Integer, ForeignKey("User.id"))
 
 
 class ContestTask(SqlAlchemyBase):
@@ -75,3 +76,6 @@ class ContestTask(SqlAlchemyBase):
     id = Column(Integer, primary_key=True, autoincrement=True)
     contest_id = Column(Integer, ForeignKey('Contest.id'))
     task_id = Column(Integer, ForeignKey("Task.id"))
+
+    def __repr__(self):
+        return 'ContestTask id: {}, contest_id: {}, task_id: {}'.format(self.id, self.contest_id, self.task_id)

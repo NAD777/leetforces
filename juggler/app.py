@@ -1,3 +1,5 @@
+import json
+
 from flask import Flask, request, jsonify
 from database.db_session import create_session, global_init
 from database.all_models import User, Task, Submission, ContestTask, Contest
@@ -5,6 +7,7 @@ from sqlalchemy.exc import NoResultFound, DataError
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import update as sqlalchemy_update
+from sqlalchemy import delete as sqlalchemy_delete
 import requests
 from threading import Thread
 from os import environ
@@ -31,43 +34,52 @@ metrics.register_default(
 )
 
 
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-        if "Authorization" in request.headers:
-            token = request.headers["Authorization"]
-        if not token:
-            return {
-                       "message": "Authentication Token is missing!",
-                       "data": None,
-                       "error": "Unauthorized"
-                   }, 401
-        try:
-            data = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
-            session = create_session()
-            user = session.query(User).filter(User.id == data['user_id'])
-
-            if user.count() == 0:
+def token_required(admin_required=False):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            token = None
+            if "Authorization" in request.headers:
+                token = request.headers["Authorization"]
+            if not token:
                 return {
-                           "message": "Invalid Authentication token!",
+                           "message": "Authentication Token is missing!",
                            "data": None,
                            "error": "Unauthorized"
                        }, 401
-            current_user = user.first()
-        except Exception as e:
-            return {
-                       "message": "Something went wrong",
-                       "data": None,
-                       "error": str(e)
-                   }, 500
-        return f(current_user, *args, **kwargs)
+            try:
+                data = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
+                session = create_session()
+                user = session.query(User).filter(User.id == data['user_id'])
 
-    return decorated
+                if user.count() == 0:
+                    return {
+                               "message": "Invalid Authentication token!",
+                               "data": None,
+                               "error": "Unauthorized"
+                           }, 401
+                current_user = user.first()
+                if admin_required and not current_user.is_admin:
+                    return {
+                               "message": "Access denied. Admin privileges required.",
+                               "data": None,
+                               "error": "Forbidden"
+                           }, 403
+            except Exception as e:
+                return {
+                           "message": "Something went wrong",
+                           "data": None,
+                           "error": str(e)
+                       }, 500
+            return f(current_user, *args, **kwargs)
+
+        return decorated_function
+
+    return decorator
 
 
 @app.route('/')
-@token_required
+@token_required()
 def check_token_works(current_user):
     return jsonify(current_user.id)
 
@@ -191,13 +203,8 @@ def register():
 
 
 @app.route('/create_task', methods=["POST"])
-@token_required
+@token_required(admin_required=True)
 def create_task(current_user):
-    if not current_user.is_admin:
-        return jsonify({
-            'status': 'Error',
-            'message': 'You are not an admin'
-        }), 403
     json_payload = dict(request.json)
     if res := require_keys(json_payload.keys(),
                            ['name', 'description', 'memory_limit', 'time_limit',
@@ -229,14 +236,8 @@ def create_task(current_user):
 
 
 @app.route('/delete_task', methods=["POST"])
-@token_required
+@token_required(admin_required=True)
 def delete_task(current_user):
-    if not current_user.is_admin:
-        return jsonify({
-            'status': 'Error',
-            'message': 'You are not an admin'
-        }), 403
-
     json_payload = request.json
 
     if 'task_id' not in json_payload:
@@ -247,14 +248,16 @@ def delete_task(current_user):
     task_id = json_payload['task_id']
     session = create_session()
 
-    task = session.query(Task).filter(Task.id == task_id)
-    if task.count() == 0:
+    task = session.query(Task).filter(Task.id == task_id).first()
+    if task is None:
         return jsonify({
             'status': 'Error',
             'message': f'Task with id {task_id} does not exists'
         })
 
-    session.delete(task.first())
+    for relation in session.query(ContestTask).filter(ContestTask.task_id == task.id):
+        session.delete(relation)
+    session.delete(task)
     session.commit()
     return jsonify({
         'status': 'Accepted',
@@ -329,7 +332,7 @@ def get_task_info():
 
 
 @app.route('/submit', methods=["POST"])
-@token_required
+@token_required()
 def submit(current_user):
     json_payload = dict(request.json)
     if check := require_keys(json_payload, ['task_id', 'source_code', 'language']):
@@ -376,13 +379,8 @@ def submit(current_user):
 
 
 @app.route('/edit_task', methods=["POST"])
-@token_required
+@token_required(admin_required=True)
 def edit_task(current_user):
-    if not current_user.is_admin:
-        return jsonify({
-            'status': 'Error',
-            'message': 'You are not an admin'
-        }), 403
     json_payload = dict(request.json)
     if 'task_id' not in json_payload.keys():
         return jsonify({
@@ -408,6 +406,182 @@ def edit_task(current_user):
         'message': f'Task successfully with id {task_id} edited',
     })
 
+
+@app.route('/add_contest', methods=["POST"])
+@token_required(admin_required=True)
+def add_contest(current_user):
+    json_payload = dict(request.json)
+    if not_given_key := require_keys(json_payload.keys(), ['contest_name', 'description']):
+        return jsonify({
+            'status': 'Error',
+            'message': f'No {not_given_key} was provided'
+        })
+
+    session = create_session()
+    name = json_payload['contest_name']
+    description = json_payload['description']
+    added_task = []
+
+    new_contest = Contest(
+        name=name,
+        description=description,
+        author_id=current_user.id
+    )
+    session.add(new_contest)
+    session.commit()
+
+    if 'tasks_ids' in json_payload:
+        tasks_ids = json_payload['tasks_ids']
+        for task_id in tasks_ids:
+            if session.query(Task).filter(Task.id == task_id).first() is None:
+                continue
+            added_task.append(task_id)
+            new_relation = ContestTask(
+                contest_id=new_contest.id,
+                task_id=task_id
+            )
+            session.add(new_relation)
+            session.commit()
+
+    return jsonify({
+        'status': 'Accepted',
+        'message': f'New contest was added with id {new_contest.id}',
+        'added_task': added_task
+    })
+
+
+@app.route('/delete_contest', methods=["POST"])
+@token_required(admin_required=True)
+def delete_contest(current_user):
+    json_payload = request.json
+    if 'contest_id' not in json_payload:
+        return jsonify({
+            'status': 'Error',
+            'message': f'No contest_id was provided'
+        })
+
+    session = create_session()
+    contest_id = json_payload['contest_id']
+    contest = session.query(Contest.id == contest_id).first()
+    if contest is None:
+        return jsonify({
+            'status': 'Error',
+            'message': f'No contest with id {contest_id} was provided'
+        })
+    statement_delete_relations = sqlalchemy_delete(ContestTask).where(ContestTask.contest_id == contest_id)
+    session.execute(statement_delete_relations)
+    statement_delete_contest = sqlalchemy_delete(Contest).where(Contest.id == contest_id)
+    session.execute(statement_delete_contest)
+    session.commit()
+    return jsonify({
+        'status': 'Accepted',
+        'message': f'Contest with id {contest_id} was successfully deleted'
+    })
+
+
+@app.route('/list_contests')
+def list_contests():
+    session = create_session()
+    contests = session.query(Contest).all()
+    tasks_dict = {
+        "contest_list": [{"contest_id": contest.id, "contest_name": contest.name} for contest in contests],
+    }
+    return jsonify(tasks_dict), 200
+
+
+def retrieve_contest_task_ids(contest: Contest):
+    session = create_session()
+    return [relation.task_id for relation in
+            session.query(ContestTask).filter(ContestTask.contest_id == contest.id)]
+
+
+@app.route('/get_contest')
+def get_contest():
+    json_payload = request.json
+    if 'contest_id' not in json_payload:
+        return jsonify({
+            'status': 'Error',
+            'message': f'No contest_id was provided'
+        }), 400
+    contest_id = json_payload['contest_id']
+    session = create_session()
+    contest = session.query(Contest).where(Contest.id == contest_id).first()
+    if not contest:
+        return jsonify({
+            'status': 'Error',
+            'message': f'Contest with id {contest_id} does not exists'
+        }), 404
+
+    tasks_ids = retrieve_contest_task_ids(contest)
+    return jsonify({
+        'status': 'Accepted',
+        'contest_id': contest.id,
+        'name': contest.name,
+        'description': contest.description,
+        'author_id': contest.author_id,
+        'tasks_ids': tasks_ids
+    })
+
+
+@app.route('/edit_contest')
+@token_required(admin_required=True)
+def edit_contest(current_user):
+    json_payload = request.json
+    if 'contest_id' not in json_payload:
+        return jsonify({
+            'status': 'Error',
+            'message': f'No contest_id was provided'
+        }), 400
+
+    if check := check_for_allowed_keys(json_payload.keys(),
+                                       ['contest_id', 'contest_name', 'description', 'tasks_ids', 'author_id']):
+        return jsonify({
+            'status': 'Error',
+            'message': f'{check} is unknown field'
+        }), 400
+    contest_id = json_payload['contest_id']
+    session = create_session()
+    contest = session.query(Contest).filter(Contest.id == contest_id).first()
+    if not contest:
+        return jsonify({
+            'status': 'Error',
+            'message': f'Contest with id {contest_id} does not exists'
+        }), 404
+
+    to_update = {}
+    if 'contest_name' in json_payload:
+        to_update['name'] = json_payload['contest_name']
+
+    if 'description' in json_payload:
+        to_update['description'] = json_payload['description']
+
+    if 'author_id' in json_payload:
+        to_update['author_id'] = json_payload['author_id']
+
+    if 'tasks_ids' in json_payload:
+        tasks_ids = retrieve_contest_task_ids(contest)
+        new_task_ids = json_payload['tasks_ids']
+
+        for task_id in set(tasks_ids) - set(new_task_ids):
+            for relation_to_delete in session.query(ContestTask).filter(ContestTask.task_id == task_id):
+                session.delete(relation_to_delete)
+        session.commit()
+        for task_id in set(new_task_ids) - set(tasks_ids):
+            relation_to_add = ContestTask(contest_id=contest.id, task_id=task_id)
+            session.add(relation_to_add)
+        session.commit()
+
+    session.query(Contest).filter(Contest.id == contest_id).update(to_update)
+    session.commit()
+    return jsonify({
+        'status': 'Accepted',
+        'message': f'Contest was edited with id {contest.id}'
+    })
+
+
+# @app.route('/report',  methods=["POST"])
+# def report():
+#     pass
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8000)
