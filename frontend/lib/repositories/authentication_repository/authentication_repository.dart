@@ -17,7 +17,7 @@ class AuthenticationRepository {
     required String username,
     required String password,
   }) async {
-    http.Response response = await http.post(
+    var response = await http.post(
       Uri.parse("/login"),
       body: jsonEncode(<String, String>{
         "login": username,

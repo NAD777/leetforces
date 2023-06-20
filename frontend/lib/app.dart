@@ -1,13 +1,14 @@
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:frontend/splash/splash.dart';
+import 'package:frontend/pages/authentication/bloc/authentication_bloc.dart';
+import 'package:frontend/pages/home/view/home_page.dart';
+import 'package:frontend/pages/login/view/login_page.dart';
+import 'package:frontend/pages/splash/view/splash_page.dart';
+import 'package:frontend/repositories/contest_repository/contest_repository.dart';
 
 import 'repositories/authentication_repository/authentication_repository.dart';
 import 'repositories/user_repository/user_repository.dart';
-import 'authentication/bloc/authentication_bloc.dart';
-import 'home/view/home_page.dart';
-import 'login/view/login_page.dart';
 
 const _brandColor = Colors.orange;
 
@@ -21,12 +22,14 @@ class CodetestApp extends StatefulWidget {
 class _CodetestAppState extends State<CodetestApp> {
   late final AuthenticationRepository _authenticationRepository;
   late final UserRepository _userRepository;
+  late final ContestRepository _contestRepository;
 
   @override
   void initState() {
     super.initState();
     _authenticationRepository = AuthenticationRepository();
     _userRepository = UserRepository();
+    _contestRepository = ContestRepository();
   }
 
   @override
@@ -44,6 +47,9 @@ class _CodetestAppState extends State<CodetestApp> {
         ),
         RepositoryProvider.value(
           value: _userRepository,
+        ),
+        RepositoryProvider.value(
+          value: _contestRepository,
         ),
       ],
       child: BlocProvider(
