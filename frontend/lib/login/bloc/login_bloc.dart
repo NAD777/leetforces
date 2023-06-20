@@ -1,9 +1,11 @@
-import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:formz/formz.dart';
 import 'package:frontend/login/login.dart';
+
+import '../../repositories/authentication_repository/authentication_repository.dart';
+import '../../repositories/user_repository/user_repository.dart';
 
 part 'login_event.dart';
 
@@ -12,7 +14,9 @@ part 'login_state.dart';
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({
     required AuthenticationRepository authenticationRepository,
+    required UserRepository userRepository,
   })  : _authenticationRepository = authenticationRepository,
+        _userRepository = userRepository,
         super(const LoginState()) {
     on<LoginUsernameChanged>(_onUsernameChanged);
     on<LoginPasswordChanged>(_onPasswordChanged);
@@ -21,6 +25,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   }
 
   final AuthenticationRepository _authenticationRepository;
+  final UserRepository _userRepository;
 
   void _onUsernameChanged(
     LoginUsernameChanged event,
@@ -55,10 +60,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     if (state.isValid) {
       emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
       try {
-        await _authenticationRepository.logIn(
+        String jwt = await _authenticationRepository.logIn(
           username: state.username.value,
           password: state.password.value,
         );
+        _userRepository.setUser(jwt);
         emit(state.copyWith(status: FormzSubmissionStatus.success));
       } catch (_) {
         emit(state.copyWith(status: FormzSubmissionStatus.failure));

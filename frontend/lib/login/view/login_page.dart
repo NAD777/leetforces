@@ -1,8 +1,9 @@
-import 'package:authentication_repository/authentication_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/login/bloc/login_bloc.dart';
 
+import '../../repositories/authentication_repository/authentication_repository.dart';
+import '../../repositories/user_repository/user_repository.dart';
 import 'login_form.dart';
 
 class LoginPage extends StatelessWidget {
@@ -24,6 +25,7 @@ class LoginPage extends StatelessWidget {
           return LoginBloc(
             authenticationRepository:
                 RepositoryProvider.of<AuthenticationRepository>(context),
+            userRepository: RepositoryProvider.of<UserRepository>(context),
           );
         },
         child: const LoginForm(),

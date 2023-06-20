@@ -1,10 +1,10 @@
-import 'package:authentication_repository/authentication_repository.dart';
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/splash/splash.dart';
-import 'package:user_repository/user_repository.dart';
 
+import 'repositories/authentication_repository/authentication_repository.dart';
+import 'repositories/user_repository/user_repository.dart';
 import 'authentication/bloc/authentication_bloc.dart';
 import 'home/view/home_page.dart';
 import 'login/view/login_page.dart';
@@ -37,8 +37,15 @@ class _CodetestAppState extends State<CodetestApp> {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider.value(
-      value: _authenticationRepository,
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider.value(
+          value: _authenticationRepository,
+        ),
+        RepositoryProvider.value(
+          value: _userRepository,
+        ),
+      ],
       child: BlocProvider(
         create: (_) => AuthenticationBloc(
           authenticationRepository: _authenticationRepository,

@@ -1,10 +1,12 @@
 import 'dart:async';
 
-import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:user_repository/user_repository.dart';
+
+import '../../repositories/authentication_repository/authentication_repository.dart';
+import '../../repositories/user_repository/models/user.dart';
+import '../../repositories/user_repository/user_repository.dart';
 
 part 'authentication_event.dart';
 part 'authentication_state.dart';
@@ -43,7 +45,7 @@ class AuthenticationBloc
       case AuthenticationStatus.unauthenticated:
         return emit(const AuthenticationState.unauthenticated());
       case AuthenticationStatus.authenticated:
-        final user = await _tryGetUser();
+        final user = _userRepository.user;
         return emit(
           user != null
               ? AuthenticationState.authenticated(user)
@@ -59,14 +61,5 @@ class AuthenticationBloc
       Emitter<AuthenticationState> emit,
       ) {
     _authenticationRepository.logOut();
-  }
-
-  Future<User?> _tryGetUser() async {
-    try {
-      final user = await _userRepository.getUser();
-      return user;
-    } catch (_) {
-      return null;
-    }
   }
 }
