@@ -1,10 +1,11 @@
 from yaml import safe_load
 from xmlrpc.client import ServerProxy, Fault
-from typing import Dict, Tuple
 from json import dump, load
 from os import makedirs, environ, path
 from requests import get
 from base64 import b64decode
+
+from typing import Dict, Tuple, Any, cast
 
 
 class TestRunner:
@@ -13,8 +14,8 @@ class TestRunner:
     task_id: int
     submission_id: int
     extension: str
-    gen_details: Dict[str, str]
-    test_details: Dict[str, str]
+    gen_details: Dict[str, str | Dict[Any, Any]]
+    test_details: Dict[str, str | Dict[Any, Any]]
 
     def __init__(self,
                  task_id : int,
@@ -43,7 +44,7 @@ class TestRunner:
         if task_settings["code"] != 0:
             raise ValueError(task_settings["status"])
 
-        self.gen_details = {                                    # type: ignore
+        self.gen_details = {
             "amount_test": task_settings["amount_test"],
             "master_solution": b64decode(task_settings["master_file"])
                                                         .decode("utf-8"),
@@ -51,7 +52,7 @@ class TestRunner:
             "compiler": {}
         }
 
-        self.test_details = {                                   # type: ignore
+        self.test_details = {
             "memory_limit": task_settings["memory_limit"],
             "time_limit": task_settings["time_limit"],
             "compiler": {},
@@ -64,8 +65,8 @@ class TestRunner:
 
         with open("configs/compiler_config.yaml") as file:
             try:
-                ext = self.gen_details["master_filename"] \
-                        .split(".")[-1]    # type: ignore
+                ext = cast(str, self.gen_details["master_filename"]) \
+                        .split(".")[-1]
 
                 configs = safe_load(file)
                 self.gen_details["compiler"] = configs[ext]
@@ -132,9 +133,12 @@ class TestRunner:
             self.test_details["filename"] = filename
             self.test_details["source_file"] = source_file
 
-            report = node.run_tests(
-                submission_id, self.task_id, self.test_details)
-            return report  # type: ignore
+            report = cast(Dict[int, Tuple[str, str]],
+                          node.run_tests(submission_id,
+                                         self.task_id,
+                                         self.test_details)
+                          )
+            return report
         except Fault as err:
             print(err.faultString)
             return {}

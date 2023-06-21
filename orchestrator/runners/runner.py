@@ -1,7 +1,7 @@
 from xmlrpc.server import SimpleXMLRPCServer
 from subprocess import Popen, PIPE, TimeoutExpired
 from json import dump, load
-from typing import Dict, Tuple, Any
+from typing import AnyStr, Dict, Tuple, Any, cast
 from os import makedirs, chdir
 from resource import setrlimit, RLIMIT_AS, RLIM_INFINITY
 from shlex import split
@@ -82,11 +82,6 @@ class Runner:
                      preexec_fn=lambda: setrlimit(RLIMIT_AS,
                                         (MAX_VIRTUAL_MEMORY, RLIM_INFINITY)))
 
-        try:
-            output = proc.communicate(timeout=time_limit + 3)
-        except TimeoutExpired:
-            output = Runner.status_codes["TLE"]
-
         tle_result = {
             "error_status": Runner.status_codes["TLE"],
             "output": ('', ''),
@@ -94,12 +89,15 @@ class Runner:
             "time": -1
         }
 
-        if output == Runner.status_codes["TLE"]:
+        try:
+            output = proc.communicate(timeout=time_limit + 3)
+        except TimeoutExpired:
             result = tle_result
             return result
 
-        output_dec = (output[0].decode(),          # type: ignore
-                      output[1].decode().lower())  # type: ignore
+        output_dec = (output[0].decode(),
+                      output[1].decode().lower())
+
         # If we got right output from /usr/bin/time
         max_mem, real_time = -1, -1
         if stdin_data != '' and len(output_dec[1].split()) == 2:
@@ -156,8 +154,8 @@ class Runner:
         }
         report["submit_id"] = submission_id
 
-        compiler = test_details["compiler"]
-        ce = compiler["ce"]                                     # type: ignore
+        compiler = cast(Dict[str, str | Any], test_details["compiler"])
+        ce = compiler["ce"]
         test_data = test_details["test_data"]
         filename = test_details["filename"]
         source_file = test_details["source_file"]
