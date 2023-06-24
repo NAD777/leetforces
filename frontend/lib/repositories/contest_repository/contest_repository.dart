@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:frontend/env/config.dart';
 import 'package:http/http.dart' as http;
 
 import 'models/contest.dart';
@@ -7,7 +8,7 @@ import 'models/contest.dart';
 class ContestRepository {
   Future<List<Contest>> getContests() async {
     var response = await http.get(
-      Uri.parse("/list_contests"),
+      Uri.parse("$host/list_contests"),
       //headers: <String, String>{""},
       // TODO: contests
     );

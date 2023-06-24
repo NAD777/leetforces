@@ -22,7 +22,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginUsernameChanged>(_onUsernameChanged);
     on<LoginPasswordChanged>(_onPasswordChanged);
     on<LoginSubmitted>(_onSubmitted);
-    on<LoginRegister>(_onLoginRegister);
+    // on<LoginRegister>(_onLoginRegister);
   }
 
   final AuthenticationRepository _authenticationRepository;
@@ -73,10 +73,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  void _onLoginRegister(
-    LoginRegister event,
-    Emitter<LoginState> emit,
-  ) {
-    // TODO: Go to register page
-  }
+  // void _onLoginRegister(
+  //   LoginRegister event,
+  //   Emitter<LoginState> emit,
+  // ) {
+  //   // TODO: Go to register page
+  // }
 }

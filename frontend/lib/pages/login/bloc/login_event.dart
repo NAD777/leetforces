@@ -30,6 +30,6 @@ final class LoginSubmitted extends LoginEvent {
   const LoginSubmitted();
 }
 
-final class LoginRegister extends LoginEvent {
-  const LoginRegister();
-}
+// final class LoginRegister extends LoginEvent {
+//   const LoginRegister();
+// }

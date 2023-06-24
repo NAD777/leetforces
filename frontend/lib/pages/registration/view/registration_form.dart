@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
-import 'package:frontend/pages/registration/registration.dart';
 
-import '../bloc/login_bloc.dart';
+import '../bloc/registration_bloc.dart';
 
-class LoginForm extends StatelessWidget {
-  const LoginForm({Key? key}) : super(key: key);
+class RegistrationForm extends StatelessWidget {
+  const RegistrationForm({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<LoginBloc, LoginState>(
+    return BlocListener<RegistrationBloc, RegistrationState>(
       listener: (context, state) {
         if (state.status.isFailure) {
           ScaffoldMessenger.of(context)
@@ -18,6 +17,13 @@ class LoginForm extends StatelessWidget {
             ..showSnackBar(
               const SnackBar(content: Text('Authentication Failure')),
             );
+        } else if (state.status.isSuccess) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(content: Text('Registration Success')),
+            );
+          Navigator.of(context).pop();
         }
       },
       child: Center(
@@ -39,11 +45,10 @@ class LoginForm extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _UsernameInput(),
+                  _EmailInput(),
                   _PasswordInput(),
                   const SizedBox(height: 30),
-                  _LoginButton(),
-                  const SizedBox(height: 25),
-                  _RegisterButton(),
+                  _RegistrationButton(),
                 ],
               ),
             ),
@@ -57,19 +62,41 @@ class LoginForm extends StatelessWidget {
 class _UsernameInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<LoginBloc, LoginState>(
+    return BlocBuilder<RegistrationBloc, RegistrationState>(
       buildWhen: (previous, current) => previous.username != current.username,
       builder: (context, state) {
         return TextFormField(
-          key: const Key('loginForm_usernameInput_textField'),
+          key: const Key('registrationForm_usernameInput_textField'),
           decoration: InputDecoration(
-            labelText: 'Login',
+            labelText: 'Username',
             errorText:
                 state.username.displayError != null ? 'Invalid username' : null,
           ),
           textInputAction: TextInputAction.next,
           onChanged: (username) =>
-              context.read<LoginBloc>().add(LoginUsernameChanged(username)),
+              context.read<RegistrationBloc>().add(RegistrationUsernameChanged(username)),
+        );
+      },
+    );
+  }
+}
+
+class _EmailInput extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<RegistrationBloc, RegistrationState>(
+      buildWhen: (previous, current) => previous.email != current.email,
+      builder: (context, state) {
+        return TextFormField(
+          key: const Key('registrationForm_emailInput_textField'),
+          decoration: InputDecoration(
+            labelText: 'Email',
+            errorText:
+            state.email.displayError != null ? 'Invalid email' : null,
+          ),
+          textInputAction: TextInputAction.next,
+          onChanged: (email) =>
+              context.read<RegistrationBloc>().add(RegistrationEmailChanged(email)),
         );
       },
     );
@@ -79,11 +106,11 @@ class _UsernameInput extends StatelessWidget {
 class _PasswordInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<LoginBloc, LoginState>(
+    return BlocBuilder<RegistrationBloc, RegistrationState>(
       buildWhen: (previous, current) => previous.password != current.password,
       builder: (context, state) {
         return TextFormField(
-          key: const Key('loginForm_passwordInput_textField'),
+          key: const Key('registrationForm_passwordInput_textField'),
           decoration: InputDecoration(
             labelText: 'Password',
             errorText:
@@ -91,47 +118,29 @@ class _PasswordInput extends StatelessWidget {
           ),
           obscureText: true,
           onChanged: (password) =>
-              context.read<LoginBloc>().add(LoginPasswordChanged(password)),
+              context.read<RegistrationBloc>().add(RegistrationPasswordChanged(password)),
         );
       },
     );
   }
 }
 
-class _LoginButton extends StatelessWidget {
+class _RegistrationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<LoginBloc, LoginState>(
+    return BlocBuilder<RegistrationBloc, RegistrationState>(
       builder: (context, state) {
         return state.status.isInProgress
             ? const CircularProgressIndicator()
             : ElevatedButton(
-                key: const Key('loginForm_continue_elevatedButton'),
+                key: const Key('registrationForm_continue_elevatedButton'),
                 onPressed: state.isValid
                     ? () {
-                        context.read<LoginBloc>().add(const LoginSubmitted());
+                        context.read<RegistrationBloc>().add(const RegistrationSubmitted());
                       }
                     : null,
-                child: const Text('Login'),
+                child: const Text('Registration'),
               );
-      },
-    );
-  }
-}
-
-class _RegisterButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<LoginBloc, LoginState>(
-      builder: (context, state) {
-        return ElevatedButton(
-          key: const Key('loginForm_register_elevatedButton'),
-          onPressed: () {
-            //context.read<LoginBloc>().add(const LoginRegister());
-            Navigator.push(context, RegistrationPage.route());
-          },
-          child: const Text('Register'),
-        );
       },
     );
   }

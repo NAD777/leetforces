@@ -6,6 +6,7 @@ import 'package:frontend/pages/home/view/home_page.dart';
 import 'package:frontend/pages/login/view/login_page.dart';
 import 'package:frontend/pages/splash/view/splash_page.dart';
 import 'package:frontend/repositories/contest_repository/contest_repository.dart';
+import 'package:frontend/repositories/registeration_repository/registration_repository.dart';
 
 import 'repositories/authentication_repository/authentication_repository.dart';
 import 'repositories/user_repository/user_repository.dart';
@@ -23,6 +24,7 @@ class _CodetestAppState extends State<CodetestApp> {
   late final AuthenticationRepository _authenticationRepository;
   late final UserRepository _userRepository;
   late final ContestRepository _contestRepository;
+  late final RegistrationRepository _registrationRepository;
 
   @override
   void initState() {
@@ -30,6 +32,7 @@ class _CodetestAppState extends State<CodetestApp> {
     _authenticationRepository = AuthenticationRepository();
     _userRepository = UserRepository();
     _contestRepository = ContestRepository();
+    _registrationRepository = RegistrationRepository();
   }
 
   @override
@@ -50,6 +53,9 @@ class _CodetestAppState extends State<CodetestApp> {
         ),
         RepositoryProvider.value(
           value: _contestRepository,
+        ),
+        RepositoryProvider.value(
+          value: _registrationRepository,
         ),
       ],
       child: BlocProvider(
