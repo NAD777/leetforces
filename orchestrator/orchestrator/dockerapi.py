@@ -2,7 +2,9 @@ from tarfile import open as taropen
 from os import chdir, getcwd, remove
 
 from docker import DockerClient, from_env
+from docker.client import APIClient
 from docker.models.containers import Container, Image
+from docker.models.networks import Network
 
 from typing import Any, Iterator, Tuple, cast
 
@@ -12,11 +14,12 @@ class APIClass:
     from the given context and start them as containers."""
 
     client: DockerClient
-    image: Image
-    container: Container
+    api_client: APIClient
+
 
     def __init__(self) -> None:
         self.client = from_env()
+        self.api_client = APIClient()
 
     def __make_tarfile(self, output_filename: str, source_dir: str) -> None:
         """Creates tar archive of given directory
@@ -35,7 +38,7 @@ class APIClass:
                     context_path: str,
                     dockerfile_path: str,
                     nocache: bool = True
-                    ) -> None:
+                    ) -> Image:
         """Builds docker image with given context path
 
         Keyword arguments:
@@ -43,6 +46,9 @@ class APIClass:
         context_path -- path to context which contains Dockerfile
         dockerfile_path -- path to Dockerfile within the given context
         nocache -- if set True, build without cache
+
+        Returns:
+        Image object
         """
 
         previous_dir = getcwd()
@@ -59,17 +65,37 @@ class APIClass:
             "nocache": nocache,
         }
 
-        self.image = cast(Tuple[Image, Iterator[Any]],
+        image = cast(Tuple[Image, Iterator[Any]],
                      self.client.images.build(**params))[0]
 
         remove(tarfile_name)
         chdir(previous_dir)
 
+        return image
+
+
+    def pull_image(self,
+                   repository: str,
+                   tag: str = ''
+                   ) -> Image:
+        """Pull the image with given name and return it
+
+        Keyword arguments:
+        repository -- repository to pull image from
+        tag -- tag of image to pull
+
+        Returns:
+        Image object"""
+
+        image = cast(Image, self.client.images.pull(repository, tag))
+        return image
+
+
     def create_container(self,
                         image_name: str,
                         memory_limit: int,
                         command: str = '',
-                        network: str = ''
+                        network_name: str = ''
                         ) -> Container:
         """Create docker container from given image.
 
@@ -77,21 +103,59 @@ class APIClass:
         image_name -- name of image to base the container on
         memory_limit -- soft memory limit for the container
         command -- overwrite default COMMAND for docker image
-        network -- network to attach the container
-        """
+        network_name -- network to attach the container
+
+        Returns:
+        Container object"""
+
         params = {
             "image": image_name,
             "command": command,
-            "network": network,
-            "mem_reservation": f"{memory_limit}m"
+            "network": network_name,
+            "mem_reservation": f"{memory_limit}m",
         }
 
 
         self.container = cast(Container,
                               self.client.containers.create(**params))
+        net = cast(Network, self.client.networks.list(names=[network_name])[0])
+        net.connect(self.container)
         return self.container
 
+    def resolve_ip(self, container_name: str, network_name: str) -> str:
+        """Resolve the ip addres of the given container in the network.
 
-    def start_container(self) -> None:
-        """Start the container"""
-        self.container.start()
+        Keyword arguments:
+        container_name -- name of the container to be inspected
+        network_name -- name of the network to which the container is attached.
+        It is assumed that container is indeed attached to the network.
+
+        Returns:
+        ip addres of the container in the given network, if the container is
+        present in the network, empty string otherwise"""
+        try:
+            ip = self.api_client.inspect_container(container_name) \
+                    ["NetworkSettings"]["Networks"][network_name]["IPAddress"]
+            return ip
+        except KeyError as e:
+            print(e)
+            return ''
+
+    @staticmethod
+    def start_container(container: Container) -> None:
+        """Start the container
+
+        Keyword arguments:
+        container -- instance of Container class to start"""
+
+        container.start()
+
+
+    @staticmethod
+    def stop_container(container: Container) -> None:
+        """Stop the running container
+
+        Keyword arguments:
+        container -- instance of Container class to start"""
+
+        container.stop()

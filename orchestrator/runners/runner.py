@@ -1,7 +1,7 @@
 from xmlrpc.server import SimpleXMLRPCServer
 from subprocess import Popen, PIPE, TimeoutExpired
 from json import dump, load
-from typing import AnyStr, Dict, Tuple, Any, cast
+from typing import Dict, Tuple, Any, cast
 from os import makedirs, chdir
 from resource import setrlimit, RLIMIT_AS, RLIM_INFINITY
 from shlex import split
@@ -264,6 +264,7 @@ class Runner:
 
 
 if __name__ == '__main__':
+    print("GAVNOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
     with SimpleXMLRPCServer(("0.0.0.0", 31337)) as server:
         server.register_introspection_functions()
         server.register_instance(Runner())
