@@ -112,13 +112,14 @@ def check_for_allowed_keys(given_keys, allowed_keys):
 @app.route("/login", methods=["POST"])
 def login_endpoint():
     try:
+        print(request.json)
         data = request.json
         if not data:
             return {
-                       "message": "Please provide user details",
-                       "data": None,
-                       "error": "Bad request"
-                   }, 400
+                "message": "Please provide user details",
+                "data": None,
+                "error": "Bad request"
+            }, 400
         # validate input
         is_validated = validate_login_and_password(data.get('login'), data.get('password'))
         if is_validated is not True:
@@ -133,20 +134,21 @@ def login_endpoint():
                     algorithm="HS256"
                 )
                 return {
-                           "message": "Successfully fetched auth token",
-                           "data": token
-                       }, 200
+                    "message": "Successfully fetched auth token",
+                    "data": token
+                }, 200
             except Exception as e:
                 return {
-                           "error": "Something went wrong",
-                           "message": str(e)
-                       }, 500
+                    "error": "Something went wrong",
+                    "message": str(e)
+                }, 500
         return {
-                   "message": "Error fetching auth token!, invalid email or password",
-                   "data": None,
-                   "error": "Unauthorized"
-               }, 404
+            "message": "Error fetching auth token!, invalid email or password",
+            "data": None,
+            "error": "Unauthorized"
+        }, 404
     except Exception as e:
+        print(e)
         return {
                    "message": "Something went wrong!",
                    "error": str(e),
