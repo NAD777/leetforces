@@ -7,6 +7,7 @@ import 'package:frontend/pages/login/view/login_page.dart';
 import 'package:frontend/pages/splash/view/splash_page.dart';
 import 'package:frontend/repositories/contest_repository/contest_repository.dart';
 import 'package:frontend/repositories/registeration_repository/registration_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'repositories/authentication_repository/authentication_repository.dart';
 import 'repositories/user_repository/user_repository.dart';
@@ -14,10 +15,12 @@ import 'repositories/user_repository/user_repository.dart';
 const _brandColor = Colors.orange;
 
 class CodetestApp extends StatefulWidget {
-  const CodetestApp({super.key});
+  final SharedPreferences pref;
+
+  const CodetestApp(this.pref, {super.key});
 
   @override
-  State<CodetestApp> createState() => _CodetestAppState();
+  State<CodetestApp> createState() => _CodetestAppState(pref);
 }
 
 class _CodetestAppState extends State<CodetestApp> {
@@ -25,12 +28,15 @@ class _CodetestAppState extends State<CodetestApp> {
   late final UserRepository _userRepository;
   late final ContestRepository _contestRepository;
   late final RegistrationRepository _registrationRepository;
+  final SharedPreferences pref;
+
+  _CodetestAppState(this.pref);
 
   @override
   void initState() {
     super.initState();
     _authenticationRepository = AuthenticationRepository();
-    _userRepository = UserRepository();
+    _userRepository = UserRepository(pref);
     _contestRepository = ContestRepository();
     _registrationRepository = RegistrationRepository();
   }
@@ -105,6 +111,7 @@ class _AppViewState extends State<AppView> {
       builder: (context, child) {
         return BlocListener<AuthenticationBloc, AuthenticationState>(
           listener: (context, state) {
+            print(state.status);
             switch (state.status) {
               case AuthenticationStatus.authenticated:
                 _navigator.pushAndRemoveUntil<void>(
@@ -116,7 +123,7 @@ class _AppViewState extends State<AppView> {
                   LoginPage.route(),
                   (route) => false,
                 );
-              case AuthenticationStatus.unknown:
+              case AuthenticationStatus.initial:
                 break;
             }
           },
