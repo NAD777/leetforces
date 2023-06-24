@@ -3,14 +3,13 @@ import 'dart:convert';
 import 'package:frontend/env/config.dart';
 import 'package:http/http.dart' as http;
 
-enum AuthenticationStatus { unknown, authenticated, unauthenticated }
+enum AuthenticationStatus { authenticated, unauthenticated, initial }
 
 class AuthenticationRepository {
   final _controller = StreamController<AuthenticationStatus>();
 
   Stream<AuthenticationStatus> get status async* {
-    await Future<void>.delayed(const Duration(seconds: 1));
-    yield AuthenticationStatus.unauthenticated;
+    yield AuthenticationStatus.initial;
     yield* _controller.stream;
   }
 
