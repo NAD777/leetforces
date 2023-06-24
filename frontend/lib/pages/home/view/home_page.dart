@@ -1,9 +1,8 @@
-import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:frontend/pages/home/bloc/home_bloc.dart';
-import 'package:frontend/pages/home/view/home_view.dart';
-import 'package:frontend/repositories/contest_repository/contest_repository.dart';
+import 'package:frontend/pages/contests/view/contests_view.dart';
+
+import '../../authentication/bloc/authentication_bloc.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -16,32 +15,45 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var theme = EasyDynamicTheme.of(context).themeMode;
+    // var theme = EasyDynamicTheme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        actions: [
-          // IconButton(
-          //   onPressed: () {},
-          //   icon: Icon(
-          //     theme
-          //   ),
-          // ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.person_outline_rounded),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            title: const Text('LeetForces'),
+            actions: [
+              // IconButton(
+              //   onPressed: () {},
+              //   icon: Icon(
+              //     theme == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+              //   ),
+              // ),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.person_outline_rounded),
+              ),
+              IconButton(
+                onPressed: () {
+                  context.read<AuthenticationBloc>().add(
+                    AuthenticationLogoutRequested(),
+                  );
+                },
+                icon: const Icon(Icons.logout),
+              ),
+            ],
           ),
+          ContestsView(),
         ],
       ),
-      body: BlocProvider(
-        create: (context) {
-          return HomeBloc(
-            contestRepository:
-                RepositoryProvider.of<ContestRepository>(context),
-          );
-        },
-        child: const HomeView(),
-      ),
+      // body: BlocProvider(
+      //   create: (context) {
+      //     return HomeBloc(
+      //       contestRepository:
+      //           RepositoryProvider.of<ContestRepository>(context),
+      //     );
+      //   },
+      //   child: const HomeView(),
+      // ),
     );
   }
 }
