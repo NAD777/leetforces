@@ -9,8 +9,6 @@ class ContestRepository {
   Future<List<Contest>> getContests() async {
     var response = await http.get(
       Uri.parse("$host/list_contests"),
-      //headers: <String, String>{""},
-      // TODO: contests
     );
     var json = jsonDecode(response.body) as Map<String, dynamic>;
 

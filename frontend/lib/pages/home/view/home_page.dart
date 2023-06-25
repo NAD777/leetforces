@@ -1,59 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:frontend/pages/contests/view/contests_view.dart';
+import 'package:frontend/repositories/contest_repository/contest_repository.dart';
+import 'package:frontend/widgets/template.dart';
 
-import '../../authentication/bloc/authentication_bloc.dart';
+import '../../../repositories/contest_repository/models/contest.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({required this.contestRepository, super.key});
 
-  static Route<void> route() {
+  final ContestRepository contestRepository;
+
+  static Route<void> route(ContestRepository contestRepository) {
     return MaterialPageRoute(
-      builder: (_) => const HomePage(),
+      builder: (_) => HomePage(contestRepository: contestRepository),
     );
+  }
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int someCount = 30;
+  late List<Contest> list;
+
+  @override
+  void initState() {
+    widget.contestRepository.getContests().then((value) {
+      list = value;
+      setState(() {});
+    });
+    list = [];
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     // var theme = EasyDynamicTheme.of(context);
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            title: const Text('LeetForces'),
-            actions: [
-              // IconButton(
-              //   onPressed: () {},
-              //   icon: Icon(
-              //     theme == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
-              //   ),
-              // ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.person_outline_rounded),
+    return Template(
+      content: Column(
+        children: [
+          for (var e in list)
+            Card(
+              child: ListTile(
+                title: Text(e.name),
               ),
-              IconButton(
-                onPressed: () {
-                  context.read<AuthenticationBloc>().add(
-                    AuthenticationLogoutRequested(),
-                  );
-                },
-                icon: const Icon(Icons.logout),
-              ),
-            ],
-          ),
-          ContestsView(),
+            ),
         ],
       ),
-      // body: BlocProvider(
-      //   create: (context) {
-      //     return HomeBloc(
-      //       contestRepository:
-      //           RepositoryProvider.of<ContestRepository>(context),
-      //     );
-      //   },
-      //   child: const HomeView(),
-      // ),
     );
   }
 }
