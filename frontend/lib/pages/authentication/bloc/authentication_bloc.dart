@@ -47,6 +47,7 @@ class AuthenticationBloc
   ) async {
     switch (event.status) {
       case AuthenticationStatus.unauthenticated:
+        _userRepository.setUser("");
         return emit(AuthenticationState.unauthenticated());
       case AuthenticationStatus.authenticated:
         final user = _userRepository.user;

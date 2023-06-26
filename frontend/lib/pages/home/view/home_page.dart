@@ -21,13 +21,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int someCount = 30;
-  late List<Contest> list;
+  late List<ContestSimple> list;
 
   @override
   void initState() {
     widget.contestRepository.getContests().then((value) {
-      list = value;
-      setState(() {});
+      setState(() {
+        list = value;
+      });
     });
     list = [];
     super.initState();
@@ -35,7 +36,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // var theme = EasyDynamicTheme.of(context);
     return Template(
       content: Column(
         children: [

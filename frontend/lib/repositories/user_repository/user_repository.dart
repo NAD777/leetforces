@@ -19,7 +19,12 @@ class UserRepository {
   }
 
   void setUser(String jwt) {
-    _user = User(jwt);
-    prefs.setString("jwt", jwt);
+    if (jwt.isEmpty) {
+      _user = null;
+      prefs.remove("jwt");
+    } else {
+      _user = User(jwt);
+      prefs.setString("jwt", jwt);
+    }
   }
 }
