@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/repositories/contest_repository/contest_repository.dart';
+import 'package:frontend/repositories/contest_repository.dart';
 import 'package:frontend/widgets/template.dart';
 
-import '../../../repositories/contest_repository/models/contest.dart';
+import '../models/contest.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({required this.contestRepository, super.key});

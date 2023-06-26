@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/repositories/contest_repository/contest_repository.dart';
-import 'package:frontend/repositories/task_repository/task_repository.dart';
+import 'package:frontend/repositories/contest_repository.dart';
+import 'package:frontend/repositories/task_repository.dart';
 import 'package:frontend/widgets/template.dart';
 
-import '../../../repositories/contest_repository/models/contest.dart';
-import '../../../repositories/task_repository/models/task.dart';
+import '../models/contest.dart';
+import '../models/task.dart';
 
 class ContestPage extends StatefulWidget {
   const ContestPage(

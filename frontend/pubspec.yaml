@@ -39,6 +39,7 @@ dependencies:
   bloc: ^8.1.2
   http: ^1.0.0
   shared_preferences: ^2.1.2
+  fluro: ^2.0.5
 
 dev_dependencies:
   flutter_test:

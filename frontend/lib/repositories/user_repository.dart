@@ -1,12 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'models/user.dart';
+import '../models/user.dart';
 
 class UserRepository {
   UserRepository(this.prefs) {
-    print(prefs.containsKey("jwt"));
     if (prefs.containsKey("jwt")) {
-      print(prefs.getString("jwt"));
       _user = User(prefs.getString("jwt")!);
     }
   }

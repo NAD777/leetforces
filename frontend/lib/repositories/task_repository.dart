@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:frontend/env/config.dart';
 import 'package:http/http.dart' as http;
 
-import '../contest_repository/models/contest.dart';
-import 'models/task.dart';
+import '../models/contest.dart';
+import '../models/task.dart';
 
 class TaskRepository {
   Future<List<Task>> getTasks(Contest contest) async {

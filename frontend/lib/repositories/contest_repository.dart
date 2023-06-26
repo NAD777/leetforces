@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:frontend/env/config.dart';
 import 'package:http/http.dart' as http;
 
-import 'models/contest.dart';
+import '../models/contest.dart';
 
 class ContestRepository {
   Future<List<ContestSimple>> getContests() async {
