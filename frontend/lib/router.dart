@@ -12,23 +12,15 @@ class AppRouter {
   static final contestRepository = ContestRepository();
   static final taskRepository = TaskRepository();
 
-  static final Handler homeHandler = Handler(handlerFunc: (context, params) {
-    return HomePage(contestRepository: contestRepository);
-  });
-  static final Handler contestHandler = Handler(handlerFunc: (context, params) {
-    return ContestPage(
-      contestRepository: contestRepository,
-      taskRepository: taskRepository,
-      contestId: int.parse(params["id"]![0]),
-    );
-  });
+  static final Handler homeHandler =
+      Handler(handlerFunc: (context, params) => const HomePage());
+  static final Handler contestHandler = Handler(
+      handlerFunc: (context, params) => ContestPage(
+            contestId: int.parse(params["id"]![0]),
+          ));
   static final Handler registrationHandler =
-      Handler(handlerFunc: (context, params) {
-    return const RegistrationPage();
-  });
-  static final Handler loginHandler = Handler(handlerFunc: (context, params) {
-    return const LoginPage();
-  });
+      Handler(handlerFunc: (context, params) => const RegistrationPage());
+  static final Handler loginHandler = Handler(handlerFunc: (context, params) => const LoginPage());
 
   static void setupRouter() {
     router.define("/", handler: homeHandler);

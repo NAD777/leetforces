@@ -25,10 +25,13 @@ class ContestRepository {
   }
 
   Future<Contest> getContestInfo(int contestId) async {
-    var response = await http.get(
-      Uri.parse("$host/get_contest/$contestId"),
-    );
-    var json = jsonDecode(response.body) as Map<String, dynamic>;
+    http.Request req = http.Request("GET", Uri.parse("$host/get_contest"));
+    req.body = jsonEncode(<String, dynamic>{
+      "contest_id": contestId,
+    });
+    req.headers["Content-Type"] = "application/json";
+    var response = await req.send();
+    var json = jsonDecode(await response.stream.bytesToString()) as Map<String, dynamic>;
 
     if (response.statusCode == 200) {
       return Contest(

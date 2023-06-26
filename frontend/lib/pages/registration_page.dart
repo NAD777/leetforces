@@ -48,7 +48,7 @@ class _RegistrationPage extends State<StatefulWidget> {
                 setState(() {
                   registrationInProcess = false;
                 });
-                AppRouter.router.navigateTo(context, "/login");
+                AppRouter.router.navigateTo(context, "/login", replace: true);
               });
             }
           },
