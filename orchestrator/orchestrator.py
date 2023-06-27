@@ -32,7 +32,7 @@ class Orchestrator:
                  task_id : int,
                  submission_ext : str
                  ) -> None:
-        """Constructor method for TestRunner class
+        """Constructor method for Orchestrator class
 
         Keyword arguments:
         task_id -- id of the task to run
@@ -167,8 +167,9 @@ class Orchestrator:
         self.test_details["filename"] = filename
         self.test_details["source_file"] = source_file
 
-        self.rpc_generate()
-        self.rpc_run()
+        print(self.rpc_generate())
+        print(self.rpc_run())
 
         report = self.clean_report()
+        print(report)
         return report

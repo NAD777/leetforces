@@ -137,16 +137,16 @@ class Runner:
         report = {
             "submit_id": int,
             "status": str,
-            "test_num": int,
+            "test_number": int,
             "memory_used": int,
             "run_time": int
         }"""
 
         report = {
             "status": str,
-            "test_num": int,
+            "test_number": int,
             "memory_used": int,
-            "run_time": int,
+            "runtime": int,
         }
 
         compiler = cast(Dict[str, str | Any], test_details["compiler"])
@@ -164,49 +164,49 @@ class Runner:
         tests = load(open(f"./test_data/tests.json", "r"))
 
         result = {}
-        for test_num, (input, desired_output) in tests.items():
+        for test_number, (input, desired_output) in tests.items():
             result = self._run_user_code(
                 executable, test_details, stdin_data=input)
             output = result["output"]
 
             # Check for CE
             if ce in result["output"][1]:
-                report["test_num"] = test_num
+                report["test_number"] = test_number
                 report["status"] = Runner.status_codes["CE"]
                 break
 
             # Check for TLE
             if result["error_status"] == Runner.status_codes["TLE"]:
-                report["test_num"] = test_num
+                report["test_number"] = test_number
                 report["status"] = Runner.status_codes["TLE"]
                 break
 
             # Check for MLE
             if "memory" in output[1]:
-                report["test_num"] = test_num
+                report["test_number"] = test_number
                 report["status"] = Runner.status_codes["MLE"]
                 break
 
             # Check for RE
             if len(output[1]) > 0:
-                report["test_num"] = test_num
+                report["test_number"] = test_number
                 report["status"] = Runner.status_codes["RE"]
                 break
 
             # Check for WA
             if output[0] != desired_output[0] and len(output[1]) == 0:
                 print(f"{output=}, {desired_output=}")
-                report["test_num"] = test_num
+                report["test_number"] = test_number
                 report["status"] = Runner.status_codes["WA"]
                 break
 
         # Everything seems OK
         else:
             report["status"] = Runner.status_codes["OK"]
-            report["test_num"] = -1
+            report["test_number"] = -1
 
         report["memory_used"] = result["max_mem"]
-        report["run_time"] = result["time"]
+        report["runtime"] = result["time"]
 
         print(report)
         return report
