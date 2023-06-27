@@ -10,11 +10,12 @@
 #
 from flask import Flask, request
 from requests import post
-from test_runner import TestRunner
 from base64 import b64decode
 from os import environ
 from logging import basicConfig, debug, DEBUG
 from prometheus_flask_exporter import PrometheusMetrics
+
+from orchestrator import Orchestrator
 
 JUGGLER = environ["JUGGLER"]
 
@@ -31,7 +32,7 @@ metrics.register_default(
 )
 
 
-@app.route("/run", methods=["POST"])  # type: ignore
+@app.route("/run", methods=["POST"])
 def run():
     """/run route handler
     """
@@ -54,7 +55,7 @@ def run():
     source_file_decoded = b64decode(source_file).decode("utf-8")
 
     try:
-        runner = TestRunner(task_id, ext)
+        runner = Orchestrator(task_id, ext)
         report = runner.run(submission_id, filename, source_file_decoded)
     except ValueError as e:
         print(e)

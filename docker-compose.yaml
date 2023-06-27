@@ -67,7 +67,7 @@ services:
   orchestrator:
     build:
       context: .
-      dockerfile: ./orchestrator/orchestrator/Dockerfile
+      dockerfile: ./orchestrator/orchestrator.Dockerfile
     networks:
       - internal
       - orchestrator_backend
@@ -81,6 +81,8 @@ services:
     #   - runner
     environment:
       - JUGGLER=http://juggler:5001
+      - PROJECT_NAME=leetforces
+      - DEBUG=True
     restart: unless-stopped
 
   # runner:

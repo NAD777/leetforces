@@ -6,6 +6,7 @@ from os import makedirs, chdir
 from resource import setrlimit, RLIMIT_AS, RLIM_INFINITY
 from shlex import split
 
+import judge_types
 
 class Runner:
     """Class that is actually responsible for test running and generation"""
@@ -18,7 +19,7 @@ class Runner:
         "TLE": "TLE",
     }
 
-    def run_user_code(self,
+    def _run_user_code(self,
                       executable: str,
                       configurations: Dict[str, Any],
                       stdin_data: str = ''
@@ -122,15 +123,11 @@ class Runner:
         return result
 
     def run_tests(self,
-                  submission_id: int,
-                  task_id: int,
                   test_details: Dict[str, str]
                   ) -> Dict[str, int | str]:
-        """Wrapper function for running user code
+        """Wrapper function for running user code. Called through RPC.
 
         Keyword arguments:
-        submission_id   -- submission id
-        task_id         -- task id
         test_details    -- Python dict object with configurations
 
         Returns:
@@ -146,13 +143,11 @@ class Runner:
         }"""
 
         report = {
-            "submit_id": int,
             "status": str,
             "test_num": int,
             "memory_used": int,
             "run_time": int,
         }
-        report["submit_id"] = submission_id
 
         compiler = cast(Dict[str, str | Any], test_details["compiler"])
         ce = compiler["ce"]
@@ -165,12 +160,12 @@ class Runner:
         open(executable, "w").write(source_file)
 
         makedirs("test_data", exist_ok=True)
-        dump(test_data, open(f"./test_data/{task_id}.json", "w"))
-        tests = load(open(f"./test_data/{task_id}.json", "r"))
+        dump(test_data, open(f"./test_data/tests.json", "w"))
+        tests = load(open(f"./test_data/tests.json", "r"))
 
         result = {}
         for test_num, (input, desired_output) in tests.items():
-            result = self.run_user_code(
+            result = self._run_user_code(
                 executable, test_details, stdin_data=input)
             output = result["output"]
 
@@ -216,8 +211,8 @@ class Runner:
         print(report)
         return report
 
-    def generate_tests(self,
-                       config : Dict[str, str]
+    def _generate_tests(self,
+                       config : judge_types.GenDetails
                        ) -> Dict[int, Tuple[str, str]]:
         """Generate tests according to the configuration details
 
@@ -230,16 +225,16 @@ class Runner:
 
         makedirs("solutions", exist_ok=True)
         with open(f"./solutions/{filename}", "w") as file:
-            file.write(config["master_solution"])
+            file.write(config["master_file"])
         tests_no = config["amount_test"]
 
         test_data = {}
         executable = f"./solutions/{filename}"
         for test in range(int(tests_no)):
-            input_data = self.run_user_code(executable + " sample",
+            input_data = self._run_user_code(executable + " sample",
                                             config)["output"][0]
 
-            output_data = self.run_user_code(executable + " test",
+            output_data = self._run_user_code(executable + " test",
                                              config,
                                              stdin_data=input_data)["output"]
             test_data[str(test)] = (input_data, output_data)
@@ -247,7 +242,7 @@ class Runner:
         return test_data
 
     def generate_test_data(self,
-                           gen_details: Dict[str, str]
+                           gen_details: judge_types.GenDetails
                            ) -> Dict[int, Tuple[str, str]]:
         """Wrapper function that is called from through RPC
 
@@ -257,14 +252,13 @@ class Runner:
         Returns:
         Python dictionary containing sample input and output data"""
 
-        tests = self.generate_tests(gen_details)
+        tests = self._generate_tests(gen_details)
         dump(tests, open("tests.json", 'w'))
 
         return tests
 
 
 if __name__ == '__main__':
-    print("GAVNOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
     with SimpleXMLRPCServer(("0.0.0.0", 31337)) as server:
         server.register_introspection_functions()
         server.register_instance(Runner())
