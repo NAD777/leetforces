@@ -35,7 +35,8 @@ def _create_image(instance: dockerapi.APIClass,
     #TODO: add master config parsing
     # and/or these parse these configs from upper stack layers
 
-    _runner_docker_image = dockerapi.get_image(f"{PROJECT_NAME}-runner")
+    _runner_docker_image = dockerapi.APIClass() \
+                                    .get_image(f"{PROJECT_NAME}-runner")
 
     # do not build/pull if object is already present
     if _runner_docker_image is not None:

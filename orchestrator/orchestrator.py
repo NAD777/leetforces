@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Optional
 
 from yaml import safe_load
 from xmlrpc.client import ServerProxy, Fault
@@ -24,7 +25,7 @@ class Orchestrator:
     test_details: judge_types.TestDetails
 
     dirty_report: judge_types.DirtyReport
-    tests: judge_types.TestData
+    tests: Optional[judge_types.TestData] = None
 
     def __init__(self,
                  task_id : int,
@@ -52,8 +53,6 @@ class Orchestrator:
         assert task_settings is not None
 
         self.task_id = task_id
-        self.tests = None
-
 
         with open("configs/compiler_config.yaml") as file:
             try:
@@ -120,7 +119,7 @@ class Orchestrator:
         try:
             node = ServerProxy(f"http://{ip}:31337")
             self.tests = \
-                    node.generate_test_data(self.gen_details)
+                    node.generate_test_data(self.gen_details) # type: ignore
             dump(self.tests, open(tests_path, "w"))
             return judge_types.GeneratorStatus.SUCCESSFULLY_GENERATED
 
@@ -147,7 +146,7 @@ class Orchestrator:
         try:
             node = ServerProxy(f"http://{ip}:31337")
             self.dirty_report: judge_types.DirtyReport = \
-                            node.run_tests(self.test_details)
+                    node.run_tests(self.test_details) #type: ignore
             return judge_types.RunStatus.SUCCESS
 
         except Fault as e:

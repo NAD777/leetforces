@@ -10,20 +10,12 @@ import judge_types
 
 class Runner:
     """Class that is actually responsible for test running and generation"""
-    status_codes = {
-        "OK": "OK",
-        "RE": "RE",
-        "WA": "WA",
-        "CE": "CE",
-        "MLE": "MLE",
-        "TLE": "TLE",
-    }
 
     def _run_user_code(self,
-                      executable: str,
-                      configurations: Dict[str, Any],
-                      stdin_data: str = ''
-                      ) -> Dict[str, str]:
+            executable: str,
+            configurations: judge_types.GenDetails | judge_types.TestDetails,
+            stdin_data: str = ''
+            ) -> judge_types.RunReport:
         """Execute user code
 
         Keyword arguments:
@@ -32,25 +24,27 @@ class Runner:
         stdin_data      -- input data for the executable
 
         Returns:
-        Python dict object with the approximate structure
-        result = {
-            "output": str,
-            "error_status": None,
-            ...
+        Python dict object with the following structure
+
+        report: judge_types.RunReport = {
+            "error_status": judge_types.StatusCode,
+            "output": judge_types.Output,
+            "memory_used": int,
+            "runtime": int
         }
-        The actual result depends on the running status
         """
 
-        try:
-            memory_limit = int(configurations["memory_limit"])
-            time_limit = float(configurations["time_limit"])
-        except KeyError:
-            memory_limit = 512
-            time_limit = 10
+        if stdin_data != '':
+            configurations = cast(judge_types.TestDetails, configurations)
+            memory_limit = configurations["memory_limit"]
+            time_limit = configurations["time_limit"]
+        else:
+            memory_limit = 1024
+            time_limit = 100
 
         lang_configs = configurations["compiler"]
         execution_string = lang_configs["execution_string"]
-        default_memory = int(lang_configs["default_memory"])
+        default_memory = lang_configs["default_memory"]
 
         if lang_configs["interpretable"] == 0:
             compiler_string = lang_configs["compiler_string"]
@@ -83,18 +77,18 @@ class Runner:
                      preexec_fn=lambda: setrlimit(RLIMIT_AS,
                                         (MAX_VIRTUAL_MEMORY, RLIM_INFINITY)))
 
-        tle_result = {
-            "error_status": Runner.status_codes["TLE"],
-            "output": ('', ''),
-            "max_mem": -1,
-            "time": -1
+        report: judge_types.RunReport = {
+            "error_status": None,
+            "output": judge_types.Output("", ""),
+            "memory_used": -1,
+            "runtime": -1
         }
 
         try:
             output = proc.communicate(timeout=time_limit + 3)
         except TimeoutExpired:
-            result = tle_result
-            return result
+            report["error_status"] = judge_types.StatusCode.TLE
+            return report
 
         output_dec = (output[0].decode(),
                       output[1].decode().lower())
@@ -104,7 +98,8 @@ class Runner:
         if stdin_data != '' and len(output_dec[1].split()) == 2:
             max_mem, real_time = output_dec[1].split('\n')[:-1][-1].split()
             if float(real_time) > time_limit:
-                return tle_result
+                report["error_status"] = judge_types.StatusCode.TLE
+                return report
 
         if stdin_data != '' and len(output_dec[1].split()) == 2:
             output_dec = (output_dec[0], '')
@@ -112,19 +107,18 @@ class Runner:
         time = int(float(real_time)*1000) if float(real_time) >= 0 else -1
         max_mem = max(int(max_mem) // 1024 - default_memory, 0)
 
-        result = {
-            "output": output_dec,
-            "time": time,
-            "max_mem": max_mem,
-            "error_status": None
-        }
-        print(result)
+        report["output"] = judge_types.Output(*output_dec)
+        report["runtime"] = time
+        report["memory_used"] = max_mem
+        report["error_status"] = judge_types.StatusCode.OK
+
+        print(report)
         chdir('..')
-        return result
+        return report
 
     def run_tests(self,
-                  test_details: Dict[str, str]
-                  ) -> Dict[str, int | str]:
+                  test_details: judge_types.TestDetails
+                  ) -> judge_types.DirtyReport:
         """Wrapper function for running user code. Called through RPC.
 
         Keyword arguments:
@@ -135,18 +129,17 @@ class Runner:
         with the following structure:
 
         report = {
-            "submit_id": int,
             "status": str,
             "test_number": int,
             "memory_used": int,
             "run_time": int
         }"""
 
-        report = {
-            "status": str,
-            "test_number": int,
-            "memory_used": int,
-            "runtime": int,
+        report: judge_types.DirtyReport = {
+            "status": judge_types.StatusCode.OK,
+            "test_number": -1,
+            "memory_used": -1,
+            "runtime": -1,
         }
 
         compiler = cast(Dict[str, str | Any], test_details["compiler"])
@@ -163,6 +156,8 @@ class Runner:
         dump(test_data, open(f"./test_data/tests.json", "w"))
         tests = load(open(f"./test_data/tests.json", "r"))
 
+        print(f"{tests=}")
+
         result = {}
         for test_number, (input, desired_output) in tests.items():
             result = self._run_user_code(
@@ -170,50 +165,50 @@ class Runner:
             output = result["output"]
 
             # Check for CE
-            if ce in result["output"][1]:
+            if ce in result["output"].stderr:
                 report["test_number"] = test_number
-                report["status"] = Runner.status_codes["CE"]
+                report["status"] = judge_types.StatusCode.CE
                 break
 
             # Check for TLE
-            if result["error_status"] == Runner.status_codes["TLE"]:
+            if result["error_status"] == judge_types.StatusCode.TLE:
                 report["test_number"] = test_number
-                report["status"] = Runner.status_codes["TLE"]
+                report["status"] = judge_types.StatusCode.TLE
                 break
 
             # Check for MLE
-            if "memory" in output[1]:
+            if "memory" in output.stderr:
                 report["test_number"] = test_number
-                report["status"] = Runner.status_codes["MLE"]
+                report["status"] = judge_types.StatusCode.MLE
                 break
 
             # Check for RE
-            if len(output[1]) > 0:
+            if len(output.stderr) > 0:
                 report["test_number"] = test_number
-                report["status"] = Runner.status_codes["RE"]
+                report["status"] = judge_types.StatusCode.RE
                 break
 
             # Check for WA
-            if output[0] != desired_output[0] and len(output[1]) == 0:
+            if output.stderr != desired_output[0] and len(output.stderr) == 0:
                 print(f"{output=}, {desired_output=}")
                 report["test_number"] = test_number
-                report["status"] = Runner.status_codes["WA"]
+                report["status"] = judge_types.StatusCode.WA
                 break
 
         # Everything seems OK
         else:
-            report["status"] = Runner.status_codes["OK"]
+            report["status"] = judge_types.StatusCode.OK
             report["test_number"] = -1
 
-        report["memory_used"] = result["max_mem"]
-        report["runtime"] = result["time"]
+        report["memory_used"] = result["memory_used"]
+        report["runtime"] = result["runtime"]
 
         print(report)
         return report
 
     def _generate_tests(self,
                        config : judge_types.GenDetails
-                       ) -> Dict[int, Tuple[str, str]]:
+                       ) -> judge_types.TestData:
         """Generate tests according to the configuration details
 
         Keyword arguments:
@@ -228,22 +223,23 @@ class Runner:
             file.write(config["master_file"])
         tests_no = config["amount_test"]
 
-        test_data = {}
+        test_data: judge_types.TestData = {}
         executable = f"./solutions/{filename}"
         for test in range(int(tests_no)):
             input_data = self._run_user_code(executable + " sample",
-                                            config)["output"][0]
+                                            config)["output"].stdout
 
             output_data = self._run_user_code(executable + " test",
-                                             config,
-                                             stdin_data=input_data)["output"]
-            test_data[str(test)] = (input_data, output_data)
+                                        config,
+                                        stdin_data=input_data)["output"].stdout
+            test_data[str(test)] = judge_types.SampleData(input_data,
+                                                          output_data)
 
         return test_data
 
     def generate_test_data(self,
                            gen_details: judge_types.GenDetails
-                           ) -> Dict[int, Tuple[str, str]]:
+                           ) -> judge_types.TestData:
         """Wrapper function that is called from through RPC
 
         Keyword arguments:
