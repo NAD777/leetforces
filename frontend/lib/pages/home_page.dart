@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/contest_repository.dart';
 import 'package:frontend/router.dart';
 import 'package:frontend/widgets/template.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/contest.dart';
 
@@ -39,8 +40,7 @@ class _HomePageState extends State<HomePage> {
               child: ListTile(
                 title: Text(e.name),
                 onTap: () {
-                  AppRouter.router
-                      .navigateTo(context, "/contest/${e.id}", replace: true);
+                  context.go("/contest/${e.id}");
                 },
               ),
             ),

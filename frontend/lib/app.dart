@@ -1,6 +1,10 @@
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/pages/contest_view.dart';
+import 'package:frontend/pages/home_page.dart';
+import 'package:frontend/pages/login_page.dart';
+import 'package:frontend/pages/registration_page.dart';
 import 'package:frontend/repositories/contest_repository.dart';
 import 'package:frontend/repositories/registration_repository.dart';
 import 'package:frontend/repositories/task_repository.dart';
@@ -47,8 +51,7 @@ class CodetestApp extends StatelessWidget {
           value: _taskRepository,
         ),
       ],
-      child: MaterialApp(
-        initialRoute: '/',
+      child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'Codetest App',
         theme: ThemeData(
@@ -66,7 +69,43 @@ class CodetestApp extends StatelessWidget {
           useMaterial3: true,
         ),
         themeMode: EasyDynamicTheme.of(context).themeMode,
-        onGenerateRoute: AppRouter.router.generator,
+        routerConfig: AppRouter.router,
+/*        onGenerateRoute: (settings) {
+          var path = Uri.parse(settings.name ?? "/");
+          if (path.pathSegments.isEmpty) {
+            return MaterialPageRoute(builder: (context) {
+              return const HomePage();
+            });
+          }
+          switch (path.pathSegments[0]) {
+            case "contest":
+              if (path.pathSegments.length == 2) {
+                try {
+                  var id = int.tryParse(path.pathSegments[1]);
+                  if (id != null) {
+                    return MaterialPageRoute(builder: (context) {
+                      return ContestPage(contestId: id);
+                    });
+                  }
+                } catch (e) {
+                  return MaterialPageRoute(builder: (context) {
+                    return const HomePage();
+                  });
+                }
+              }
+              break;
+            case "login":
+              return MaterialPageRoute(builder: (context) {
+                return const LoginPage();
+              });
+              break;
+            case "register":
+              return MaterialPageRoute(builder: (context) {
+                return const RegistrationPage();
+              });
+              break;
+          }
+        },*/
       ),
     );
   }

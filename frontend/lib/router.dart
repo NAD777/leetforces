@@ -1,45 +1,31 @@
-import 'dart:js';
-
-import 'package:fluro/fluro.dart';
+import 'package:frontend/pages/contest_view.dart';
 import 'package:frontend/pages/home_page.dart';
 import 'package:frontend/pages/login_page.dart';
 import 'package:frontend/pages/registration_page.dart';
 import 'package:frontend/pages/task_page.dart';
-import 'package:frontend/repositories/contest_repository.dart';
-import 'package:frontend/repositories/task_repository.dart';
+import 'package:go_router/go_router.dart';
 
-import 'pages/contest_view.dart';
 
 class AppRouter {
-  static final router = FluroRouter();
-  static final contestRepository = ContestRepository();
-  static final taskRepository = TaskRepository();
-
-  static final Handler homeHandler = Handler(
-    handlerFunc: (context, params) => const HomePage(),
-  );
-  static final Handler contestHandler = Handler(
-    handlerFunc: (context, params) => ContestPage(
-      contestId: int.parse(params["id"]![0]),
+  static final router = GoRouter(routes: [
+    GoRoute(
+      path: "/",
+      builder: (context, state) => const HomePage(),
     ),
-  );
-  static final Handler registrationHandler = Handler(
-    handlerFunc: (context, params) => const RegistrationPage(),
-  );
-  static final Handler loginHandler = Handler(
-    handlerFunc: (context, params) => const LoginPage(),
-  );
-  static final Handler taskHandler = Handler(
-    handlerFunc: (context, params) => TaskPage(
-      taskId: int.parse(params["id"]![0]),
+    GoRoute(
+      path: "/register",
+      builder: (context, state) => const RegistrationPage(),
     ),
-  );
-
-  static void setupRouter() {
-    router.define("/", handler: homeHandler);
-    router.define("/contest/:id", handler: contestHandler);
-    router.define("/register", handler: registrationHandler);
-    router.define("/login", handler: loginHandler);
-    router.define("/task/:id", handler: taskHandler);
-  }
+    GoRoute(
+      path: "/login",
+      builder: (context, state) => const LoginPage(),
+    ),
+    GoRoute(
+      path: "/contest/:id",
+      builder: (context, state) =>
+          ContestPage(contestId: int.parse(state.pathParameters["id"]!)),
+    ),
+    GoRoute(path: "/task/:id",
+    builder: (context, state) => TaskPage(taskId: int.parse(state.pathParameters["id"]!)))
+  ]);
 }

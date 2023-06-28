@@ -13,7 +13,7 @@ class SqlAlchemyBase(DeclarativeBase):
 
 import os
 
-PASSWORD = "postgres"
+PASSWORD = "user_1"
 PASSWORD = os.environ['PASSWORD']
 __factory = None
 
@@ -29,7 +29,7 @@ def global_init(db_file):
 
     # conn_str = f'sqlite:///{db_file.strip()}?check_same_thread=False'
     # conn_str = f'postgresql://postgres:{PASSWORD}@postgres:5432/{db_file}'
-    conn_str = f'postgresql://postgres:{PASSWORD}@localhost:5432/{db_file}'
+    conn_str = f'postgresql://user_1:{PASSWORD}@localhost:5432/{db_file}'
     print(f"Conn base {conn_str}")
 
     from time import sleep

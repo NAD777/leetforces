@@ -10,7 +10,6 @@ void main() async {
   var a = await SharedPreferences.getInstance();
   await a.reload();
   setPathUrlStrategy();
-  AppRouter.setupRouter();
   runApp(EasyDynamicThemeWidget(
     child: CodetestApp(a),
   ));

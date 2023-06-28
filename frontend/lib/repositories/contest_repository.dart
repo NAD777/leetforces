@@ -31,11 +31,14 @@ class ContestRepository {
     var json = jsonDecode(response.body) as Map<String, dynamic>;
 
     if (response.statusCode == 200) {
+      var d =
+          (json["tasks_ids"] as List<dynamic>).map((e) => e as int).toList();
       return Contest(
-          id: contestId,
-          name: json["name"],
-          description: json["description"],
-          taskIds: json["tasks_ids"]);
+        id: contestId,
+        name: json["name"],
+        description: json["description"],
+        taskIds: d,
+      );
     } else {
       throw Exception();
     }

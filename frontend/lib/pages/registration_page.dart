@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/registration_repository.dart';
 import 'package:frontend/router.dart';
+import 'package:go_router/go_router.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -48,7 +49,7 @@ class _RegistrationPage extends State<StatefulWidget> {
                 setState(() {
                   registrationInProcess = false;
                 });
-                AppRouter.router.navigateTo(context, "/login", replace: true);
+                context.go("/login");
               });
             }
           },

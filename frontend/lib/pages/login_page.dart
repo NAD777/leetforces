@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/authentication_repository.dart';
 import 'package:frontend/repositories/user_repository.dart';
 import 'package:frontend/router.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -51,7 +52,7 @@ class _LoginPage extends State<LoginPage> {
                     loginInProgress = false;
                   });
                   RepositoryProvider.of<UserRepository>(context).setUser(value);
-                  AppRouter.router.navigateTo(context, "/", replace: true);
+                  context.go("/");
                 });
               }
             },
@@ -63,7 +64,7 @@ class _LoginPage extends State<LoginPage> {
     return ElevatedButton(
       key: const Key('loginForm_register_elevatedButton'),
       onPressed: () {
-        AppRouter.router.navigateTo(context, "/register", replace: true);
+        context.go("/register");
       },
       child: const Text('Register'),
     );
