@@ -5,7 +5,7 @@ from time import sleep
 
 import dockerapi
 
-_runner_docker_image = None
+_runner_docker_image: Image | None = None
 
 PROJECT_NAME = environ["PROJECT_NAME"]
 # TODO: parse _CONTAINERS_MAX from config file somehow
@@ -35,6 +35,8 @@ def _create_image(instance: dockerapi.APIClass,
     #TODO: add master config parsing
     # and/or these parse these configs from upper stack layers
 
+    _runner_docker_image = dockerapi.get_image(f"{PROJECT_NAME}-runner")
+
     # do not build/pull if object is already present
     if _runner_docker_image is not None:
         return _runner_docker_image
@@ -44,7 +46,7 @@ def _create_image(instance: dockerapi.APIClass,
         # that the runner source code might have changed
         _runner_docker_image = instance.build_image(
                 f"{PROJECT_NAME}-runner", ".",
-                "./runners/runner.Dockerfile", True)
+                "./runners/runner.Dockerfile", False)
     else:
         # pull the runner image from the DockerHub registry for faster
         # execution

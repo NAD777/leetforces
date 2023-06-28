@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from docker.models.containers import Image
 from yaml import safe_load
 from xmlrpc.client import ServerProxy, Fault
 from json import dump, load
@@ -24,7 +23,6 @@ class Orchestrator:
     gen_details: judge_types.GenDetails
     test_details: judge_types.TestDetails
 
-    runner_docker_image: Image | None = None
     dirty_report: judge_types.DirtyReport
     tests: judge_types.TestData
 

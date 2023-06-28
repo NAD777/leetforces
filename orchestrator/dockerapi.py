@@ -3,6 +3,7 @@ from os import chdir, getcwd, remove
 
 from docker import DockerClient, from_env
 from docker.client import APIClient
+from docker.errors import ImageNotFound
 from docker.models.containers import Container, Image
 from docker.models.networks import Network
 
@@ -90,6 +91,24 @@ class APIClass:
         image = cast(Image, self.client.images.pull(repository, tag))
         return image
 
+
+    def get_image(self,
+                  image_name: str
+                  ) -> Image | None:
+        """Try to get the image by its name.
+
+        Keyword arguments:
+        image_name -- name of the image
+
+        Returns:
+        Image object if it exitsts, None otherwise"""
+
+        try:
+            image = cast(Image, self.client.images.get(image_name))
+            return image
+        except ImageNotFound as e:
+            print(e)
+            return None
 
     def create_container(self,
                         image_name: str,
