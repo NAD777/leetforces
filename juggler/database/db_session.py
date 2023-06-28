@@ -2,6 +2,8 @@ import sqlalchemy as sa
 import sqlalchemy.orm as orm
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import registry
+
 import sqlalchemy.ext.declarative as dec
 
 
