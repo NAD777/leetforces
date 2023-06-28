@@ -12,12 +12,11 @@ class TaskRepository {
   }
 
   Future<Task> getTask(int taskId) async {
-    var response = await http.get(Uri.parse("$host/get_task/$taskId"),
-        headers: <String, String>{"Content-Type": "application/json"});
+    var response = await http.get(Uri.parse("$host/get_task/$taskId"));
     var json = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 200) {
       return Task(taskId, json["name"], json["description"],
-          json["memory_limit"], json["time_limit"], json["amount_of_tests"]);
+          json["memory_limit"], json["time_limit"], json["author_name"]);
     } else {
       throw Exception();
     }
