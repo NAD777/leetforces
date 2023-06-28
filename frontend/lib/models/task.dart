@@ -4,8 +4,8 @@ class Task {
   String description;
   int memoryLimit;
   int timeLimit;
-  int testsCount;
+  String authorName;
 
   Task(this.id, this.name, this.description, this.memoryLimit, this.timeLimit,
-      this.testsCount);
+      this.authorName);
 }
