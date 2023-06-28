@@ -1,7 +1,10 @@
+import 'dart:js';
+
 import 'package:fluro/fluro.dart';
 import 'package:frontend/pages/home_page.dart';
 import 'package:frontend/pages/login_page.dart';
 import 'package:frontend/pages/registration_page.dart';
+import 'package:frontend/pages/task_page.dart';
 import 'package:frontend/repositories/contest_repository.dart';
 import 'package:frontend/repositories/task_repository.dart';
 
@@ -26,11 +29,17 @@ class AppRouter {
   static final Handler loginHandler = Handler(
     handlerFunc: (context, params) => const LoginPage(),
   );
+  static final Handler taskHandler = Handler(
+    handlerFunc: (context, params) => TaskPage(
+      taskId: int.parse(params["id"]![0]),
+    ),
+  );
 
   static void setupRouter() {
     router.define("/", handler: homeHandler);
     router.define("/contest/:id", handler: contestHandler);
     router.define("/register", handler: registrationHandler);
     router.define("/login", handler: loginHandler);
+    router.define("/task/:id", handler: taskHandler);
   }
 }
