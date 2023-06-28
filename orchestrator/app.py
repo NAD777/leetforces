@@ -32,7 +32,7 @@ metrics.register_default(
 )
 
 
-@app.route("/run", methods=["POST"])
+@app.route("/run", methods=["POST"]) # type: ignore
 def run():
     """/run route handler
     """
@@ -57,6 +57,9 @@ def run():
     try:
         runner = Orchestrator(task_id, ext)
         report = runner.run(submission_id, filename, source_file_decoded)
+    except RuntimeError as e:
+        print(e)
+        return 500
     except ValueError as e:
         print(e)
         return 500

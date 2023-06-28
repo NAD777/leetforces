@@ -1,4 +1,4 @@
-from typing import NamedTuple, TypedDict, Optional, TypeAlias, Dict
+from typing import NamedTuple, TypedDict, Optional, TypeAlias, Dict, Tuple
 from enum import Enum
 
 
@@ -17,9 +17,7 @@ class GenDetails(TypedDict):
     compiler: CompilerDetails
 
 
-class SampleData(NamedTuple):
-    sample_in: str
-    sample_out: str
+SampleData: TypeAlias = Tuple[str, str]
 
 TestData: TypeAlias = Dict[str, SampleData]
 
@@ -46,7 +44,7 @@ class Report(TypedDict):
     submission_id: int
     runtime: float
     memory: int
-    status: StatusCode
+    status: StatusCode | str
     test_number: int
 
 
@@ -56,14 +54,14 @@ class Output(NamedTuple):
 
 
 class RunReport(TypedDict):
-    error_status: Optional[StatusCode]
+    error_status: Optional[StatusCode | str]
     output: Output
     memory_used: int
     runtime: int
 
 
 class DirtyReport(TypedDict):
-    status: StatusCode
+    status: StatusCode | str
     test_number: int
     memory_used: int
     runtime: float

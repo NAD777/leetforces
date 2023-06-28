@@ -1,7 +1,7 @@
 from xmlrpc.server import SimpleXMLRPCServer
 from subprocess import Popen, PIPE, TimeoutExpired
 from json import dump, load
-from typing import Dict, Tuple, Any, cast
+from typing import Dict, Any, cast
 from os import makedirs, chdir
 from resource import setrlimit, RLIMIT_AS, RLIM_INFINITY
 from shlex import split
@@ -34,8 +34,9 @@ class Runner:
         }
         """
 
-        if stdin_data != '':
+        if "memory_limit" in configurations.keys():
             configurations = cast(judge_types.TestDetails, configurations)
+            print(configurations)
             memory_limit = configurations["memory_limit"]
             time_limit = configurations["time_limit"]
         else:
@@ -51,12 +52,9 @@ class Runner:
             prepared = split(f"{compiler_string} {executable}")
             Popen(prepared).communicate()
 
-        MAX_VIRTUAL_MEMORY = int((memory_limit + default_memory) * 1024 * 1024)
-
         prepared_executable = executable.split("/")[2]
 
         if "java" in executable:
-            MAX_VIRTUAL_MEMORY = RLIM_INFINITY
             prepared_executable = executable.split("/")[2].split(".")[0]
 
         folder = executable.split('/')[1]
@@ -75,7 +73,7 @@ class Runner:
         prepared = split(cmd)
         proc = Popen(prepared, stdout=PIPE, stdin=PIPE, stderr=PIPE,
                      preexec_fn=lambda: setrlimit(RLIMIT_AS,
-                                        (MAX_VIRTUAL_MEMORY, RLIM_INFINITY)))
+                                        (RLIM_INFINITY, RLIM_INFINITY)))
 
         report: judge_types.RunReport = {
             "error_status": None,
@@ -92,20 +90,24 @@ class Runner:
 
         output_dec = (output[0].decode(),
                       output[1].decode().lower())
-
+        print(output_dec)
         # If we got right output from /usr/bin/time
         max_mem, real_time = -1, -1
         if stdin_data != '' and len(output_dec[1].split()) == 2:
-            max_mem, real_time = output_dec[1].split('\n')[:-1][-1].split()
-            if float(real_time) > time_limit:
+            max_mem, real_time = map(float,
+                                    output_dec[1].split('\n')[:-1][-1].split())
+            max_mem = max(int(max_mem) // 1024 - default_memory, 0)
+            if real_time > time_limit:
                 report["error_status"] = judge_types.StatusCode.TLE
+                return report
+            if max_mem > memory_limit:
+                report["error_status"] = judge_types.StatusCode.MLE
                 return report
 
         if stdin_data != '' and len(output_dec[1].split()) == 2:
             output_dec = (output_dec[0], '')
 
         time = int(float(real_time)*1000) if float(real_time) >= 0 else -1
-        max_mem = max(int(max_mem) // 1024 - default_memory, 0)
 
         report["output"] = judge_types.Output(*output_dec)
         report["runtime"] = time
@@ -159,9 +161,9 @@ class Runner:
         print(f"{tests=}")
 
         result = {}
-        for test_number, (input, desired_output) in tests.items():
+        for test_number, (sample_in, desired_output) in tests.items():
             result = self._run_user_code(
-                executable, test_details, stdin_data=input)
+                executable, test_details, stdin_data=sample_in)
             output = result["output"]
 
             # Check for CE
@@ -177,7 +179,8 @@ class Runner:
                 break
 
             # Check for MLE
-            if "memory" in output.stderr:
+            if result["error_status"] == judge_types.StatusCode.MLE or \
+                                                "memory" in output.stderr:
                 report["test_number"] = test_number
                 report["status"] = judge_types.StatusCode.MLE
                 break
@@ -189,8 +192,8 @@ class Runner:
                 break
 
             # Check for WA
-            if output.stderr != desired_output[0] and len(output.stderr) == 0:
-                print(f"{output=}, {desired_output=}")
+            if output.stdout != desired_output:
+                print(f"{output.stdout=}, {desired_output=}")
                 report["test_number"] = test_number
                 report["status"] = judge_types.StatusCode.WA
                 break
@@ -202,6 +205,7 @@ class Runner:
 
         report["memory_used"] = result["memory_used"]
         report["runtime"] = result["runtime"]
+        report["status"] = report["status"].value
 
         print(report)
         return report
@@ -232,8 +236,7 @@ class Runner:
             output_data = self._run_user_code(executable + " test",
                                         config,
                                         stdin_data=input_data)["output"].stdout
-            test_data[str(test)] = judge_types.SampleData(input_data,
-                                                          output_data)
+            test_data[str(test)] = (input_data, output_data)
 
         return test_data
 

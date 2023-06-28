@@ -3,7 +3,7 @@
 def app():
     lt = []
     for i in range(0, 100000):
-        lt.append(i)
+        lt.append("A"*1000 + str(i))
 
 # function call
 app()

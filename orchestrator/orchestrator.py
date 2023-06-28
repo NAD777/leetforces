@@ -4,7 +4,7 @@ from typing import Optional
 from yaml import safe_load
 from xmlrpc.client import ServerProxy, Fault
 from json import dump, load
-from os import makedirs, environ, path, walk
+from os import makedirs, environ, path
 from requests import get
 from base64 import b64decode
 
@@ -69,12 +69,12 @@ class Orchestrator:
                     "master_filename": ""
                 }
                 self.test_details = {
-                        "compiler": judge_compiler_details,
-                        "filename": "",
-                        "test_data": {},
-                        "time_limit": 0.0,
-                        "source_file": "",
-                        "memory_limit": 0
+                    "compiler": judge_compiler_details,
+                    "filename": "",
+                    "test_data": {},
+                    "time_limit": 0.0,
+                    "source_file": "",
+                    "memory_limit": 0
                 }
                 self.test_details["compiler"] = judge_compiler_details
             except Exception as e:
@@ -107,11 +107,6 @@ class Orchestrator:
     @inside_container
     def rpc_generate(self, ip='127.0.0.1') -> judge_types.GeneratorStatus:
 
-        memory_limit_mb = self.test_details["memory_limit"]
-        amount_of_tests = self.gen_details["amount_test"]
-        tl_single = self.test_details["time_limit"]
-        timeout = amount_of_tests * (tl_single + TRANSPORT_OVERHEAD)
-
         tests_path = f"./test_data/task_{self.task_id}.json"
         if path.exists(tests_path):
             return judge_types.GeneratorStatus.ALREADY_GENERATED
@@ -131,11 +126,10 @@ class Orchestrator:
     @inside_container
     def rpc_run(self, ip='') -> judge_types.RunStatus:
 
-        # TODO: check for container memory consumption
-        memory_limit_mb = self.test_details["memory_limit"]
         amount_of_tests = self.gen_details["amount_test"]
         tl_single = self.test_details["time_limit"]
         timeout = amount_of_tests * (tl_single + TRANSPORT_OVERHEAD)
+        # TODO: add timeout
 
         if self.tests is None:
             tests_path = f"./test_data/task_{self.task_id}.json"
@@ -164,7 +158,11 @@ class Orchestrator:
         self.test_details["filename"] = filename
         self.test_details["source_file"] = source_file
 
-        print(self.rpc_generate())
+        gen_status = self.rpc_generate()
+        if gen_status == judge_types.GeneratorStatus.GENERATION_ERROR:
+            raise RuntimeError(
+                    judge_types.GeneratorStatus.GENERATION_ERROR.value)
+        print(gen_status)
         print(self.rpc_run())
 
         report = self.clean_report()

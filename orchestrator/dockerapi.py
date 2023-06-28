@@ -7,7 +7,7 @@ from docker.errors import ImageNotFound
 from docker.models.containers import Container, Image
 from docker.models.networks import Network
 
-from typing import Any, Iterator, Dict, Tuple, cast
+from typing import Any, Iterator, Tuple, cast
 
 
 class APIClass:

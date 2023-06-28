@@ -39,7 +39,7 @@ def _create_image(instance: dockerapi.APIClass,
                                     .get_image(f"{PROJECT_NAME}-runner")
 
     # do not build/pull if object is already present
-    if _runner_docker_image is not None:
+    if not DEBUG and _runner_docker_image is not None:
         return _runner_docker_image
 
     if DEBUG:
@@ -79,7 +79,7 @@ def inside_container(_func=None, *,
 
             dockerapi.APIClass.start_container(container)
 
-            print(f"Started the container {container.name} with id" + \
+            print(f"Started the container {container.name} with id " + \
                                                        f"{container.short_id}")
             ip = instance.resolve_ip(
                     cast(str, container.name), f"{PROJECT_NAME.lower()}_internal")
