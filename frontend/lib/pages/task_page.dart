@@ -26,7 +26,7 @@ class _TaskPageState extends State<TaskPage> {
         task = value;
       });
     });
-    task = Task(1, "A + B", "aekghlkgfnskzjbgmrd rkjggkjd hzd kjh jghrdghkjrzsnkjgh dkjsrghjk drnkgjn kdjh kjt h", 412, 112, 31);
+    task = Task(1, "A + B", "aekghlkgfnskzjbgmrd rkjggkjd hzd kjh jghrdghkjrzsnkjgh dkjsrghjk drnkgjn kdjh kjt h", 412, 112, 'asvf');
     super.initState();
   }
 
@@ -55,44 +55,58 @@ class TaskDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              task.name,
-              style: TextStyle(
-                fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize,
+    return Expanded(
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                task.name,
+                style: TextStyle(
+                  fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize,
+                ),
               ),
-            ),
-            // Here can be placed some badges
-            const SizedBox(height: 10),
-            Table(
-              border: TableBorder.all(),
-              columnWidths: const <int, TableColumnWidth> {
-                0: IntrinsicColumnWidth(),
-                1: IntrinsicColumnWidth(),
-              },
-              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              children: <TableRow>[
-                TableRow(
-                  children: <Widget>[
-                    const Text('Time Limit'),
-                    Text('${task.timeLimit} seconds'),
-                  ],
-                ),
-                TableRow(
-                  children: <Widget>[
-                    const Text('Memory Limit'),
-                    Text('${task.memoryLimit} megabytes'),
-                  ]
-                ),
-              ],
-            ),
-            Text(task.description),
-          ],
+              // Here can be placed some badges
+              const SizedBox(height: 10),
+              Table(
+                border: TableBorder.all(),
+                columnWidths: const <int, TableColumnWidth> {
+                  0: IntrinsicColumnWidth(),
+                  1: IntrinsicColumnWidth(),
+                },
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                children: <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text('Time Limit'),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('${task.timeLimit} seconds'),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: <Widget>[
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text('Memory Limit'),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('${task.memoryLimit} megabytes'),
+                      ),
+                    ]
+                  ),
+                ],
+              ),
+              Text(task.description),
+            ],
+          ),
         ),
       ),
     );
