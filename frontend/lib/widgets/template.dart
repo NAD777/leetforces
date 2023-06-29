@@ -30,7 +30,7 @@ class Template extends StatelessWidget {
           // ContestsView(),
           SliverPadding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-            sliver: SliverToBoxAdapter(
+            sliver: SliverFillRemaining(
               child: content,
             ),
           ),
