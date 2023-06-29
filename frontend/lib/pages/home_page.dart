@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/contest_repository.dart';
-import 'package:frontend/router.dart';
 import 'package:frontend/widgets/template.dart';
 import 'package:go_router/go_router.dart';
 
