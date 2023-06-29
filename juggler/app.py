@@ -563,7 +563,7 @@ def get_contest(contest_id):
     return jsonify(contest.to_dict())
 
 
-@app.route('/edit_contest')
+@app.route('/edit_contest', methods=["POST"])
 @token_required(admin_required=True)
 def edit_contest(current_user):
     json_payload = request.json
