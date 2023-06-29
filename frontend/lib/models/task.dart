@@ -1,11 +1,17 @@
-class Task {
+class SimpleTask {
   int id;
   String name;
-  String description;
   int memoryLimit;
   int timeLimit;
-  String authorName;
+  int authorId;
 
-  Task(this.id, this.name, this.description, this.memoryLimit, this.timeLimit,
-      this.authorName);
+  SimpleTask(
+      this.id, this.name, this.memoryLimit, this.timeLimit, this.authorId);
+}
+
+class Task extends SimpleTask {
+  String description;
+
+  Task(super.id, super.name, super.memoryLimit, super.timeLimit, super.authorId,
+      this.description);
 }

@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> {
               child: ListTile(
                 title: Text(e.name),
                 onTap: () {
-                  context.go("/contest/${e.id}");
+                  context.replace("/contest/${e.id}");
                 },
               ),
             ),

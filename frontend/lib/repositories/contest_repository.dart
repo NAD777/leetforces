@@ -4,6 +4,7 @@ import 'package:frontend/env/config.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/contest.dart';
+import '../models/task.dart';
 
 class ContestRepository {
   Future<List<ContestSimple>> getContests() async {
@@ -31,13 +32,15 @@ class ContestRepository {
     var json = jsonDecode(response.body) as Map<String, dynamic>;
 
     if (response.statusCode == 200) {
-      var d =
-          (json["tasks_ids"] as List<dynamic>).map((e) => e as int).toList();
+      var d = (json["tasks_ids"] as List<dynamic>)
+          .map((e) => SimpleTask(e["task_id"], e["name"], e["memory_limit"],
+              e["time_limit"], e["author_id"]))
+          .toList();
       return Contest(
         id: contestId,
         name: json["name"],
         description: json["description"],
-        taskIds: d,
+        tasks: d,
       );
     } else {
       throw Exception();
@@ -56,7 +59,7 @@ class ContestRepository {
           "contest_name": name,
           "description": description,
         }));
-    var json = jsonDecode(response.body) as Map<String, dynamic>;
+    // var json = jsonDecode(response.body) as Map<String, dynamic>;
 
     if (response.statusCode == 200) {
       return;

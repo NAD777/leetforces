@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/contest_repository.dart';
 import 'package:frontend/repositories/task_repository.dart';
 import 'package:frontend/widgets/template.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/contest.dart';
 import '../models/task.dart';
@@ -52,6 +53,9 @@ class _ContestPageState extends State<ContestPage> {
                   Card(
                     child: ListTile(
                       title: Text(e.name),
+                      onTap: () {
+                        context.replace("/task/${e.id}");
+                      },
                     ),
                   ),
               ],

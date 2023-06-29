@@ -27,14 +27,6 @@ class _TaskPageState extends State<TaskPage> {
         task = value;
       });
     });
-    task = Task(
-      1,
-      "A + B",
-      "aekghlkgfnskzjbgmrd rkjggkjd hzd kjh jghrdghkjrzsnkjgh dkjsrghjk drnkgjn kdjh kjt h",
-      412,
-      112,
-      'asvf',
-    );
     super.initState();
   }
 
@@ -144,7 +136,7 @@ class TaskSubmission extends StatelessWidget {
                 onPressed: () async {
                   var result = await FilePicker.platform.pickFiles();
                   if (result != null) {
-                    PlatformFile file = result.files.first;
+                    // PlatformFile file = result.files.first;
                     // TODO: send file
                   }
                 },

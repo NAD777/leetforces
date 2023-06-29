@@ -66,42 +66,6 @@ class CodetestApp extends StatelessWidget {
         ),
         themeMode: EasyDynamicTheme.of(context).themeMode,
         routerConfig: AppRouter.router,
-/*        onGenerateRoute: (settings) {
-          var path = Uri.parse(settings.name ?? "/");
-          if (path.pathSegments.isEmpty) {
-            return MaterialPageRoute(builder: (context) {
-              return const HomePage();
-            });
-          }
-          switch (path.pathSegments[0]) {
-            case "contest":
-              if (path.pathSegments.length == 2) {
-                try {
-                  var id = int.tryParse(path.pathSegments[1]);
-                  if (id != null) {
-                    return MaterialPageRoute(builder: (context) {
-                      return ContestPage(contestId: id);
-                    });
-                  }
-                } catch (e) {
-                  return MaterialPageRoute(builder: (context) {
-                    return const HomePage();
-                  });
-                }
-              }
-              break;
-            case "login":
-              return MaterialPageRoute(builder: (context) {
-                return const LoginPage();
-              });
-              break;
-            case "register":
-              return MaterialPageRoute(builder: (context) {
-                return const RegistrationPage();
-              });
-              break;
-          }
-        },*/
       ),
     );
   }

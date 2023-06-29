@@ -8,15 +8,15 @@ import '../models/task.dart';
 
 class TaskRepository {
   Future<List<Task>> getTasks(Contest contest) async {
-    return await Future.wait(contest.taskIds.map((e) => getTask(e)));
+    return await Future.wait(contest.tasks.map((e) => getTask(e.id)));
   }
 
   Future<Task> getTask(int taskId) async {
     var response = await http.get(Uri.parse("$host/get_task/$taskId"));
     var json = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 200) {
-      return Task(taskId, json["name"], json["description"],
-          json["memory_limit"], json["time_limit"], json["author_name"]);
+      return Task(taskId, json["name"], json["memory_limit"],
+          json["time_limit"], 0 /*json["description"]*/, json["description"]);
     } else {
       throw Exception();
     }

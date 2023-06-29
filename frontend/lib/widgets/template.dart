@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class Template extends StatelessWidget {
   const Template({required this.content, super.key});
@@ -11,7 +12,11 @@ class Template extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            title: const Text('LeetForces'),
+            title: GestureDetector(
+                child: const Text('LeetForces'),
+                onTap: () {
+                  context.replace("/");
+                }),
             actions: [
               IconButton(
                 onPressed: () {},

@@ -48,7 +48,7 @@ class _RegistrationPage extends State<StatefulWidget> {
                 setState(() {
                   registrationInProcess = false;
                 });
-                context.go("/login");
+                context.replace("/login");
               });
             }
           },

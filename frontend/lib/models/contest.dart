@@ -1,3 +1,5 @@
+import 'package:frontend/models/task.dart';
+
 class ContestSimple {
   int id;
   String name;
@@ -7,11 +9,11 @@ class ContestSimple {
 
 class Contest extends ContestSimple {
   String description;
-  List<int> taskIds;
+  List<SimpleTask> tasks;
 
   Contest(
       {required super.id,
       required super.name,
       required this.description,
-      required this.taskIds});
+      required this.tasks});
 }
