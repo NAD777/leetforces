@@ -43,4 +43,25 @@ class ContestRepository {
       throw Exception();
     }
   }
+
+  Future<void> editContestNameAndDescription(
+      String auth, int contestId, String name, String description) async {
+    var response = await http.post(Uri.parse("$host/edit_contest"),
+        headers: <String, String>{
+          "Authorization": auth,
+          "Content-Type": "application/json"
+        },
+        body: jsonEncode(<String, dynamic>{
+          "contest_id": contestId,
+          "contest_name": name,
+          "description": description,
+        }));
+    var json = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode == 200) {
+      return;
+    } else {
+      throw Exception();
+    }
+  }
 }
