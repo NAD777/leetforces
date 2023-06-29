@@ -7,11 +7,16 @@ from json import dump, load
 from os import makedirs, environ, path
 from requests import get
 from base64 import b64decode
+from logging import error, info, basicConfig
+from logging import DEBUG as _DEBUG
 
 from decorators import inside_container
 import judge_types
 
-DEBUG = True
+DEBUG = environ["DEBUG"]
+
+if DEBUG == "True":
+    basicConfig(level=_DEBUG)
 
 TRANSPORT_OVERHEAD = 0.1
 
@@ -47,7 +52,7 @@ class Orchestrator:
         try:
             task_settings = resp.json()
         except Exception as e:
-            print(e)
+            error(e)
             raise ValueError(
                 "Exception has occured while trying to retrieve the \
                         task configurations")
@@ -80,7 +85,7 @@ class Orchestrator:
                 }
                 self.test_details["compiler"] = judge_compiler_details
             except Exception as e:
-                print(e)
+                error(e)
                 raise ValueError("Unsupported submission format file")
 
         # generate
@@ -143,7 +148,7 @@ class Orchestrator:
             return judge_types.GeneratorStatus.SUCCESSFULLY_GENERATED
 
         except Fault as e:
-            print(e)
+            error(e)
             return judge_types.GeneratorStatus.GENERATION_ERROR
 
 
@@ -180,11 +185,11 @@ class Orchestrator:
 
         except ProtocolError as e:
             # this except might have a bug, but I am too lazy to find it
-            print(e)
+            error(e)
             return judge_types.RunStatus.TIMEOUT_EXPIRED
 
         except Fault as e:
-            print(e)
+            error(e)
             return judge_types.RunStatus.FAILURE
 
 
@@ -222,14 +227,14 @@ class Orchestrator:
         if gen_status == judge_types.GeneratorStatus.GENERATION_ERROR:
             raise RuntimeError(
                     judge_types.GeneratorStatus.GENERATION_ERROR)
-        print(gen_status)
+        info(gen_status)
 
         run_status = self.rpc_run()
         if run_status != judge_types.RunStatus.SUCCESS:
             raise RuntimeError(run_status)
-        print(run_status)
+        info(run_status)
 
         report = self.__clean_report()
-        print(report)
+        info(report)
 
         return report

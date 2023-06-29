@@ -82,7 +82,7 @@ services:
     environment:
       - JUGGLER=http://juggler:5001
       - PROJECT_NAME=leetforces
-      - DEBUG=True
+      - DEBUG=False
     restart: unless-stopped
 
   # runner:
