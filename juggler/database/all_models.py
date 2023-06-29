@@ -61,9 +61,9 @@ class Tag(SqlAlchemyBase):
 class UserTag(SqlAlchemyBase):
     __tablename__ = 'UserTag'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    tag_id = Column(Integer, ForeignKey('Tag.id'))
-    user_id = Column(Integer, ForeignKey('User.id'))
+    # id = Column(Integer, primary_key=True, autoincrement=True)
+    tag_id = Column(Integer, ForeignKey('Tag.id'), primary_key=True)
+    user_id = Column(Integer, ForeignKey('User.id'), primary_key=True)
 
 
 class Task(SqlAlchemyBase):
@@ -89,7 +89,7 @@ class Task(SqlAlchemyBase):
             'name': self.name,
             'memory_limit': self.memory_limit,
             'time_limit': self.time_limit,
-            'author_id': self.author_id
+            'author_id': self.author_id,
         }
 
 
@@ -110,6 +110,20 @@ class Submission(SqlAlchemyBase):
     def __repr__(self):
         return '<Submission {} {}>'.format(self.id, self.user_id, self.task_id, self.status)
 
+    def to_dict(self):
+        return {
+            "submission_id": self.id,
+            "user_id": self.user_id,
+            "task_id": self.task_id,
+            "source_code": self.source_code,
+            "language": self.language,
+            "status": self.status,
+            "test_number": self.test_number,
+            "submission_time": self.submission_time,
+            "memory": self.memory,
+            "runtime": self.runtime
+        }
+
 
 class Contest(SqlAlchemyBase):
     __tablename__ = "Contest"
@@ -129,24 +143,26 @@ class Contest(SqlAlchemyBase):
             "description": self.description,
             "author_id": self.author_id,
             "tasks_ids": [task.short_description() for task in self.tasks],
-            "is_closed": self.is_closed
+            "is_closed": self.is_closed,
+            "tags": [tag.to_dict() for tag in self.tags]
         }
 
 
 class ContestTag(SqlAlchemyBase):
     __tablename__ = "ContestTag"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    tag_id = Column(Integer, ForeignKey('Tag.id'))
-    contest_id = Column(Integer, ForeignKey('Contest.id'))
+    # id = Column(Integer, primary_key=True, autoincrement=True)
+    tag_id = Column(Integer, ForeignKey('Tag.id'), primary_key=True)
+    contest_id = Column(Integer, ForeignKey('Contest.id'), primary_key=True)
 
     def __repr__(self):
-        return 'ContestTask id: {}, contest_id: {}, task_id: {}'.format(self.id, self.contest_id, self.task_id)
+        # return 'ContestTask id: {}, contest_id: {}, task_id: {}'.format(z self.contest_id, self.task_id)
+        return 'ContestTag tag_id: {}, contest_id: {}'.format(self.tag_id, self.contest_id)
 
 
 class ContestTask(SqlAlchemyBase):
     __tablename__ = "ContestTask"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    contest_id = Column(Integer, ForeignKey('Contest.id'))
-    task_id = Column(Integer, ForeignKey("Task.id"))
+    # id = Column(Integer, primary_key=True, autoincrement=True)
+    contest_id = Column(Integer, ForeignKey('Contest.id'), primary_key=True)
+    task_id = Column(Integer, ForeignKey("Task.id"), primary_key=True)
