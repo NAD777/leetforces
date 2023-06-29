@@ -76,3 +76,4 @@ class GeneratorStatus(str, Enum):
 class RunStatus(str, Enum):
     SUCCESS = "Successfully tested the submission"
     FAILURE = "Failure while testing the user submission"
+    TIMEOUT_EXPIRED = "Timeout expired while running the user submission"

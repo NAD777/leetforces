@@ -75,14 +75,14 @@ def inside_container(_func=None, *,
 
             _CURRENT_CONTAINERS += 1
             container = instance.create_container(f"{PROJECT_NAME}-runner",
-                    memory_limit, network_name=f"{PROJECT_NAME.lower()}_internal")
+                memory_limit, network_name=f"{PROJECT_NAME.lower()}_internal")
 
             dockerapi.APIClass.start_container(container)
 
             print(f"Started the container {container.name} with id " + \
                                                        f"{container.short_id}")
             ip = instance.resolve_ip(
-                    cast(str, container.name), f"{PROJECT_NAME.lower()}_internal")
+                cast(str, container.name), f"{PROJECT_NAME.lower()}_internal")
             print(f"IP address for container {container.name} is {ip}")
 
             output = None

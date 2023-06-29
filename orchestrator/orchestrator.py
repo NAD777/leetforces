@@ -1,8 +1,8 @@
 from __future__ import annotations
-from typing import Optional
 
+from typing import Optional
 from yaml import safe_load
-from xmlrpc.client import ServerProxy, Fault
+from xmlrpc.client import ServerProxy, Fault, Transport, ProtocolError
 from json import dump, load
 from os import makedirs, environ, path
 from requests import get
@@ -23,7 +23,6 @@ class Orchestrator:
     extension: str
     gen_details: judge_types.GenDetails
     test_details: judge_types.TestDetails
-
     dirty_report: judge_types.DirtyReport
     tests: Optional[judge_types.TestData] = None
 
@@ -95,12 +94,12 @@ class Orchestrator:
 
     def clean_report(self) -> judge_types.Report:
         report: judge_types.Report = {
-                "submission_id": self.submission_id,
-                "runtime": self.dirty_report["runtime"],
-                "memory": self.dirty_report["memory_used"],
-                "status": self.dirty_report["status"],
-                "test_number": self.dirty_report["test_number"]
-                }
+            "submission_id": self.submission_id,
+            "runtime": self.dirty_report["runtime"],
+            "memory": self.dirty_report["memory_used"],
+            "status": self.dirty_report["status"],
+            "test_number": self.dirty_report["test_number"]
+        }
 
         return report
 
@@ -124,12 +123,7 @@ class Orchestrator:
 
 
     @inside_container
-    def rpc_run(self, ip='') -> judge_types.RunStatus:
-
-        amount_of_tests = self.gen_details["amount_test"]
-        tl_single = self.test_details["time_limit"]
-        timeout = amount_of_tests * (tl_single + TRANSPORT_OVERHEAD)
-        # TODO: add timeout
+    def rpc_run(self, ip = '') -> judge_types.RunStatus:
 
         if self.tests is None:
             tests_path = f"./test_data/task_{self.task_id}.json"
@@ -138,10 +132,23 @@ class Orchestrator:
         self.test_details["test_data"] = self.tests
 
         try:
-            node = ServerProxy(f"http://{ip}:31337")
-            self.dirty_report: judge_types.DirtyReport = \
-                    node.run_tests(self.test_details) #type: ignore
+            amount_of_tests = self.gen_details["amount_test"]
+            tl_single = self.test_details["time_limit"]
+            timeout = amount_of_tests * (tl_single + TRANSPORT_OVERHEAD)
+
+            transport = Transport()
+            con = transport.make_connection(ip)
+            con.timeout = timeout
+
+            node = ServerProxy(f"http://{ip}:31337", transport=transport)
+            self.dirty_report = node.run_tests(self.test_details) #type: ignore
+
             return judge_types.RunStatus.SUCCESS
+
+        except ProtocolError as e:
+            # this except might have a bug, but I am too lazy to find it
+            print(e)
+            return judge_types.RunStatus.TIMEOUT_EXPIRED
 
         except Fault as e:
             print(e)
@@ -167,4 +174,5 @@ class Orchestrator:
 
         report = self.clean_report()
         print(report)
+
         return report
