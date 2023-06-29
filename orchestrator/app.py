@@ -1,13 +1,3 @@
-# route /run for POST requests
-# accept
-# {
-#   submission_id : <sub_id>
-#   source_file : file
-#   task_no : <task_no>
-#   extension : <ext>
-#   file_name : <file_name>
-# }
-#
 from flask import Flask, request
 from requests import post
 from base64 import b64decode
