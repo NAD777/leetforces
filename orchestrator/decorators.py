@@ -2,6 +2,7 @@ from os import environ
 from docker.models.containers import Image
 from typing import cast
 from time import sleep
+from logging import error, info, warning
 
 import dockerapi
 
@@ -13,7 +14,7 @@ _CONTAINERS_MAX = 5
 _CURRENT_CONTAINERS = 0
 _WAIT_TIME = 1
 DEBUG = environ["DEBUG"]
-
+NET_NAME = environ["NET_NAME"]
 
 #TODO: debug and run configurations
 def _create_image(instance: dockerapi.APIClass,
@@ -53,6 +54,7 @@ def _create_image(instance: dockerapi.APIClass,
         # execution
         _runner_docker_image = instance.pull_image(
                 "ghcr.io/nad777/codetest_bot-runner", "latest")
+    assert _runner_docker_image is not None
     return _runner_docker_image
 
 # container_interactor accepts str with ip address and returns T
@@ -77,38 +79,39 @@ def inside_container(_func=None, *,
             _create_image(instance, PROJECT_NAME)
 
             while _CONTAINERS_MAX <= _CURRENT_CONTAINERS:
-                print(f"Current container pool is full, waiting for " + \
+                info(f"Current container pool is full, waiting for " + \
                                                         f"{_WAIT_TIME} sec...")
                 sleep(_WAIT_TIME)
 
             _CURRENT_CONTAINERS += 1
             container = instance.create_container(f"{PROJECT_NAME}-runner",
-                memory_limit, network_name=f"{PROJECT_NAME.lower()}_internal")
+               memory_limit, network_name=f"{PROJECT_NAME.lower()}_{NET_NAME}")
 
             dockerapi.APIClass.start_container(container)
 
-            print(f"Started the container {container.name} with id " + \
+            info(f"Started the container {container.name} with id " + \
                                                        f"{container.short_id}")
             ip = instance.resolve_ip(
-                cast(str, container.name), f"{PROJECT_NAME.lower()}_internal")
-            print(f"IP address for container {container.name} is {ip}")
+               cast(str, container.name), f"{PROJECT_NAME.lower()}_{NET_NAME}")
+            info(f"IP address for container {container.name} is {ip}")
 
             output = None
-            for _ in range(retries):
+            for try_ in range(retries):
                 try:
                     output = container_interactor(*args, **kwargs, ip=ip)
                     break
-                except ConnectionRefusedError as e:
-                    print(e)
+                except ConnectionRefusedError:
+                    warning(f"Got connection refused on {try_}, trying to " \
+                                                                "reconnect")
                     sleep(_WAIT_TIME)
             else:
-                print("Failed to establish connection with container and " + \
+                error("Failed to establish connection with container and " + \
                         "get the output of the interactor")
 
             dockerapi.APIClass.stop_container(container)
             dockerapi.APIClass.remove_container(container)
             _CURRENT_CONTAINERS -= 1
-            print(f"Stopped and removed the running container {container.name}")
+            info(f"Stopped and removed the running container {container.name}")
 
             return output
 

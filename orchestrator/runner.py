@@ -6,7 +6,15 @@ from os import makedirs, chdir
 from resource import setrlimit, RLIMIT_AS, RLIM_INFINITY
 from shlex import split
 
+from logging import debug, info, basicConfig
+from logging import DEBUG as _DEBUG
+
 import judge_types
+
+DEBUG = False # change this if needed
+
+if DEBUG:
+    basicConfig(level=_DEBUG)
 
 class Runner:
     """Class that is actually responsible for test running and generation"""
@@ -36,7 +44,9 @@ class Runner:
 
         if "memory_limit" in configurations.keys():
             configurations = cast(judge_types.TestDetails, configurations)
-            print(configurations)
+
+            debug(configurations)
+
             memory_limit = configurations["memory_limit"]
             time_limit = configurations["time_limit"]
         else:
@@ -90,7 +100,7 @@ class Runner:
 
         output_dec = (output[0].decode(),
                       output[1].decode().lower())
-        print(output_dec)
+        debug(output_dec)
         # If we got right output from /usr/bin/time
         max_mem, real_time = -1, -1
         if stdin_data != '' and len(output_dec[1].split()) == 2:
@@ -114,7 +124,8 @@ class Runner:
         report["memory_used"] = max_mem
         report["error_status"] = judge_types.StatusCode.OK
 
-        print(report)
+        info(report)
+
         chdir('..')
         return report
 
@@ -158,7 +169,7 @@ class Runner:
         dump(test_data, open(f"./test_data/tests.json", "w"))
         tests = load(open(f"./test_data/tests.json", "r"))
 
-        print(f"{tests=}")
+        info(f"{tests=}")
 
         result = {}
         for test_number, (sample_in, desired_output) in tests.items():
@@ -193,7 +204,7 @@ class Runner:
 
             # Check for WA
             if output.stdout != desired_output:
-                print(f"{output.stdout=}, {desired_output=}")
+                info(f"{output.stdout=}, {desired_output=}")
                 report["test_number"] = test_number
                 report["status"] = judge_types.StatusCode.WA
                 break
@@ -207,7 +218,7 @@ class Runner:
         report["runtime"] = result["runtime"]
         report["status"] = report["status"].value
 
-        print(report)
+        info(report)
         return report
 
     def _generate_tests(self,

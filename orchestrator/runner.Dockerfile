@@ -11,4 +11,11 @@ COPY ./runners/judge_types.py ./
 COPY ./runners/run.sh ./
 COPY ./runners/test.sh ./
 
+# RUN chmod +rw ../app
+# RUN mkdir submissions test_data
+# RUN chmod +w submissions test_data
+
+# RUN adduser -G userrr
+# USER userrr
+
 ENTRYPOINT python -u runner.py

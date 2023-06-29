@@ -109,8 +109,7 @@ class APIClass:
         try:
             image = cast(Image, self.client.images.get(image_name))
             return image
-        except ImageNotFound as e:
-            print(e)
+        except ImageNotFound:
             return None
 
     def create_container(self,
@@ -164,8 +163,7 @@ class APIClass:
             ip = self.api_client.inspect_container(container_name) \
                     ["NetworkSettings"]["Networks"][network_name]["IPAddress"]
             return ip
-        except KeyError as e:
-            print(e)
+        except KeyError:
             return ''
 
 

@@ -69,7 +69,7 @@ services:
       context: .
       dockerfile: ./orchestrator/orchestrator.Dockerfile
     networks:
-      - internal
+      - internal_net
       - orchestrator_backend
     volumes:
       - type: bind
@@ -82,7 +82,8 @@ services:
     environment:
       - JUGGLER=http://juggler:5001
       - PROJECT_NAME=leetforces
-      - DEBUG=True
+      - DEBUG=False
+      - NET_NAME=internal_net
     restart: unless-stopped
 
   # runner:
@@ -121,7 +122,7 @@ services:
   #     - ./bot/env.properties
 
 networks:
-  internal:
+  internal_net:
   bot_backend:
   orchestrator_backend:
   # metrics:

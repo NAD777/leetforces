@@ -12,12 +12,17 @@ from flask import Flask, request
 from requests import post
 from base64 import b64decode
 from os import environ
-from logging import basicConfig, debug, DEBUG
+from logging import basicConfig, info
+from logging import DEBUG as _DEBUG
 from prometheus_flask_exporter import PrometheusMetrics
 
 from orchestrator import Orchestrator
 
 JUGGLER = environ["JUGGLER"]
+DEBUG = environ["DEBUG"]
+
+if DEBUG == "True":
+    basicConfig(level=_DEBUG)
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -46,11 +51,11 @@ def run():
     ext = body['extension']
     filename = body['file_name']
 
-    basicConfig(level=DEBUG)
-    debug(f'Got request with: {submission_id=}')
-    debug(f'Got request with: {source_file=}')
-    debug(f'Got request with: {task_id=}')
-    debug(f'Got request with: {ext=}')
+
+    info(f'Got request with: {submission_id=}')
+    info(f'Got request with: {source_file=}')
+    info(f'Got request with: {task_id=}')
+    info(f'Got request with: {ext=}')
 
     source_file_decoded = b64decode(source_file).decode("utf-8")
 
