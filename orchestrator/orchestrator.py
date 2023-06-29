@@ -168,9 +168,13 @@ class Orchestrator:
         gen_status = self.rpc_generate()
         if gen_status == judge_types.GeneratorStatus.GENERATION_ERROR:
             raise RuntimeError(
-                    judge_types.GeneratorStatus.GENERATION_ERROR.value)
+                    judge_types.GeneratorStatus.GENERATION_ERROR)
         print(gen_status)
-        print(self.rpc_run())
+
+        run_status = self.rpc_run()
+        if run_status != judge_types.RunStatus.SUCCESS:
+            raise RuntimeError(run_status)
+        print(run_status)
 
         report = self.clean_report()
         print(report)
