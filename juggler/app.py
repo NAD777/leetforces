@@ -2,7 +2,7 @@ import json
 
 from flask import Flask, request, jsonify
 from database.db_session import create_session, global_init
-from database.all_models import User, Task, Submission, ContestTask, Contest, Role, Tag
+from database.all_models import User, Task, Submission, ContestTask, Contest, Role, Tag, ContestTag, UserTag
 from sqlalchemy.exc import NoResultFound, DataError
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import IntegrityError
@@ -211,6 +211,7 @@ def register():
             login=login,
             password=password
         )
+        new_user.tags.append(session.query(Tag).filter(Tag.name == "All").first())
         session.add(new_user)
         session.commit()
     except IntegrityError as int_error:
@@ -452,13 +453,24 @@ def add_contest(current_user):
     session = create_session()
     name = json_payload['contest_name']
     description = json_payload['description']
+    is_closed = False
+    if 'is_closed' in json_payload:
+        is_closed = json_payload['is_closed']
     added_task = []
 
     new_contest = Contest(
         name=name,
         description=description,
-        author_id=current_user.id
+        author_id=current_user.id,
+        is_closed=is_closed
     )
+    if 'tags' in json_payload:
+        tags = json_payload['tags']
+        for tag_id in tags:
+            tag = session.query(Tag).filter(Tag.id == tag_id).first()
+            if tag is None:
+                continue
+            new_contest.tags.append(tag)
     session.add(new_contest)
     session.commit()
 
@@ -524,6 +536,12 @@ def retrieve_contest_task_ids(contest: Contest):
             session.query(ContestTask).filter(ContestTask.contest_id == contest.id)]
 
 
+def retrieve_contest_tags(contest: Contest):
+    session = create_session()
+    return [relation.tag_id for relation in
+            session.query(ContestTag).filter(ContestTag.contest_id == contest.id)]
+
+
 @app.route('/get_contest/<int:contest_id>')
 def get_contest(contest_id):
     # json_payload = request.json
@@ -556,7 +574,8 @@ def edit_contest(current_user):
         }), 400
 
     if check := check_for_allowed_keys(json_payload.keys(),
-                                       ['contest_id', 'contest_name', 'description', 'tasks_ids', 'author_id']):
+                                       ['contest_id', 'contest_name', 'description',
+                                        'tasks_ids', 'author_id', 'is_closed', "tags"]):
         return jsonify({
             'status': 'Error',
             'message': f'{check} is unknown field'
@@ -580,6 +599,9 @@ def edit_contest(current_user):
     if 'author_id' in json_payload:
         to_update['author_id'] = json_payload['author_id']
 
+    if 'is_closed' in json_payload:
+        to_update['is_closed'] = json_payload['is_closed']
+
     if 'tasks_ids' in json_payload:
         tasks_ids = retrieve_contest_task_ids(contest)
         new_task_ids = json_payload['tasks_ids']
@@ -590,6 +612,18 @@ def edit_contest(current_user):
         session.commit()
         for task_id in set(new_task_ids) - set(tasks_ids):
             relation_to_add = ContestTask(contest_id=contest.id, task_id=task_id)
+            session.add(relation_to_add)
+        session.commit()
+
+    if 'tags' in json_payload:
+        new_tags_ids = json_payload['tags']
+        tags_ids = retrieve_contest_tags(contest)
+        for tag_id in set(tags_ids) - set(new_tags_ids):
+            for relation_to_delete in session.query(ContestTag).filter(ContestTag.tag_id == tag_id):
+                session.delete(relation_to_delete)
+        session.commit()
+        for tag_id in set(new_tags_ids) - set(tags_ids):
+            relation_to_add = ContestTag(contest_id=contest.id, tag_id=tag_id)
             session.add(relation_to_add)
         session.commit()
 
@@ -646,6 +680,25 @@ def add_tag(current_user):
         "message": f"Tag with name {tag_name} successfully created",
         'tag_id': new_tag.id
     }), 200
+
+
+@app.route("/delete_tag/<int:tag_id>", methods=["DELETE"])
+@token_required(admin_required=True)
+def delete_tag(current_user, tag_id):
+    session = create_session()
+    tag = session.query(Tag).filter(Task.id == tag_id).first()
+    if tag is None:
+        return jsonify({
+            'status': 'Error',
+            'message': f'Tag with id {tag_id} does not exists'
+        }), 404
+
+    session.delete(tag)
+    session.commit()
+    return jsonify({
+        'status': 'Accepted',
+        'message': f'Tag with id {tag_id} was successfully deleted'
+    })
 
 
 @app.route('/add_tag_to_user', methods=['POST'])
@@ -705,7 +758,7 @@ def contests_by_tag(tag_id):
 
     return jsonify({
         "tag_name": tag.name,
-        "contests": [contest.to_dict for contest in tag.contests]
+        "contests": [contest.to_dict() for contest in tag.contests]
     })
 
 
@@ -721,5 +774,115 @@ def public_user_info(user_id):
     return user.public_info()
 
 
+def retrieve_user_tags(user: User):
+    session = create_session()
+    return [relation.tag_id for relation in
+            session.query(UserTag).filter(UserTag.user_id == user.id)]
+
+
+@app.route('/edit_user', methods=['POST'])
+@token_required()
+def edit_user(current_user):
+    json_payload = request.json
+    if not_given_key := require_keys(json_payload.keys(), ['user_id']):
+        return jsonify({
+            'status': 'Error',
+            'message': f'No {not_given_key} was provided'
+        }), 400
+
+    if res := check_for_allowed_keys(json_payload.keys(),
+                                     ['user_id', 'login', 'role', 'email',
+                                      'password', 'chat_id', 'tags']):
+        return jsonify({
+            'status': 'Error',
+            'message': f'{res} is unknown field'
+        }), 400
+    user_id = json_payload['user_id']
+    session = create_session()
+    user = session.query(User).filter(User.id == user_id).first()
+    if not user:
+        return jsonify({
+            'status': 'Error',
+            'message': f'User does not exists'
+        }), 404
+
+    if current_user.role == Role.user and current_user.id != user_id:
+        return jsonify({
+            'status': 'Error',
+            'message': f'You do not have privileges'
+        }), 403
+
+    to_update = {}
+    if 'login' in json_payload:
+        to_update['login'] = json_payload['login']
+    if 'role' in json_payload and current_user.role.value > 1:
+        if json_payload['role'] == 'user':
+            to_update['role'] = Role.user
+        elif json_payload['role'] == 'admin' and current_user.role.value in [2, 3]:
+            to_update['role'] = Role.admin
+        elif json_payload['role'] == 'superAdmin' and current_user.role == 3:
+            to_update['role'] = Role.superAdmin
+    if 'email' in json_payload:
+        to_update['email'] = json_payload['email']
+    if 'password' in json_payload:
+        to_update['password'] = json_payload['password']
+    if 'chat_id' in json_payload:
+        to_update['chat_id'] = json_payload['chat_id']
+    if len(to_update) != 0:
+        try:
+            session = create_session()
+            print(to_update)
+            session.query(User).filter(User.id == user_id).update(to_update)
+            session.commit()
+        except IntegrityError as int_error:
+            constraint = int_error.args[0].split('\n')[0].split()[-1]
+            return jsonify({
+                'status': 'Error',
+                'message': f'Violates constraint {constraint}'
+            }), 400
+    session = create_session()
+    if 'tags' in json_payload and current_user.role in [Role.admin, Role.superAdmin]:
+        new_tags_ids = json_payload['tags']
+        tags_ids = retrieve_user_tags(user)
+        for tag_id in set(tags_ids) - set(new_tags_ids):
+            for relation_to_delete in session.query(UserTag).filter(UserTag.tag_id == tag_id):
+                session.delete(relation_to_delete)
+        session.commit()
+        for tag_id in set(new_tags_ids) - set(tags_ids):
+            relation_to_add = UserTag(user_id=user_id, tag_id=tag_id)
+            session.add(relation_to_add)
+        session.commit()
+    print(to_update)
+    return jsonify({
+        'status': 'Accepted',
+        'message': f'User was edited with id {user.id}'
+    })
+
+
+@app.route('/get_submission/<int:task_id>', methods=["GET"])
+@token_required()
+def get_submission(current_user, task_id):
+    session = create_session()
+    if session.query(Task).filter(Task.id == task_id).first() is None:
+        return jsonify({
+            'status': 'Error',
+            'message': f'Task does not exists'
+        }), 404
+
+    if current_user.role == Role.user:
+        return jsonify([
+            sub.to_dict() for sub in session.query(Submission).filter(Submission.user_id == current_user.id,
+                                                                      Submission.task_id == task_id)
+        ]), 200
+    else:
+        return jsonify([
+            sub.to_dict() for sub in session.query(Submission).filter(Submission.task_id == task_id)
+        ]), 200
+
+
 if __name__ == '__main__':
+    session = create_session()
+    if not session.query(Tag).filter(Tag.name == "All").first():
+        session.add(Tag(name="All"))
+        session.commit()
     app.run(host="0.0.0.0", port=8000)
