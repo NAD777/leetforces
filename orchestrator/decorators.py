@@ -23,9 +23,9 @@ def _create_image(instance: dockerapi.APIClass,
     built/pulled
 
     Keyword arguments:
-    instance -- instance of dockerapi.APIClass object, used as a wrapper
+    instance        -- instance of dockerapi.APIClass object, used as a wrapper
     of docker api
-    PROJECT_NAME -- name of the project the main dockerfile is located
+    PROJECT_NAME    -- name of the project the main dockerfile is located
 
     Returns:
     Image object"""
@@ -56,10 +56,18 @@ def _create_image(instance: dockerapi.APIClass,
     return _runner_docker_image
 
 # container_interactor accepts str with ip address and returns T
-# TODO: generics
 def inside_container(_func=None, *,
                      memory_limit: str = "1g",
                      retries: int = 10):
+    """Decorator function. Create the container and execute `_func` inside it.
+    `_func` must accept the `ip` parameter, which determines the ip of the
+    created container.
+
+    Keyword arguments:
+    memory_limit    -- memory limit of the created container
+    retries         -- number of retries to make the connection with the
+        container. If you have slow PC, increase this number accordingly."""
+
     def decorator_container(container_interactor):
         def wrapper(*args, **kwargs):
 

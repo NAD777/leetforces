@@ -26,8 +26,11 @@ class APIClass:
         """Creates tar archive of given directory
 
         Keyword arguments:
-        output_filenam -- name of the output archive
-        source_dir -- directory to pack into the .tar archive
+        output_filenam  -- name of the output archive
+        source_dir      -- directory to pack into the .tar archive
+
+        Returns:
+        None
         """
         with taropen(output_filename, "w") as tar:
             tar.add(source_dir)
@@ -43,10 +46,10 @@ class APIClass:
         """Builds docker image with given context path
 
         Keyword arguments:
-        image_tag -- tag to add to final image
-        context_path -- path to context which contains Dockerfile
+        image_tag       -- tag to add to final image
+        context_path    -- path to context which contains Dockerfile
         dockerfile_path -- path to Dockerfile within the given context
-        nocache -- if set True, build without cache
+        nocache         -- if set True, build without cache
 
         Returns:
         Image object
@@ -82,8 +85,8 @@ class APIClass:
         """Pull the image with given name and return it
 
         Keyword arguments:
-        repository -- repository to pull image from
-        tag -- tag of image to pull
+        repository  -- repository to pull image from
+        tag         -- tag of image to pull
 
         Returns:
         Image object"""
@@ -119,13 +122,13 @@ class APIClass:
         """Create docker container from given image.
 
         Keywork arguments:
-        image_name -- name of image to base the container on
-        memory_limit -- soft memory limit for the container, string with a
+        image_name      -- name of image to base the container on
+        memory_limit    -- soft memory limit for the container, string with a
             units identification char (100000b, 1000k, 128m, 1g). If a string
             is specified without a units character, bytes are assumed as an
             intended unit.
-        command -- overwrite default COMMAND for docker image
-        network_name -- network to attach the container
+        command         -- overwrite default COMMAND for docker image
+        network_name    -- network to attach the container
 
         Returns:
         Container object"""
@@ -149,13 +152,14 @@ class APIClass:
         """Resolve the ip addres of the given container in the network.
 
         Keyword arguments:
-        container_name -- name of the container to be inspected
-        network_name -- name of the network to which the container is attached.
+        container_name  -- name of the container to be inspected
+        network_name    -- name of the network to which the container is attached.
         It is assumed that container is indeed attached to the network.
 
         Returns:
         ip addres of the container in the given network, if the container is
         present in the network, empty string otherwise"""
+
         try:
             ip = self.api_client.inspect_container(container_name) \
                     ["NetworkSettings"]["Networks"][network_name]["IPAddress"]
@@ -190,4 +194,5 @@ class APIClass:
 
         Keyword arguments:
         container: -- instance of Container class to remove"""
+
         container.remove()

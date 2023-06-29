@@ -33,8 +33,11 @@ class Orchestrator:
         """Constructor method for Orchestrator class
 
         Keyword arguments:
-        task_id -- id of the task to run
-        submission_ext -- file extension of the user submission
+        task_id         -- id of the task to run
+        submission_ext  -- file extension of the user submission
+
+        Returns:
+        None
         """
 
         # TODO: correctly parse all responses
@@ -92,7 +95,20 @@ class Orchestrator:
 
         makedirs("test_data", exist_ok=True)
 
-    def clean_report(self) -> judge_types.Report:
+    def __clean_report(self) -> judge_types.Report:
+        """'Clean' the report, i.e. change the report to the format of the
+        Report class
+
+        Returns:
+        Report with the following fields:
+
+        report: judge_types.Report = {
+            "submission_id": int
+            "runtime": float,
+            "memory": int,
+            "status": judge_types.StatusCode (OK, WA, CE, etc.),
+            "test_number": int
+        }"""
         report: judge_types.Report = {
             "submission_id": self.submission_id,
             "runtime": self.dirty_report["runtime"],
@@ -104,7 +120,16 @@ class Orchestrator:
         return report
 
     @inside_container
-    def rpc_generate(self, ip='127.0.0.1') -> judge_types.GeneratorStatus:
+    def rpc_generate(self,
+                     ip: str = '127.0.0.1'
+                     ) -> judge_types.GeneratorStatus:
+        """Generate the test data with the RPC call to the remote host.
+
+        Keyword arguments:
+        ip  -- ip of the remote host to make connection
+
+        Returns:
+        Generation status (judge_types.GeneratorStatus)"""
 
         tests_path = f"./test_data/task_{self.task_id}.json"
         if path.exists(tests_path):
@@ -123,7 +148,15 @@ class Orchestrator:
 
 
     @inside_container
-    def rpc_run(self, ip = '') -> judge_types.RunStatus:
+    def rpc_run(self, ip: str = '127.0.0.1') -> judge_types.RunStatus:
+        """Run the user code with the RPC call to the remote host.
+
+        Keyword arguments:
+        ip  --  of the remote host to make connection
+
+        Returns:
+        Running status (judge_types.RunStatus)"""
+
 
         if self.tests is None:
             tests_path = f"./test_data/task_{self.task_id}.json"
@@ -160,6 +193,26 @@ class Orchestrator:
             filename: str,
             source_file: str,
             ) -> judge_types.Report:
+        """Generate tests and run the user submission.
+
+        Keyword arguments:
+        submission_id   -- id of user submission
+        filename        -- filename of the user submission
+        source_file     -- actual source code of the file
+
+        Returns:
+        Report with the following fields:
+        report: judge_types.Report = {
+            "submission_id": int
+            "runtime": float,
+            "memory": int,
+            "status": judge_types.StatusCode (OK, WA, CE, etc.),
+            "test_number": int
+        }
+
+        Raises:
+        RuntimeError    -- in case of errors while generating tests or running
+        the user submission"""
 
         self.submission_id = submission_id
         self.test_details["filename"] = filename
@@ -176,7 +229,7 @@ class Orchestrator:
             raise RuntimeError(run_status)
         print(run_status)
 
-        report = self.clean_report()
+        report = self.__clean_report()
         print(report)
 
         return report

@@ -220,6 +220,7 @@ class Runner:
 
         Returns:
         Python dictionary containing sample input and output data"""
+
         filename = config["master_filename"]
 
         makedirs("solutions", exist_ok=True)
