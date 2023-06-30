@@ -41,7 +41,7 @@ class Orchestrator:
 
         # TODO: correctly parse all responses
         JUGGLER = environ["JUGGLER"]
-        resp = get(f"{JUGGLER}/get_task_info", params={"task_id": task_id})
+        resp = get(f"{JUGGLER}/get_task_info/{task_id}")
 
         try:
             task_settings = resp.json()

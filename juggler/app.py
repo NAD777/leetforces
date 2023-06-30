@@ -23,7 +23,7 @@ metrics = PrometheusMetrics(app, group_by='endpoint')
 app.config.from_object(__name__)
 global_init("backbase")
 PERMITTED_LANGUAGES = ['Python', 'Java']
-# ORCHESTRATOR_URL = environ['ORCHESTRATOR']
+ORCHESTRATOR_URL = environ['ORCHESTRATOR']
 # BOT_URL = environ['BOT']
 SECRET_KEY = os.environ.get('SECRET_KEY') or 'this is a secret'
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -398,12 +398,12 @@ def submit(current_user):
     session.commit()
 
     # TODO: uncomment on merge
-    # requests.post(f"{ORCHESTRATOR_URL}/run", json=jsonify({
-    #     'submission_id': submission.id,
-    #     'task_id': task_id,
-    #     'source_code': source_code,
-    #     'language': language
-    # }))
+    requests.post(f"{ORCHESTRATOR_URL}/run", json=jsonify({
+        'submission_id': submission.id,
+        'task_id': task_id,
+        'source_code': source_code,
+        'language': language
+    }))
     return jsonify({
         'status': 'Accepted',
         'message': f'Submitted',

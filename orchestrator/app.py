@@ -38,8 +38,15 @@ def run():
     submission_id = body['submission_id']
     source_file = body['source_file']
     task_id = body['task_no']
-    ext = body['extension']
-    filename = body['file_name']
+    lang = body['language']
+    # TODO: change this
+    ext = ''
+    if lang == "Python":
+        ext = "py"
+    else:
+        ext = "java"
+
+    filename = "Main"
 
 
     info(f'Got request with: {submission_id=}')

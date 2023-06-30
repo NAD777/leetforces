@@ -63,6 +63,7 @@ services:
     environment:
       - ORCHESTRATOR=http://orchestrator:5000
       - BOT=http://bot:8081
+      - PASSWORD=postgres
 
   orchestrator:
     build:
@@ -76,35 +77,12 @@ services:
         source: /var/run/docker.sock
         target: /var/run/docker.sock
     command: python -u -m flask run -h 0.0.0.0 -p 5000
-    # depends_on:
-    #   - test_generator
-    #   - runner
     environment:
       - JUGGLER=http://juggler:5001
       - PROJECT_NAME=leetforces
       - DEBUG=False
       - NET_NAME=internal_net
     restart: unless-stopped
-
-  # runner:
-  #   build:
-  #     dockerfile: ./orchestrator/runners/Dockerfile
-  #     context: .
-  #   networks:
-  #     - internal
-  #   command: python -u runner.py
-  #   depends_on:
-  #     - test_generator
-  #   restart: unless-stopped
-
-  # test_generator:
-  #   build:
-  #     dockerfile: ./orchestrator/runners/Dockerfile
-  #     context: .
-  #   networks:
-  #     - internal
-  #   command: python -u runner.py
-  #   restart: unless-stopped
 
   # bot:
   #   build:
