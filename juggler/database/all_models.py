@@ -142,7 +142,7 @@ class Contest(SqlAlchemyBase):
             "name": self.name,
             "description": self.description,
             "author_id": self.author_id,
-            "tasks_ids": [task.short_description() for task in self.tasks],
+            "tasks": [task.short_description() for task in self.tasks],
             "is_closed": self.is_closed,
             "tags": [tag.to_dict() for tag in self.tags]
         }

@@ -326,7 +326,7 @@ def get_task(task_id):
             'message': f'There is no such task with id {task_id}'
         }), 404
     task = task.first()
-    task_author = session.query(User).filter(User.id == task.author_id).first()
+    # task_author = session.query(User).filter(User.id == task.author_id).first()
     return jsonify({
         'status': "Accepted",
         'task_id': task.id,
@@ -334,7 +334,7 @@ def get_task(task_id):
         'description': task.description,
         'memory_limit': task.memory_limit,
         'time_limit': task.time_limit,
-        'author_name': task_author.login
+        'author_name': task.author_id
     })
 
 
