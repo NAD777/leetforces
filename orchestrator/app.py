@@ -36,8 +36,8 @@ def run():
     assert body is not None
 
     submission_id = body['submission_id']
-    source_file = body['source_file']
-    task_id = body['task_no']
+    source_file = body['source_code']
+    task_id = body['task_id']
     lang = body['language']
     # TODO: change this
     ext = ''

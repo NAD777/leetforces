@@ -32,7 +32,7 @@ def global_init(db_file):
     print(f"Conn base {conn_str}")
 
     from time import sleep
-    # sleep(2)
+    sleep(2)
     engine = sa.create_engine(conn_str, echo=False)
     __factory = orm.sessionmaker(bind=engine)
 

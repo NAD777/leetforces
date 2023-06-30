@@ -396,14 +396,14 @@ def submit(current_user):
     )
     session.add(submission)
     session.commit()
-
+    
     # TODO: uncomment on merge
-    requests.post(f"{ORCHESTRATOR_URL}/run", json=jsonify({
+    Thread(target=lambda: requests.post(f"{ORCHESTRATOR_URL}/run", json={
         'submission_id': submission.id,
         'task_id': task_id,
         'source_code': source_code,
         'language': language
-    }))
+    })).start()
     return jsonify({
         'status': 'Accepted',
         'message': f'Submitted',
@@ -880,9 +880,10 @@ def get_submission(current_user, task_id):
         ]), 200
 
 
+
+session = create_session()
+if not session.query(Tag).filter(Tag.name == "All").first():
+    session.add(Tag(name="All"))
+    session.commit()
 if __name__ == '__main__':
-    session = create_session()
-    if not session.query(Tag).filter(Tag.name == "All").first():
-        session.add(Tag(name="All"))
-        session.commit()
     app.run(host="0.0.0.0", port=8000)
