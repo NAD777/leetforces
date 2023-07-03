@@ -25,7 +25,7 @@ class _AdminTemplateState extends State<AdminTemplate> {
           admin = true;
         });
       } else {
-        context.replace('/');
+        context.go('/');
       }
     });
   }

@@ -54,7 +54,7 @@ class _ContestPageState extends State<ContestPage> {
                     child: ListTile(
                       title: Text(e.name),
                       onTap: () {
-                        context.replace("/task/${e.id}");
+                        context.go("/task/${e.id}");
                       },
                     ),
                   ),

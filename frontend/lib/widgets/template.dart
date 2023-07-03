@@ -17,19 +17,19 @@ class Template extends StatelessWidget {
             title: GestureDetector(
                 child: const Text('LeetForces'),
                 onTap: () {
-                  context.replace("/");
+                  context.go("/");
                 }),
             actions: [
               IconButton(
                 onPressed: () {
-                  context.replace("/profile");
+                  context.go("/profile");
                 },
                 icon: const Icon(Icons.person_outline_rounded),
               ),
               IconButton(
                 onPressed: () {
                   RepositoryProvider.of<UserRepository>(context).setUser("");
-                  context.replace("/login");
+                  context.go("/login");
                 },
                 icon: const Icon(Icons.logout),
               ),

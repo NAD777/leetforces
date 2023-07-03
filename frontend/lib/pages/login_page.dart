@@ -51,7 +51,7 @@ class _LoginPage extends State<LoginPage> {
                     loginInProgress = false;
                   });
                   RepositoryProvider.of<UserRepository>(context).setUser(value);
-                  context.replace("/");
+                  context.go("/");
                 });
               }
             },
@@ -63,7 +63,7 @@ class _LoginPage extends State<LoginPage> {
     return ElevatedButton(
       key: const Key('loginForm_register_elevatedButton'),
       onPressed: () {
-        context.replace("/register");
+        context.go("/register");
       },
       child: const Text('Register'),
     );
