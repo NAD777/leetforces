@@ -39,7 +39,6 @@ class UserRepository {
       Uri.parse("$host/check_privileges"),
       headers: <String, String>{
         "Authorization": _user!.jwt,
-        "Content-Type": "application/json"
       },
     );
     return response.body;
@@ -53,7 +52,6 @@ class UserRepository {
       Uri.parse("$host/current_user_info"),
       headers: <String, String>{
         "Authorization": _user!.jwt,
-        "Content-Type": "application/json"
       },
     );
     Map<String, dynamic> resp = jsonDecode(response.body);
