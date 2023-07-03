@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend/env/config.dart';
+
+import '../models/userinfo.dart';
 
 class UserRepository {
   UserRepository(this.prefs) {
@@ -31,11 +35,28 @@ class UserRepository {
     if (user?.jwt == null) {
       return "Role.guest";
     }
-    var response = await http.get(Uri.parse("$host/check_privileges"),
-        headers: <String, String>{
-          "Authorization": _user!.jwt,
-          "Content-Type": "application/json"
-        },);
+    var response = await http.get(
+      Uri.parse("$host/check_privileges"),
+      headers: <String, String>{
+        "Authorization": _user!.jwt,
+        "Content-Type": "application/json"
+      },
+    );
     return response.body;
+  }
+
+  Future<UserInfo> getUserInfo() async {
+    if (user?.jwt == null) {
+      return UserInfo("guest", "Role.guest", "none");
+    }
+    var response = await http.get(
+      Uri.parse("$host/current_user_info"),
+      headers: <String, String>{
+        "Authorization": _user!.jwt,
+        "Content-Type": "application/json"
+      },
+    );
+    Map<String, dynamic> resp = jsonDecode(response.body);
+    return UserInfo(resp["login"], resp["role"], resp["email"]);
   }
 }
