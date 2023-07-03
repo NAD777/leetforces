@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/task_repository.dart';
+import 'package:frontend/repositories/user_repository.dart';
 import 'package:frontend/widgets/template.dart';
 
+import '../env/config.dart';
 import '../models/task.dart';
 
 class TaskPage extends StatefulWidget {
@@ -41,7 +45,9 @@ class _TaskPageState extends State<TaskPage> {
               children: <Widget>[
                 TaskDescription(task: task!),
                 const SizedBox(width: 15),
-                const TaskSubmission(),
+                TaskSubmission(
+                  task: task!,
+                ),
               ],
             ),
     );
@@ -113,8 +119,23 @@ class TaskDescription extends StatelessWidget {
   }
 }
 
-class TaskSubmission extends StatelessWidget {
-  const TaskSubmission({super.key});
+class TaskSubmission extends StatefulWidget {
+  final Task task;
+
+  const TaskSubmission({super.key, required this.task});
+
+  @override
+  State<TaskSubmission> createState() => _TaskSubmissionState();
+}
+
+class _TaskSubmissionState extends State<TaskSubmission> {
+  late String language;
+  late Uint8List data;
+
+  @override
+  void initState() {
+    language = languages.first;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,15 +153,45 @@ class TaskSubmission extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
+              DropdownButton<String>(
+                  value: language,
+                  items: languages
+                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .toList(),
+                  onChanged: (e) {
+                    setState(() {
+                      language = e ?? "";
+                    });
+                  }),
               FilledButton(
+                child: const Text('Choose File'),
                 onPressed: () async {
                   var result = await FilePicker.platform.pickFiles();
                   if (result != null) {
-                    // PlatformFile file = result.files.first;
-                    // TODO: send file
+                    setState(() {
+                      data = result.files.first.bytes ?? Uint8List(0);
+                    });
                   }
                 },
-                child: const Text('Choose File'),
+              ),
+              const SizedBox(height: 5),
+              FilledButton(
+                onPressed: () async {
+                  if (language.isEmpty) {
+                    ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(const SnackBar(
+                          content: Text("Choose language first")));
+                    return;
+                  }
+                  if (context.mounted) {
+                    var user =
+                        RepositoryProvider.of<UserRepository>(context).user!;
+                    RepositoryProvider.of<TaskRepository>(context)
+                        .submitSolution(user.jwt, widget.task, data, language);
+                  }
+                },
+                child: const Text('Submit'),
               ),
             ],
           ),

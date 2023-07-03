@@ -32,7 +32,7 @@ class ContestRepository {
     var json = jsonDecode(response.body) as Map<String, dynamic>;
 
     if (response.statusCode == 200) {
-      var d = (json["tasks_ids"] as List<dynamic>)
+      var d = (json["tasks"] as List<dynamic>)
           .map((e) => SimpleTask(e["task_id"], e["name"], e["memory_limit"],
               e["time_limit"], e["author_id"]))
           .toList();
