@@ -23,7 +23,7 @@ metrics = PrometheusMetrics(app, group_by='endpoint')
 app.config.from_object(__name__)
 global_init("backbase")
 PERMITTED_LANGUAGES = ['Python', 'Java']
-# ORCHESTRATOR_URL = environ['ORCHESTRATOR']
+ORCHESTRATOR_URL = environ['ORCHESTRATOR']
 # BOT_URL = environ['BOT']
 SECRET_KEY = os.environ.get('SECRET_KEY') or 'this is a secret'
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -326,7 +326,7 @@ def get_task(task_id):
             'message': f'There is no such task with id {task_id}'
         }), 404
     task = task.first()
-    task_author = session.query(User).filter(User.id == task.author_id).first()
+    # task_author = session.query(User).filter(User.id == task.author_id).first()
     return jsonify({
         'status': "Accepted",
         'task_id': task.id,
@@ -334,7 +334,7 @@ def get_task(task_id):
         'description': task.description,
         'memory_limit': task.memory_limit,
         'time_limit': task.time_limit,
-        'author_name': task_author.login
+        'author_name': task.author_id
     })
 
 
@@ -396,14 +396,14 @@ def submit(current_user):
     )
     session.add(submission)
     session.commit()
-
+    
     # TODO: uncomment on merge
-    # requests.post(f"{ORCHESTRATOR_URL}/run", json=jsonify({
-    #     'submission_id': submission.id,
-    #     'task_id': task_id,
-    #     'source_code': source_code,
-    #     'language': language
-    # }))
+    Thread(target=lambda: requests.post(f"{ORCHESTRATOR_URL}/run", json={
+        'submission_id': submission.id,
+        'task_id': task_id,
+        'source_code': source_code,
+        'language': language
+    })).start()
     return jsonify({
         'status': 'Accepted',
         'message': f'Submitted',
@@ -880,9 +880,10 @@ def get_submission(current_user, task_id):
         ]), 200
 
 
+
+session = create_session()
+if not session.query(Tag).filter(Tag.name == "All").first():
+    session.add(Tag(name="All"))
+    session.commit()
 if __name__ == '__main__':
-    session = create_session()
-    if not session.query(Tag).filter(Tag.name == "All").first():
-        session.add(Tag(name="All"))
-        session.commit()
     app.run(host="0.0.0.0", port=8000)
