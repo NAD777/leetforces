@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/repositories/user_repository.dart';
 import 'package:go_router/go_router.dart';
 
 class Template extends StatelessWidget {
@@ -19,20 +21,20 @@ class Template extends StatelessWidget {
                 }),
             actions: [
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.replace("/profile");
+                },
                 icon: const Icon(Icons.person_outline_rounded),
               ),
               IconButton(
                 onPressed: () {
-                  /*context.read<AuthenticationBloc>().add(
-                        AuthenticationLogoutRequested(),
-                      );*/
+                  RepositoryProvider.of<UserRepository>(context).setUser("");
+                  context.replace("/login");
                 },
                 icon: const Icon(Icons.logout),
               ),
             ],
           ),
-          // ContestsView(),
           SliverPadding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
             sliver: SliverFillRemaining(
