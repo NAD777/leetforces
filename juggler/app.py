@@ -100,7 +100,7 @@ def check_privileges(current_user):
 def validate_login_and_password(login, password):
     session = create_session()
     user = session.query(User).filter(User.login == login)
-    if user.count == 0:
+    if user.count() == 0:
         return False
     user = user.first()
     if user.password != password:
