@@ -41,6 +41,7 @@ class ContestRepository {
         name: json["name"],
         description: json["description"],
         tasks: d,
+        tags: (json["tags"] as List).map((tag) => tag as String).toList()
       );
     } else {
       throw Exception();

@@ -46,7 +46,7 @@ class UserRepository {
 
   Future<UserInfo> getUserInfo() async {
     if (user?.jwt == null) {
-      return UserInfo("guest", "Role.guest", "none");
+      return UserInfo("guest", "Role.guest", "none", []);
     }
     var response = await http.get(
       Uri.parse("$host/current_user_info"),
@@ -55,6 +55,7 @@ class UserRepository {
       },
     );
     Map<String, dynamic> resp = jsonDecode(response.body);
-    return UserInfo(resp["login"], resp["role"], resp["email"]);
+    var tags = (resp["tags"] as List).map((tag) => tag as String).toList();
+    return UserInfo(resp["login"], resp["role"], resp["email"], tags);
   }
 }
