@@ -233,7 +233,8 @@ def current_user_info(current_user):
         'login': current_user.login,
         'role': str(current_user.role),
         'email': current_user.email,
-        'chat_id': current_user.chat_id
+        'chat_id': current_user.chat_id,
+        'tags': [x.name for x in current_user.tags]
     }), 200
 
 
