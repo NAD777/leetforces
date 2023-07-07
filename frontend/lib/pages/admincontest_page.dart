@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/contest_repository.dart';
 import 'package:frontend/repositories/task_repository.dart';
+import 'package:frontend/widgets/tags_list_view.dart';
 
 import '../models/contest.dart';
 import '../models/task.dart';
@@ -79,6 +80,18 @@ class _AdminContestPageState extends State<AdminContestPage> {
                         decoration: InputDecoration(
                             border: const OutlineInputBorder(),
                             hintText: contest!.description),
+                      ),
+                      TagsListView(
+                        tags: contest!.tags,
+                        isAdmin: true,
+                        onDelete: (id) {
+                          // TODO: implement deletion of tag by given int id
+                          print("Delete $id");
+                        },
+                        onCreate: (name) {
+                          // TODO: implement adding of tag by given String name
+                          print("Create $name");
+                        },
                       ),
                       ElevatedButton(
                         onPressed: () => _onChangeDataPress(context),
@@ -205,11 +218,7 @@ class _AdminContestPageState extends State<AdminContestPage> {
         var newTask = int.parse(controllerTaskId.text);
         newTasks.add(newTask);
         int res = await RepositoryProvider.of<ContestRepository>(context)
-            .setTasksToContest(
-          token,
-          contest!.id,
-          newTasks
-        );
+            .setTasksToContest(token, contest!.id, newTasks);
         if (context.mounted) {
           String value;
           switch (res) {
@@ -222,7 +231,8 @@ class _AdminContestPageState extends State<AdminContestPage> {
           }
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text(value)));
-          var task = await RepositoryProvider.of<TaskRepository>(context).getTask(newTask);
+          var task = await RepositoryProvider.of<TaskRepository>(context)
+              .getTask(newTask);
           setState(() {
             tasks.add(task);
           });
