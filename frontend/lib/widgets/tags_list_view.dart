@@ -15,11 +15,12 @@ class TagsListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert((isAdmin && onDelete != null) || !isAdmin);
-    return Row(
-      children: List<Widget>.generate(
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      const Text('Tags: '),
+      ...List<Widget>.generate(
         tags.length,
         (index) => Chip(
-          padding: const EdgeInsets.symmetric(horizontal: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           label: Text(tags[index]),
           deleteIcon: isAdmin ? const Icon(Icons.close) : null,
           onDeleted: isAdmin
@@ -29,6 +30,6 @@ class TagsListView extends StatelessWidget {
               : null,
         ),
       ),
-    );
+    ]);
   }
 }
