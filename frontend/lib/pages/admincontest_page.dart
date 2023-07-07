@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/contest_repository.dart';
 import 'package:frontend/repositories/task_repository.dart';
-import 'package:frontend/widgets/template.dart';
 
 import '../models/contest.dart';
 import '../models/task.dart';

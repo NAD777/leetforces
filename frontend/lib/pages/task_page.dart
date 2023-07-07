@@ -134,6 +134,7 @@ class _TaskSubmissionState extends State<TaskSubmission> {
 
   @override
   void initState() {
+    super.initState();
     language = languages.first;
   }
 

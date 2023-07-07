@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/models/userinfo.dart';
 import 'package:frontend/repositories/user_repository.dart';
+import 'package:frontend/widgets/tags_list_view.dart';
 import 'package:frontend/widgets/template.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -39,24 +40,31 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   const SizedBox(height: 20),
+                  TagsListView(
+                    tags: userInfo!.tags,
+                    isAdmin: false,
+                  ),
                   Text(
                     '${userInfo?.login}',
                     style: TextStyle(
-                      fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize,
+                      fontSize:
+                          Theme.of(context).textTheme.headlineMedium?.fontSize,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     '${userInfo?.email}',
                     style: TextStyle(
-                      fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize,
+                      fontSize:
+                          Theme.of(context).textTheme.headlineMedium?.fontSize,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     '${userInfo?.role}',
                     style: TextStyle(
-                      fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize,
+                      fontSize:
+                          Theme.of(context).textTheme.headlineMedium?.fontSize,
                     ),
                   ),
                 ],

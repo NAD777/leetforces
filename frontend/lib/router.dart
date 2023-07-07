@@ -1,5 +1,3 @@
-import 'dart:js';
-
 import 'package:frontend/pages/admincontest_page.dart';
 import 'package:frontend/pages/contest_page.dart';
 import 'package:frontend/pages/home_page.dart';
