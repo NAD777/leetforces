@@ -86,9 +86,9 @@ class _AdminContestPageState extends State<AdminContestPage> {
                       ),
                       TextFormField(
                         controller: controllerTaskId,
-                        decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            hintText: contest!.description),
+                        decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: "Task id"),
                       ),
                       Form(
                         key: _form2Key,
@@ -98,7 +98,7 @@ class _AdminContestPageState extends State<AdminContestPage> {
                                 onPressed: () => _onAddTask(context),
                                 child: const Text("Add task by id")),
                             FutureBuilder<ListView>(
-                              future: _tasksAsChildren(),
+                              future: _tasksAsChildren(context),
                               builder: (context, snapshot) {
                                 switch (snapshot.connectionState) {
                                   case ConnectionState.done:
@@ -123,14 +123,16 @@ class _AdminContestPageState extends State<AdminContestPage> {
     );
   }
 
-  Future<ListView> _tasksAsChildren() async {
+  Future<ListView> _tasksAsChildren(BuildContext context) async {
     List<DataRow> res = [];
     for (var task in tasks) {
       res.add(
         DataRow(
           cells: [
             DataCell(Text(task.id.toString())),
-            DataCell(Text(task.name))
+            DataCell(Text(task.name)),
+            DataCell(ElevatedButton(onPressed: () => _onDeleteTask(context, task.id),
+            child: const Text("Delete"),))
           ],
         ),
       );
@@ -138,6 +140,7 @@ class _AdminContestPageState extends State<AdminContestPage> {
     var columns = List.of([
       const DataColumn(label: Text("Task id")),
       const DataColumn(label: Text("Task name")),
+      const DataColumn(label: Text(""))
     ]);
     return ListView(
       scrollDirection: Axis.vertical,
@@ -148,6 +151,49 @@ class _AdminContestPageState extends State<AdminContestPage> {
 
   List<Widget> _wrongNumber() {
     return [const Text("Wrong contest number")];
+  }
+
+  void _onDeleteTask(BuildContext context, int taskId) async {
+    if (_form2Key.currentState!.validate()) {
+      var user = RepositoryProvider.of<UserRepository>(context).user;
+      String token = user?.jwt ?? "";
+      try {
+        var newTasks = tasks.map((e) => e.id).toList();
+        var oldTask = taskId;
+        if (newTasks.contains(oldTask)) {
+          newTasks.remove(oldTask);
+        }
+        else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text("Task does not exist")));
+        }
+        int res = await RepositoryProvider.of<ContestRepository>(context)
+            .setTasksToContest(
+            token,
+            contest!.id,
+            newTasks
+        );
+        if (context.mounted) {
+          String value;
+          switch (res) {
+            case 200:
+              value = "Successfully removed task";
+              break;
+            default:
+              value = "Something went wrong";
+              break;
+          }
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(value)));
+          setState(() {
+            tasks.removeWhere((element) => element.id == oldTask);
+          });
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("Error")));
+      }
+    }
   }
 
   void _onAddTask(BuildContext context) async {
