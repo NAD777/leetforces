@@ -156,7 +156,8 @@ class _AdminContestPageState extends State<AdminContestPage> {
       String token = user?.jwt ?? "";
       try {
         var newTasks = tasks.map((e) => e.id).toList();
-        newTasks.add(int.parse(controllerTaskId.text));
+        var newTask = int.parse(controllerTaskId.text);
+        newTasks.add(newTask);
         int res = await RepositoryProvider.of<ContestRepository>(context)
             .setTasksToContest(
           token,
@@ -175,6 +176,10 @@ class _AdminContestPageState extends State<AdminContestPage> {
           }
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text(value)));
+          var task = await RepositoryProvider.of<TaskRepository>(context).getTask(newTask);
+          setState(() {
+            tasks.add(task);
+          });
         }
       } catch (e) {
         ScaffoldMessenger.of(context)

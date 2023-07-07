@@ -628,8 +628,10 @@ def edit_contest(current_user):
             session.add(relation_to_add)
         session.commit()
 
-    session.query(Contest).filter(Contest.id == contest_id).update(to_update)
-    session.commit()
+    if to_update:
+        session.query(Contest).filter(Contest.id == contest_id).update(to_update)
+        session.commit()
+
     return jsonify({
         'status': 'Accepted',
         'message': f'Contest was edited with id {contest.id}'
