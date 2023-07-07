@@ -35,15 +35,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: <Widget>[
                   const CircleAvatar(
                     radius: 50,
-                    backgroundImage: NetworkImage(
-                      'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
-                    ),
                   ),
                   const SizedBox(height: 20),
                   TagsListView(
                     tags: userInfo!.tags,
                     isAdmin: false,
                   ),
+                  const SizedBox(height: 10),
                   Text(
                     '${userInfo?.login}',
                     style: TextStyle(

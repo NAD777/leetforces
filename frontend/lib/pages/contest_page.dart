@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/contest_repository.dart';
 import 'package:frontend/repositories/task_repository.dart';
+import 'package:frontend/widgets/tags_list_view.dart';
 import 'package:frontend/widgets/template.dart';
 import 'package:go_router/go_router.dart';
 
@@ -45,20 +46,24 @@ class _ContestPageState extends State<ContestPage> {
   Widget build(BuildContext context) {
     return Template(
       content: Column(
-        children: contest == null
-            ? []
-            : [
-                Text(contest!.name),
-                for (var e in tasks)
-                  Card(
-                    child: ListTile(
-                      title: Text(e.name),
-                      onTap: () {
-                        context.go("/task/${e.id}");
-                      },
-                    ),
-                  ),
-              ],
+        children: [
+          Text(contest!.name),
+          const SizedBox(height: 10),
+          TagsListView(
+            tags: contest!.tags,
+            isAdmin: false,
+          ),
+          const SizedBox(height: 10),
+          for (var e in tasks)
+            Card(
+              child: ListTile(
+                title: Text(e.name),
+                onTap: () {
+                  context.go("/task/${e.id}");
+                },
+              ),
+            ),
+        ],
       ),
     );
   }
