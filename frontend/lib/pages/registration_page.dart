@@ -49,6 +49,13 @@ class _RegistrationPage extends State<StatefulWidget> {
                   registrationInProcess = false;
                 });
                 context.go("/login");
+              }).catchError((e) {
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(SnackBar(content: Text(e.toString())));
+                setState(() {
+                  registrationInProcess = false;
+                });
               });
             }
           },
@@ -57,6 +64,13 @@ class _RegistrationPage extends State<StatefulWidget> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: GestureDetector(
+              child: const Text('LeetForces'),
+              onTap: () {
+                context.go("/");
+              }),
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

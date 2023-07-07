@@ -246,9 +246,7 @@ class _TaskSubmissionState extends State<TaskSubmission> {
                 children: <TableRow>[
                   TableRow(
                     children: <TableCell>[
-                      ...(isAdmin
-                          ? [const TableCell(child: Text("User"))]
-                          : []),
+                      if (isAdmin) const TableCell(child: Text("User")),
                       const TableCell(
                           child: Row(children: [
                         Text("Id"),
@@ -271,13 +269,10 @@ class _TaskSubmissionState extends State<TaskSubmission> {
                   ),
                   ...widget.submissions
                       .map((e) => TableRow(children: <TableCell>[
-                            ...(isAdmin
-                                ? [
-                                    TableCell(
-                                      child: Text(e.userId.toString()),
-                                    )
-                                  ]
-                                : []),
+                            if (isAdmin)
+                              TableCell(
+                                child: Text(e.userId.toString()),
+                              ),
                             TableCell(
                               child: InkWell(
                                 child: Text(e.submissionId.toString()),

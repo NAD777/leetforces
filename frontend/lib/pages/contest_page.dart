@@ -49,11 +49,26 @@ class _ContestPageState extends State<ContestPage> {
           ? const CircularProgressIndicator()
           : Column(
               children: [
-                Text(contest!.name),
+                Row(
+                  children: [
+                    Text(contest!.name, style: const TextStyle(fontSize: 30)),
+                  ],
+                ),
                 const SizedBox(height: 10),
-                TagsListView(
-                  tags: contest!.tags,
-                  isAdmin: false,
+                Row(
+                  children: [
+                    TagsListView(
+                      tags: contest!.tags,
+                      isAdmin: false,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Text(contest!.description,
+                        style: const TextStyle(fontSize: 24)),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 for (var e in tasks)

@@ -19,8 +19,8 @@ class _LoginPage extends State<LoginPage> {
   final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  TextFormField inputField(String name, TextEditingController controller,
-      FormFieldValidator<String> validator) {
+  TextFormField inputField(String name, bool hidden,
+      TextEditingController controller, FormFieldValidator<String> validator) {
     return TextFormField(
       key: Key('loginForm_${name.toLowerCase()}Input_textField'),
       decoration: InputDecoration(
@@ -29,6 +29,7 @@ class _LoginPage extends State<LoginPage> {
       textInputAction: TextInputAction.next,
       controller: controller,
       validator: validator,
+      obscureText: hidden,
     );
   }
 
@@ -52,6 +53,15 @@ class _LoginPage extends State<LoginPage> {
                   });
                   RepositoryProvider.of<UserRepository>(context).setUser(value);
                   context.go("/");
+                }).catchError((e) {
+                  print(e);
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                        const SnackBar(content: Text("Invalid credentials")));
+                  setState(() {
+                    loginInProgress = false;
+                  });
                 });
               }
             },
@@ -72,6 +82,13 @@ class _LoginPage extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: GestureDetector(
+            child: const Text('LeetForces'),
+            onTap: () {
+              context.go("/");
+            }),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -91,13 +108,15 @@ class _LoginPage extends State<LoginPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    inputField("username", usernameController, (String? val) {
+                    inputField("username", false, usernameController,
+                        (String? val) {
                       if (val == null) {
                         return null;
                       }
                       return val.length >= 6 ? null : "Invalid length";
                     }),
-                    inputField("password", passwordController, (String? val) {
+                    inputField("password", true, passwordController,
+                        (String? val) {
                       if (val == null) {
                         return null;
                       }

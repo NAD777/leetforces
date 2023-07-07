@@ -10,6 +10,7 @@ class Template extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var user = RepositoryProvider.of<UserRepository>(context).user;
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -19,21 +20,34 @@ class Template extends StatelessWidget {
                 onTap: () {
                   context.go("/");
                 }),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  context.go("/profile");
-                },
-                icon: const Icon(Icons.person_outline_rounded),
-              ),
-              IconButton(
-                onPressed: () {
-                  RepositoryProvider.of<UserRepository>(context).setUser("");
-                  context.go("/login");
-                },
-                icon: const Icon(Icons.logout),
-              ),
-            ],
+            actions: user != null
+                ? <IconButton>[
+                    IconButton(
+                      onPressed: () {
+                        context.go("/profile");
+                      },
+                      icon: const Icon(Icons.person_outline_rounded),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        RepositoryProvider.of<UserRepository>(context)
+                            .setUser("");
+                        context.go("/login");
+                      },
+                      icon: const Icon(Icons.logout),
+                    ),
+                  ]
+                : [
+                    TextButton(
+                      child: const Text("Login"),
+                      onPressed: () {
+                        context.go("/login");
+                      },
+                    ),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                  ],
           ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
