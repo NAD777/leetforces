@@ -37,7 +37,9 @@ class TagsListView extends StatelessWidget {
         ActionChip(
           label: const Text('Add'),
           avatar: const Icon(Icons.add),
-          onPressed: () {},
+          onPressed: () async {
+            await askForName(context);
+          },
         ),
     ]);
   }

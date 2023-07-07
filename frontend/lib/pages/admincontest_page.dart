@@ -86,9 +86,11 @@ class _AdminContestPageState extends State<AdminContestPage> {
                         isAdmin: true,
                         onDelete: (id) {
                           // TODO: implement deletion of tag by given int id
+                          print("Delete $id");
                         },
                         onCreate: (name) {
                           // TODO: implement adding of tag by given String name
+                          print("Create $name");
                         },
                       ),
                       ElevatedButton(
