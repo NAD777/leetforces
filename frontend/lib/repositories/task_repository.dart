@@ -5,6 +5,7 @@ import 'package:frontend/env/config.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/contest.dart';
+import '../models/submission.dart';
 import '../models/task.dart';
 
 class TaskRepository {
@@ -38,6 +39,44 @@ class TaskRepository {
         });
     var json = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode != 200) {
+      throw Exception(json['message']);
+    }
+  }
+
+  Future<List<Submission>> getSubmissions(String jwt, Task task) async {
+    var response = await http.get(Uri.parse("$host/get_submission/${task.id}"),
+        headers: <String, String>{
+          "Authorization": jwt,
+        });
+    if (response.statusCode == 200) {
+      var json = jsonDecode(response.body) as List<dynamic>;
+      return json.map((e) {
+        print([
+          e["submission_id"],
+          e["user_id"],
+          e["task_id"],
+          e["source_code"],
+          e["language"],
+          e["status"],
+          e["test_number"],
+          e["submission_time"],
+          e["memory"],
+          e["runtime"]
+        ]);
+        return Submission(
+            e["submission_id"],
+            e["user_id"],
+            e["task_id"],
+            e["source_code"],
+            e["language"],
+            e["status"],
+            e["test_number"],
+            e["submission_time"],
+            e["memory"],
+            e["runtime"]);
+      }).toList();
+    } else {
+      var json = jsonDecode(response.body) as Map<String, dynamic>;
       throw Exception(json['message']);
     }
   }

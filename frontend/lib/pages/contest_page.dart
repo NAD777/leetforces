@@ -45,26 +45,28 @@ class _ContestPageState extends State<ContestPage> {
   @override
   Widget build(BuildContext context) {
     return Template(
-      content: Column(
-        children: [
-          Text(contest!.name),
-          const SizedBox(height: 10),
-          TagsListView(
-            tags: contest!.tags,
-            isAdmin: false,
-          ),
-          const SizedBox(height: 10),
-          for (var e in tasks)
-            Card(
-              child: ListTile(
-                title: Text(e.name),
-                onTap: () {
-                  context.go("/task/${e.id}");
-                },
-              ),
+      content: contest == null
+          ? const CircularProgressIndicator()
+          : Column(
+              children: [
+                Text(contest!.name),
+                const SizedBox(height: 10),
+                TagsListView(
+                  tags: contest!.tags,
+                  isAdmin: false,
+                ),
+                const SizedBox(height: 10),
+                for (var e in tasks)
+                  Card(
+                    child: ListTile(
+                      title: Text(e.name),
+                      onTap: () {
+                        context.go("/task/${e.id}");
+                      },
+                    ),
+                  ),
+              ],
             ),
-        ],
-      ),
     );
   }
 }
