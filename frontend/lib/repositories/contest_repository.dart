@@ -37,12 +37,11 @@ class ContestRepository {
               e["time_limit"], e["author_id"]))
           .toList();
       return Contest(
-        id: contestId,
-        name: json["name"],
-        description: json["description"],
-        tasks: d,
-        tags: (json["tags"] as List).map((tag) => tag as String).toList()
-      );
+          id: contestId,
+          name: json["name"],
+          description: json["description"],
+          tasks: d,
+          tags: (json["tags"] as List).map((tag) => tag as String).toList());
     } else {
       throw Exception();
     }
@@ -62,6 +61,18 @@ class ContestRepository {
         }));
     // var json = jsonDecode(response.body) as Map<String, dynamic>;
 
+    return response.statusCode;
+  }
+
+  Future<int> setTasksToContest(
+      String auth, int contestId, List<int> tasks) async {
+    var response = await http.post(Uri.parse("$host/edit_contest"),
+        headers: <String, String>{
+          "Authorization": auth,
+          "Content-Type": "application/json"
+        },
+        body: jsonEncode(
+            <String, dynamic>{"contest_id": contestId, "tasks_ids": tasks}));
     return response.statusCode;
   }
 }

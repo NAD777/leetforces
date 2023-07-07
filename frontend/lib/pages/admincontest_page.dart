@@ -22,9 +22,11 @@ class _AdminContestPageState extends State<AdminContestPage> {
   late List<Task> tasks;
 
   final _formKey = GlobalKey<FormState>();
+  final _form2Key = GlobalKey<FormState>();
 
   TextEditingController controllerName = TextEditingController();
   TextEditingController controllerDescription = TextEditingController();
+  TextEditingController controllerTaskId = TextEditingController();
 
   @override
   void initState() {
@@ -46,6 +48,7 @@ class _AdminContestPageState extends State<AdminContestPage> {
     });
     controllerName.text = "";
     controllerDescription.text = "";
+    controllerTaskId.text = "";
     tasks = [];
     super.initState();
   }
@@ -53,41 +56,134 @@ class _AdminContestPageState extends State<AdminContestPage> {
   @override
   Widget build(BuildContext context) {
     return AdminTemplate(
-      content: Form(
-        key: _formKey,
-        child: Column(
-          children: contest == null
-              ? wrongNumber()
-              : [
-                  Text(contest!.name),
-                  const Text("Edit name of the contest:"),
-                  TextFormField(
-                      controller: controllerName,
-                      decoration: InputDecoration(
+      content: Column(
+        children: [
+          Form(
+            key: _formKey,
+            child: Column(
+              children: contest == null
+                  ? _wrongNumber()
+                  : [
+                      Text(contest!.name),
+                      const Text("Edit name of the contest:"),
+                      TextFormField(
+                        controller: controllerName,
+                        decoration: InputDecoration(
                           border: const OutlineInputBorder(),
-                          hintText: contest!.name)),
-                  const Text("Edit description of the contest:"),
-                  TextFormField(
-                    controller: controllerDescription,
-                    decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        hintText: contest!.description),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => onChangeDataPress(context),
-                    child: const Text("Change data"),
-                  ),
-                ],
-        ),
+                          hintText: contest!.name,
+                        ),
+                      ),
+                      const Text("Edit description of the contest:"),
+                      TextFormField(
+                        controller: controllerDescription,
+                        decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            hintText: contest!.description),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _onChangeDataPress(context),
+                        child: const Text("Change data"),
+                      ),
+                      TextFormField(
+                        controller: controllerTaskId,
+                        decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            hintText: contest!.description),
+                      ),
+                      Form(
+                        key: _form2Key,
+                        child: Column(
+                          children: [
+                            ElevatedButton(
+                                onPressed: () => _onAddTask(context),
+                                child: const Text("Add task by id")),
+                            FutureBuilder<ListView>(
+                              future: _tasksAsChildren(),
+                              builder: (context, snapshot) {
+                                switch (snapshot.connectionState) {
+                                  case ConnectionState.done:
+                                    if (snapshot.hasError) {
+                                      return const Text(
+                                          "Some error has occured");
+                                    }
+                                    return snapshot.data!;
+                                  default:
+                                    return const Text("Error occured");
+                                }
+                              },
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  List<Widget> wrongNumber() {
+  Future<ListView> _tasksAsChildren() async {
+    List<DataRow> res = [];
+    for (var task in tasks) {
+      res.add(
+        DataRow(
+          cells: [
+            DataCell(Text(task.id.toString())),
+            DataCell(Text(task.name))
+          ],
+        ),
+      );
+    }
+    var columns = List.of([
+      const DataColumn(label: Text("Task id")),
+      const DataColumn(label: Text("Task name")),
+    ]);
+    return ListView(
+      scrollDirection: Axis.vertical,
+      shrinkWrap: true,
+      children: [DataTable(columns: columns, rows: res)],
+    );
+  }
+
+  List<Widget> _wrongNumber() {
     return [const Text("Wrong contest number")];
   }
 
-  void onChangeDataPress(BuildContext context) async {
+  void _onAddTask(BuildContext context) async {
+    if (_form2Key.currentState!.validate()) {
+      var user = RepositoryProvider.of<UserRepository>(context).user;
+      String token = user?.jwt ?? "";
+      try {
+        var newTasks = tasks.map((e) => e.id).toList();
+        newTasks.add(int.parse(controllerTaskId.text));
+        int res = await RepositoryProvider.of<ContestRepository>(context)
+            .setTasksToContest(
+          token,
+          contest!.id,
+          newTasks
+        );
+        if (context.mounted) {
+          String value;
+          switch (res) {
+            case 200:
+              value = "Successfully added task";
+              break;
+            default:
+              value = "Something went wrong";
+              break;
+          }
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(value)));
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("Error")));
+      }
+    }
+  }
+
+  void _onChangeDataPress(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       var user = RepositoryProvider.of<UserRepository>(context).user;
       String token = user?.jwt ?? "";
@@ -112,11 +208,12 @@ class _AdminContestPageState extends State<AdminContestPage> {
               value = "Something went wrong";
               break;
           }
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(value)));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(value)));
         }
-      }
-      catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error")));
+      } catch (e) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("Error")));
       }
     }
   }
