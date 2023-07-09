@@ -30,7 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Template(
       content: Center(
         child: userInfo == null
-            ? const CircularProgressIndicator()
+            ? const Center(child: CircularProgressIndicator())
             : Column(
                 children: <Widget>[
                   const CircleAvatar(

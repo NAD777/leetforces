@@ -46,7 +46,7 @@ class _ContestPageState extends State<ContestPage> {
   Widget build(BuildContext context) {
     return Template(
       content: contest == null
-          ? const CircularProgressIndicator()
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 Row(

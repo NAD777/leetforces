@@ -34,7 +34,7 @@ class _AdminTemplateState extends State<AdminTemplate> {
   Widget build(BuildContext context) {
     return Template(
       content:
-          admin ? widget.content : const CircularProgressIndicator(),
+          admin ? widget.content : const Center(child: CircularProgressIndicator()),
     );
   }
 }
