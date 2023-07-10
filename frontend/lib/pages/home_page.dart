@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/contest_repository.dart';
+import 'package:frontend/repositories/user_repository.dart';
 import 'package:frontend/widgets/template.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,6 +16,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late List<ContestSimple> list;
+  bool isAdmin = false;
 
   @override
   void initState() {
@@ -23,6 +25,11 @@ class _HomePageState extends State<HomePage> {
         .then((value) {
       setState(() {
         list = value;
+      });
+    });
+    RepositoryProvider.of<UserRepository>(context).getUserInfo().then((value) {
+      setState(() {
+        isAdmin = value.role == "Role.admin" || value.role == "Role.superAdmin";
       });
     });
     list = [];
@@ -38,6 +45,14 @@ class _HomePageState extends State<HomePage> {
             Card(
               child: ListTile(
                 title: Text(e.name),
+                trailing: isAdmin
+                    ? IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          context.go("/admin/contest/${e.id}");
+                        },
+                      )
+                    : null,
                 onTap: () {
                   context.go("/contest/${e.id}");
                 },
