@@ -4,6 +4,7 @@ import 'package:frontend/env/config.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/contest.dart';
+import '../models/tag.dart';
 import '../models/task.dart';
 
 class ContestRepository {
@@ -41,7 +42,7 @@ class ContestRepository {
           name: json["name"],
           description: json["description"],
           tasks: d,
-          tags: (json["tags"] as List).map((tag) => tag as String).toList());
+          tags: (json["tags"] as List<dynamic>).map((tag) => Tag(tag["id"], tag["name"])).toList());
     } else {
       throw Exception();
     }

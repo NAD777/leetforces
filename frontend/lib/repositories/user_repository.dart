@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/tag.dart';
 import '../models/user.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend/env/config.dart';
@@ -54,8 +55,8 @@ class UserRepository {
         "Authorization": _user!.jwt,
       },
     );
-    Map<String, dynamic> resp = jsonDecode(response.body);
-    var tags = (resp["tags"] as List).map((tag) => tag as String).toList();
+    var resp = jsonDecode(response.body) as Map<String, dynamic>;
+    var tags = (resp["tags"] as List<dynamic>).map((tag) => Tag(tag["id"], tag["name"])).toList();
     return UserInfo(resp["login"], resp["role"], resp["email"], tags);
   }
 }

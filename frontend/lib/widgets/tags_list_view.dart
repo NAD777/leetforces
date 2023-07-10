@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/tag.dart';
 import 'package:go_router/go_router.dart';
 
 class TagsListView extends StatelessWidget {
@@ -10,7 +11,7 @@ class TagsListView extends StatelessWidget {
     this.onCreate,
   });
 
-  final List<String> tags;
+  final List<Tag> tags;
   final bool isAdmin;
   final Function(int)? onDelete;
   final Function(String)? onCreate;
@@ -24,11 +25,11 @@ class TagsListView extends StatelessWidget {
         tags.length,
         (index) => Chip(
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          label: Text(tags[index]),
+          label: Text(tags[index].name),
           deleteIcon: isAdmin ? const Icon(Icons.close) : null,
           onDeleted: isAdmin
               ? () {
-                  onDelete!(index);
+                  onDelete!(tags[index].id);
                 }
               : null,
         ),

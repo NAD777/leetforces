@@ -1,3 +1,4 @@
+import 'package:frontend/models/tag.dart';
 import 'package:frontend/models/task.dart';
 
 class ContestSimple {
@@ -10,7 +11,7 @@ class ContestSimple {
 class Contest extends ContestSimple {
   String description;
   List<SimpleTask> tasks;
-  List<String> tags;
+  List<Tag> tags;
 
   Contest(
       {required super.id,
