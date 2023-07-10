@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:frontend/repositories/task_repository.dart';
 import 'package:frontend/repositories/user_repository.dart';
 import 'package:frontend/widgets/template.dart';
@@ -121,7 +122,7 @@ class TaskDescription extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              Text(task.description),
+              MarkdownBody(data: task.description, selectable: true,),
             ],
           ),
         ),
