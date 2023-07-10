@@ -5,6 +5,7 @@ import 'package:frontend/repositories/task_repository.dart';
 import 'package:frontend/widgets/tags_list_view.dart';
 
 import '../models/contest.dart';
+import '../models/tag.dart';
 import '../models/task.dart';
 import '../repositories/user_repository.dart';
 import '../widgets/admit_template.dart';
@@ -82,17 +83,10 @@ class _AdminContestPageState extends State<AdminContestPage> {
                             hintText: contest!.description),
                       ),
                       TagsListView(
-                        tags: contest!.tags,
-                        isAdmin: true,
-                        onDelete: (id) {
-                          // TODO: implement deletion of tag by given int id
-                          print("Delete $id");
-                        },
-                        onCreate: (name) {
-                          // TODO: implement adding of tag by given String name
-                          print("Create $name");
-                        },
-                      ),
+                          tags: contest!.tags,
+                          isAdmin: true,
+                          onDelete: _onTagDeleted,
+                          onCreate: _onTagAdded),
                       ElevatedButton(
                         onPressed: () => _onChangeDataPress(context),
                         child: const Text("Change data"),
@@ -100,8 +94,7 @@ class _AdminContestPageState extends State<AdminContestPage> {
                       TextFormField(
                         controller: controllerTaskId,
                         decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: "Task id"),
+                            border: OutlineInputBorder(), hintText: "Task id"),
                       ),
                       Form(
                         key: _form2Key,
@@ -136,6 +129,68 @@ class _AdminContestPageState extends State<AdminContestPage> {
     );
   }
 
+  void _onTagDeleted(int id) async {
+    if (id == 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Deleting this tag is forbidden")));
+      return;
+    }
+    var user = RepositoryProvider.of<UserRepository>(context).user;
+    if (await RepositoryProvider.of<ContestRepository>(context)
+        .removeTagFromContest(user!.jwt, contest!, id)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Successfully deleted a tag")));
+        setState(() {
+          contest!.tags.removeWhere((element) => element.id == id);
+        });
+      }
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to delete a tag")));
+      }
+    }
+  }
+
+  void _onTagAdded(String name) async {
+    var user = RepositoryProvider.of<UserRepository>(context).user;
+    var tags =
+        await RepositoryProvider.of<ContestRepository>(context).getAllTags();
+    int? tagsId;
+    if (!tags.any((element) => element.name == name)) {
+      if (context.mounted) {
+        tagsId = await RepositoryProvider.of<ContestRepository>(context)
+            .addTag(user!.jwt, name);
+        if (tagsId == null) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Could not create a new tag")));
+          }
+          return;
+        }
+      }
+    }
+    tagsId ??= tags.where((element) => element.name == name).first.id;
+    if (context.mounted) {
+      if (await RepositoryProvider.of<ContestRepository>(context)
+          .addTagToContest(user!.jwt, contest!, tagsId)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Successfully added tag to the contest")));
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Failure while adding tag to the contest")));
+        }
+      }
+    }
+    setState(() {
+      contest!.tags.add(Tag(tagsId!, name));
+    });
+  }
+
   Future<ListView> _tasksAsChildren(BuildContext context) async {
     List<DataRow> res = [];
     for (var task in tasks) {
@@ -144,8 +199,10 @@ class _AdminContestPageState extends State<AdminContestPage> {
           cells: [
             DataCell(Text(task.id.toString())),
             DataCell(Text(task.name)),
-            DataCell(ElevatedButton(onPressed: () => _onDeleteTask(context, task.id),
-            child: const Text("Delete"),))
+            DataCell(ElevatedButton(
+              onPressed: () => _onDeleteTask(context, task.id),
+              child: const Text("Delete"),
+            ))
           ],
         ),
       );
@@ -175,17 +232,12 @@ class _AdminContestPageState extends State<AdminContestPage> {
         var oldTask = taskId;
         if (newTasks.contains(oldTask)) {
           newTasks.remove(oldTask);
-        }
-        else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text("Task does not exist")));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Task does not exist")));
         }
         int res = await RepositoryProvider.of<ContestRepository>(context)
-            .setTasksToContest(
-            token,
-            contest!.id,
-            newTasks
-        );
+            .setTasksToContest(token, contest!.id, newTasks);
         if (context.mounted) {
           String value;
           switch (res) {
