@@ -234,7 +234,7 @@ def current_user_info(current_user):
         'role': str(current_user.role),
         'email': current_user.email,
         'chat_id': current_user.chat_id,
-        'tags': [x.name for x in current_user.tags]
+        'tags': [tag.to_dict() for tag in current_user.tags]
     }), 200
 
 
