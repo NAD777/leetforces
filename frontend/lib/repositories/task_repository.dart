@@ -80,4 +80,44 @@ class TaskRepository {
       throw Exception(json['message']);
     }
   }
+
+  Future<bool> editTask(String token, int taskId,
+      {String? name,
+      String? description,
+      int? memoryLimit,
+      int? timeLimit,
+      int? amountOfTests,
+      String? masterFilename,
+      String? masterSolution}) async {
+    var dict = <String, dynamic>{};
+    if (name != null) {
+      dict["name"] = name;
+    }
+    if (description != null) {
+      dict["description"] = description;
+    }
+    if (memoryLimit != null) {
+      dict["memory_limit"] = memoryLimit;
+    }
+    if (timeLimit != null) {
+      dict["time_limit"] = timeLimit;
+    }
+    if (amountOfTests != null) {
+      dict["amount_of_tests"] = amountOfTests;
+    }
+    if (masterFilename != null) {
+      dict["master_filename"] = masterFilename;
+    }
+    if (masterSolution != null) {
+      dict["master_solution"] = masterSolution;
+    }
+    var json = jsonEncode(dict);
+    var response = await http.post(Uri.parse("$host/edit_task"),
+        headers: <String, String>{
+          "Authorization": token,
+          "Content-Type": "application/json"
+        },
+        body: json);
+    return response.statusCode == 200;
+  }
 }
