@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:frontend/repositories/contest_repository.dart';
 import 'package:frontend/repositories/task_repository.dart';
 import 'package:frontend/widgets/tags_list_view.dart';
@@ -47,40 +48,53 @@ class _ContestPageState extends State<ContestPage> {
     return Template(
       content: contest == null
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Row(
-                  children: [
-                    Text(contest!.name, style: const TextStyle(fontSize: 30)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    TagsListView(
-                      tags: contest!.tags,
-                      isAdmin: false,
+          : ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 1000,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 1000,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Text(contest!.description,
-                        style: const TextStyle(fontSize: 24)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                for (var e in tasks)
-                  Card(
-                    child: ListTile(
-                      title: Text(e.name),
-                      onTap: () {
-                        context.go("/task/${e.id}");
-                      },
+                    child: Text(
+                      contest!.name,
+                      style: const TextStyle(fontSize: 30),
                     ),
                   ),
-              ],
+                  const SizedBox(height: 10),
+                  TagsListView(
+                    tags: contest!.tags,
+                    isAdmin: false,
+                  ),
+                  const SizedBox(height: 10),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 1000,
+                    ),
+                    child: MarkdownBody(
+                      data: contest!.description,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  for (var e in tasks)
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: 1000,
+                      ),
+                      child: Card(
+                        child: ListTile(
+                          title: Text(e.name),
+                          onTap: () {
+                            context.go("/task/${e.id}");
+                          },
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
     );
   }

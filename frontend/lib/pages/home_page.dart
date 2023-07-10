@@ -42,20 +42,25 @@ class _HomePageState extends State<HomePage> {
       content: Column(
         children: [
           for (var e in list)
-            Card(
-              child: ListTile(
-                title: Text(e.name),
-                trailing: isAdmin
-                    ? IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () {
-                          context.go("/admin/contest/${e.id}");
-                        },
-                      )
-                    : null,
-                onTap: () {
-                  context.go("/contest/${e.id}");
-                },
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 1000,
+              ),
+              child: Card(
+                child: ListTile(
+                  title: Text(e.name),
+                  trailing: isAdmin
+                      ? IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            context.go("/admin/contest/${e.id}");
+                          },
+                        )
+                      : null,
+                  onTap: () {
+                    context.go("/contest/${e.id}");
+                  },
+                ),
               ),
             ),
         ],
