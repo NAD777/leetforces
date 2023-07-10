@@ -122,7 +122,10 @@ class TaskDescription extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              MarkdownBody(data: task.description, selectable: true,),
+              MarkdownBody(
+                data: task.description,
+                selectable: true,
+              ),
             ],
           ),
         ),
@@ -145,6 +148,7 @@ class TaskSubmission extends StatefulWidget {
 class _TaskSubmissionState extends State<TaskSubmission> {
   late String language;
   late Uint8List data;
+  String? fileName;
   late bool isAdmin;
 
   @override
@@ -156,6 +160,7 @@ class _TaskSubmissionState extends State<TaskSubmission> {
     });
     language = languages.first;
     isAdmin = false;
+    super.initState();
   }
 
   @override
@@ -166,127 +171,151 @@ class _TaskSubmissionState extends State<TaskSubmission> {
           Card(
             child: Center(
               child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 15.0, horizontal: 15.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Upload solution',
-                        style: TextStyle(
-                          fontSize: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.fontSize,
-                        ),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 15.0, horizontal: 15.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Upload solution',
+                      style: TextStyle(
+                        fontSize: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.fontSize,
                       ),
-                      const SizedBox(height: 10),
-                      DropdownButton<String>(
-                          value: language,
-                          items: languages
-                              .map((e) =>
-                                  DropdownMenuItem(value: e, child: Text(e)))
-                              .toList(),
-                          onChanged: (e) {
-                            setState(() {
-                              language = e ?? "";
-                            });
-                          }),
-                      FilledButton(
-                        child: const Text('Choose File'),
-                        onPressed: () async {
-                          var result = await FilePicker.platform.pickFiles();
-                          if (result != null) {
-                            setState(() {
-                              data = result.files.first.bytes ?? Uint8List(0);
-                            });
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 5),
-                      FilledButton(
-                        onPressed: () async {
-                          if (language.isEmpty) {
-                            ScaffoldMessenger.of(context)
-                              ..hideCurrentSnackBar()
-                              ..showSnackBar(const SnackBar(
-                                  content: Text("Choose language first")));
-                            return;
-                          }
-                          if (context.mounted) {
-                            var user =
-                                RepositoryProvider.of<UserRepository>(context)
-                                    .user!;
-                            RepositoryProvider.of<TaskRepository>(context)
-                                .submitSolution(
-                                    user.jwt, widget.task, data, language);
-                          }
-                        },
-                        child: const Text('Submit'),
-                      ),
-                    ],
-                  )),
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButton<String>(
+                      value: language,
+                      items: languages
+                          .map((e) => DropdownMenuItem(
+                                value: e,
+                                child: Text(e),
+                              ))
+                          .toList(),
+                      onChanged: (e) {
+                        setState(() {
+                          language = e ?? "";
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 5),
+                    FilledButton(
+                      child: const Text('Choose File'),
+                      onPressed: () async {
+                        var result = await FilePicker.platform.pickFiles();
+                        if (result != null) {
+                          setState(() {
+                            data = result.files.first.bytes ?? Uint8List(0);
+                            fileName = result.names.first;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    Text(fileName ?? "No file selected"),
+                    const SizedBox(height: 10),
+                    FilledButton(
+                      onPressed: () async {
+                        if (language.isEmpty) {
+                          ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar()
+                            ..showSnackBar(const SnackBar(
+                              content: Text("Choose language first"),
+                            ));
+                          return;
+                        }
+                        if (context.mounted) {
+                          var user =
+                              RepositoryProvider.of<UserRepository>(context)
+                                  .user!;
+                          RepositoryProvider.of<TaskRepository>(context)
+                              .submitSolution(
+                            user.jwt,
+                            widget.task,
+                            data,
+                            language,
+                          );
+                        }
+                      },
+                      child: const Text('Submit'),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 18),
-              child: Table(
-                columnWidths: isAdmin
-                    ? const {
-                        0: IntrinsicColumnWidth(),
-                        1: IntrinsicColumnWidth(),
-                        2: FlexColumnWidth(),
-                        3: IntrinsicColumnWidth(),
-                      }
-                    : const {
-                        0: IntrinsicColumnWidth(),
-                        1: FlexColumnWidth(),
-                        2: IntrinsicColumnWidth(),
-                      },
-                children: <TableRow>[
-                  TableRow(
-                    children: <TableCell>[
-                      if (isAdmin) const TableCell(child: Text("User")),
-                      const TableCell(
-                          child: Row(children: [
-                        Text("Id"),
-                        SizedBox(
-                          width: 30,
-                        )
-                      ])),
-                      const TableCell(child: Text("Submission time")),
-                      const TableCell(
-                        child: Row(
-                          children: [
-                            Text("Status"),
-                            SizedBox(
-                              width: 20,
-                            ),
-                          ],
+          const SizedBox(height: 10),
+          Expanded(
+            child: Card(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 18),
+                child: Table(
+                  columnWidths: isAdmin
+                      ? const {
+                          0: IntrinsicColumnWidth(),
+                          1: IntrinsicColumnWidth(),
+                          2: FlexColumnWidth(),
+                          3: IntrinsicColumnWidth(),
+                        }
+                      : const {
+                          0: IntrinsicColumnWidth(),
+                          1: FlexColumnWidth(),
+                          2: IntrinsicColumnWidth(),
+                        },
+                  children: <TableRow>[
+                    TableRow(
+                      children: <TableCell>[
+                        if (isAdmin) const TableCell(child: Text("User")),
+                        const TableCell(
+                          child: Row(
+                            children: [
+                              Text("Id"),
+                              SizedBox(
+                                width: 30,
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  ...widget.submissions
-                      .map((e) => TableRow(children: <TableCell>[
-                            if (isAdmin)
+                        const TableCell(child: Text("Submission time")),
+                        const TableCell(
+                          child: Row(
+                            children: [
+                              Text("Status"),
+                              SizedBox(
+                                width: 20,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    ...widget.submissions
+                        .map(
+                          (e) => TableRow(
+                            children: <TableCell>[
+                              if (isAdmin)
+                                TableCell(
+                                  child: Text(e.userId.toString()),
+                                ),
                               TableCell(
-                                child: Text(e.userId.toString()),
+                                child: InkWell(
+                                  child: Text(e.submissionId.toString()),
+                                  onTap: () {
+                                    context.go("/submission/${e.submissionId}");
+                                  },
+                                ),
                               ),
-                            TableCell(
-                              child: InkWell(
-                                child: Text(e.submissionId.toString()),
-                                onTap: () {
-                                  context.go("/submission/${e.submissionId}");
-                                },
-                              ),
-                            ),
-                            TableCell(child: Text(e.submissionTime)),
-                            TableCell(child: Text(e.status ?? "Checking...")),
-                          ]))
-                      .toList()
-                ],
+                              TableCell(child: Text(e.submissionTime)),
+                              TableCell(child: Text(e.status ?? "Checking...")),
+                            ],
+                          ),
+                        )
+                        .toList()
+                  ],
+                ),
               ),
             ),
           )
