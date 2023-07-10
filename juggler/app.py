@@ -871,16 +871,19 @@ def get_submission(current_user, task_id):
             'status': 'Error',
             'message': f'Task does not exists'
         }), 404
-
+    res = []
     if current_user.role == Role.user:
-        return jsonify([
-            sub.to_dict() for sub in session.query(Submission).filter(Submission.user_id == current_user.id,
-                                                                      Submission.task_id == task_id)
-        ]), 200
+        for sub in session.query(Submission).filter(Submission.user_id == current_user.id, Submission.task_id == task_id):
+            submission = sub.to_dict()
+            submission["user_login"] = current_user.login
+            res.append(submission)
     else:
-        return jsonify([
-            sub.to_dict() for sub in session.query(Submission).filter(Submission.task_id == task_id)
-        ]), 200
+        for sub in session.query(Submission).filter(Submission.task_id == task_id):
+            submission = sub.to_dict()
+            user = session.query(User).filter(User.id == sub.user_id).first()
+            submission["user_login"] = user.login
+            res.append(submission)
+    return jsonify(res), 200
 
 
 
