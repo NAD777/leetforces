@@ -24,6 +24,17 @@ class TaskRepository {
     }
   }
 
+  Future<TaskInfo> getTaskInfo(int taskId) async {
+    var response = await http.get(Uri.parse("$host/get_task_info/$taskId"));
+    var json = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 200) {
+      return TaskInfo(
+          json["master_filename"], json["master_file"], json["amount_test"]);
+    } else {
+      throw Exception();
+    }
+  }
+
   Future<void> submitSolution(
       String jwt, Task task, Uint8List submission, String language) async {
     var b64 = base64.encode(submission.toList());
@@ -89,7 +100,7 @@ class TaskRepository {
       int? amountOfTests,
       String? masterFilename,
       String? masterSolution}) async {
-    var dict = <String, dynamic>{};
+    var dict = <String, dynamic>{"task_id": taskId};
     if (name != null) {
       dict["name"] = name;
     }
