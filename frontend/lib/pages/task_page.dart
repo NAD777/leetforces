@@ -49,6 +49,7 @@ class _TaskPageState extends State<TaskPage> {
   @override
   Widget build(BuildContext context) {
     return Template(
+      scrollable: false,
       content: task == null
           ? const Center(
               child: CircularProgressIndicator(),
