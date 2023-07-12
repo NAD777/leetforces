@@ -41,6 +41,10 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: "/admin/task",
+        builder: (context, state) => const AdminTaskPage(),
+      ),
+      GoRoute(
         path: "/admin/task/:id",
         builder: (context, state) => AdminTaskPage(
           taskId: int.parse(state.pathParameters["id"]!),

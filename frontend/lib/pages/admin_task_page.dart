@@ -6,13 +6,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/models/task.dart';
 import 'package:frontend/repositories/task_repository.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:go_router/go_router.dart';
 import '../repositories/user_repository.dart';
 import '../widgets/admit_template.dart';
 
 class AdminTaskPage extends StatefulWidget {
-  final int taskId;
+  final int? taskId;
 
-  const AdminTaskPage({super.key, required this.taskId});
+  const AdminTaskPage({super.key, this.taskId});
 
   @override
   State<StatefulWidget> createState() => _AdminTaskPageState();
@@ -32,8 +33,12 @@ class _AdminTaskPageState extends State<AdminTaskPage> {
 
   @override
   void initState() {
+    if (widget.taskId == null) {
+      task = Task(0, "", 0, 0, 0, "");
+      return;
+    }
     RepositoryProvider.of<TaskRepository>(context)
-        .getTask(widget.taskId)
+        .getTask(widget.taskId!)
         .then((value) {
       setState(() {
         task = value;
@@ -43,7 +48,7 @@ class _AdminTaskPageState extends State<AdminTaskPage> {
       controllerMemoryLimit.text = value.memoryLimit.toString();
       controllerTimeLimit.text = value.timeLimit.toString();
       RepositoryProvider.of<TaskRepository>(context)
-          .getTaskInfo(widget.taskId)
+          .getTaskInfo(widget.taskId!)
           .then((value) {
         controllerAmountOfTests.text = value.testsCount.toString();
         controllerFileName.text = value.masterFilename;
@@ -65,12 +70,25 @@ class _AdminTaskPageState extends State<AdminTaskPage> {
             if (intV <= 0) {
               return "Must be positive";
             }
+            if (widget.taskId == null) {
+              if (val.isEmpty) {
+                return "Must not be empty";
+              }
+            }
             return null;
           }
-        : null;
+        : (val) {
+            if (widget.taskId == null) {
+              if (val.isEmpty) {
+                return "Must not be empty";
+              }
+            }
+            return null;
+          };
     return TableRow(
       children: [
         TableCell(
+          verticalAlignment: TableCellVerticalAlignment.middle,
           child: Text(label),
         ),
         TableCell(
@@ -164,25 +182,47 @@ class _AdminTaskPageState extends State<AdminTaskPage> {
                 if (data != null) {
                   file = base64.encode(data!.toList());
                 }
-                RepositoryProvider.of<TaskRepository>(context)
-                    .editTask(
-                  user.jwt,
-                  task!.id,
-                  name: controllerName.text,
-                  description: controllerDescription.text,
-                  memoryLimit: int.tryParse(controllerMemoryLimit.text),
-                  timeLimit: int.tryParse(controllerTimeLimit.text),
-                  amountOfTests: int.tryParse(controllerAmountOfTests.text),
-                  masterFilename: controllerFileName.text,
-                  masterSolution: file,
-                )
-                    .then((value) {
-                  setState(() {
-                    data = null;
+                if (widget.taskId == null) {
+                  if (data == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Select master solution")));
+                    return;
+                  }
+                  RepositoryProvider.of<TaskRepository>(context)
+                      .createTask(
+                    user.jwt,
+                    controllerName.text,
+                    controllerDescription.text,
+                    int.parse(controllerMemoryLimit.text),
+                    int.parse(controllerTimeLimit.text),
+                    int.parse(controllerAmountOfTests.text),
+                    controllerFileName.text,
+                    file!,
+                  )
+                      .then((value) {
+                    context.go("/task/$value");
                   });
-                });
+                } else {
+                  RepositoryProvider.of<TaskRepository>(context)
+                      .editTask(
+                    user.jwt,
+                    widget.taskId!,
+                    name: controllerName.text,
+                    description: controllerDescription.text,
+                    memoryLimit: int.parse(controllerMemoryLimit.text),
+                    timeLimit: int.parse(controllerTimeLimit.text),
+                    amountOfTests: int.parse(controllerAmountOfTests.text),
+                    masterFilename: controllerFileName.text,
+                    masterSolution: file,
+                  )
+                      .then((value) {
+                    setState(() {
+                      data = null;
+                    });
+                  });
+                }
               },
-              child: const Text("Update"),
+              child: Text(widget.taskId == null ? "Create" : "Update"),
             ),
           ),
         ],
