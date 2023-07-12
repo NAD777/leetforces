@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/authentication_repository.dart';
@@ -54,7 +56,7 @@ class _LoginPage extends State<LoginPage> {
                   RepositoryProvider.of<UserRepository>(context).setUser(value);
                   context.go("/");
                 }).catchError((e) {
-                  print(e);
+                  log(e);
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
                     ..showSnackBar(
