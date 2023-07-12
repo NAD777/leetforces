@@ -131,4 +131,36 @@ class TaskRepository {
         body: json);
     return response.statusCode == 200;
   }
+
+  Future<int> createTask(
+      String token,
+      String name,
+      String description,
+      int memoryLimit,
+      int timeLimit,
+      int amountOfTests,
+      String masterFilename,
+      String masterSolution) async {
+    var dict = <String, dynamic>{
+      "name": name,
+      "description": description,
+      "memory_limit": memoryLimit,
+      "time_limit": timeLimit,
+      "amount_of_tests": amountOfTests,
+      "master_filename": masterFilename,
+      "master_solution": masterSolution,
+    };
+    var json = jsonEncode(dict);
+    var response = await http.post(Uri.parse("$host/create_task"),
+        headers: <String, String>{
+          "Authorization": token,
+          "Content-Type": "application/json"
+        },
+        body: json);
+    var resp = jsonDecode(response.body);
+    if ((response.statusCode == 200)) {
+      return resp["task_number"];
+    }
+    throw Exception(resp["message"]);
+  }
 }

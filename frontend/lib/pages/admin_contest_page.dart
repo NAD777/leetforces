@@ -24,7 +24,6 @@ class _AdminContestPageState extends State<AdminContestPage> {
   late List<Task> tasks;
 
   final _formKey = GlobalKey<FormState>();
-  final _form2Key = GlobalKey<FormState>();
 
   TextEditingController controllerName = TextEditingController();
   TextEditingController controllerDescription = TextEditingController();
@@ -58,97 +57,87 @@ class _AdminContestPageState extends State<AdminContestPage> {
   @override
   Widget build(BuildContext context) {
     return AdminTemplate(
-      content: Column(
-        children: [
-          Form(
-            key: _formKey,
-            child: Column(
-              children: contest == null
-                  ? _wrongNumber()
-                  : [
-                      Text(contest!.name),
-                      const Text("Edit name of the contest:"),
-                      TextFormField(
-                        controller: controllerName,
-                        decoration: InputDecoration(
+        content: Column(children: [
+      Form(
+          key: _formKey,
+          child: Column(
+            children: contest == null
+                ? [const Text("Wrong contest number")]
+                : [
+                    Text(contest!.name),
+                    const Text("Edit name of the contest:"),
+                    TextFormField(
+                      controller: controllerName,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        hintText: contest!.name,
+                      ),
+                    ),
+                    const Text("Edit description of the contest:"),
+                    TextFormField(
+                      controller: controllerDescription,
+                      decoration: InputDecoration(
                           border: const OutlineInputBorder(),
-                          hintText: contest!.name,
-                        ),
-                      ),
-                      const Text("Edit description of the contest:"),
-                      TextFormField(
-                        controller: controllerDescription,
-                        decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            hintText: contest!.description),
-                      ),
-                      TagsListView(
-                          tags: contest!.tags,
-                          isAdmin: true,
-                          onDelete: _onTagDeleted,
-                          onCreate: _onTagAdded),
-                      ElevatedButton(
-                        onPressed: () => _onChangeDataPress(context),
-                        child: const Text("Change data"),
-                      ),
-                      TextFormField(
-                        controller: controllerTaskId,
-                        decoration: const InputDecoration(
-                            border: OutlineInputBorder(), hintText: "Task id"),
-                      ),
-                      Form(
-                        key: _form2Key,
-                        child: Column(
-                          children: [
-                            ElevatedButton(
-                                onPressed: () => _onAddTask(context),
-                                child: const Text("Add task by id")),
-                            FutureBuilder<ListView>(
-                              future: _tasksAsChildren(context),
-                              builder: (context, snapshot) {
-                                switch (snapshot.connectionState) {
-                                  case ConnectionState.done:
-                                    if (snapshot.hasError) {
-                                      return const Text(
-                                          "Some error has occured");
-                                    }
-                                    return snapshot.data!;
-                                  default:
-                                    return const Text("Error occured");
-                                }
-                              },
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-            ),
-          ),
-        ],
-      ),
-    );
+                          hintText: contest!.description),
+                    ),
+                    CheckboxListTile(
+                      title: const Text("Is closed"),
+                      value: contest!.isClosed,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          contest!.isClosed = value!;
+                        });
+                      },
+                    ),
+                    TagsListView(
+                        tags: contest!.tags,
+                        isAdmin: true,
+                        onDelete: _onTagDeleted,
+                        onCreate: _onTagAdded),
+                    TextFormField(
+                      controller: controllerTaskId,
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(), hintText: "Task id"),
+                    ),
+                    Column(
+                      children: [
+                        ElevatedButton(
+                            onPressed: () => _onAddTask(context),
+                            child: const Text("Add task by id")),
+                        _tasksAsChildren(context)
+                      ],
+                    ),
+                    ElevatedButton(
+                        onPressed: _onSaveChanges,
+                        child: const Text("Save changes")),
+                  ],
+          ))
+    ]));
   }
 
   void _onTagDeleted(int id) async {
-    if (id == 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Deleting this tag is forbidden")));
-      return;
-    }
+    setState(() {
+      contest!.tags.removeWhere((element) => element.id == id);
+    });
+  }
+
+  void _onSaveChanges() async {
     var user = RepositoryProvider.of<UserRepository>(context).user;
-    if (await RepositoryProvider.of<ContestRepository>(context)
-        .removeTagFromContest(user!.jwt, contest!, id)) {
+    if (await RepositoryProvider.of<ContestRepository>(context).editContest(
+        user!.jwt, contest!.id,
+        name: controllerName.text,
+        description: controllerDescription.text,
+        tasks: tasks.map((e) => e.id).toList(),
+        tags: contest!.tags.map((e) => e.id).toList(),
+        isClosed: contest!.isClosed)) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Successfully deleted a tag")));
-        setState(() {
-          contest!.tags.removeWhere((element) => element.id == id);
-        });
+            const SnackBar(content: Text("Successfully updated the contest")));
       }
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Failed to delete a tag")));
+            const SnackBar(content: Text("Could not update contest")));
       }
     }
   }
@@ -170,28 +159,15 @@ class _AdminContestPageState extends State<AdminContestPage> {
           return;
         }
       }
-    }
-    tagsId ??= tags.where((element) => element.name == name).first.id;
-    if (context.mounted) {
-      if (await RepositoryProvider.of<ContestRepository>(context)
-          .addTagToContest(user!.jwt, contest!, tagsId)) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("Successfully added tag to the contest")));
-        }
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("Failure while adding tag to the contest")));
-        }
-      }
+    } else {
+      tagsId = tags.where((element) => element.name == name).first.id;
     }
     setState(() {
       contest!.tags.add(Tag(tagsId!, name));
     });
   }
 
-  Future<ListView> _tasksAsChildren(BuildContext context) async {
+  ListView _tasksAsChildren(BuildContext context) {
     List<DataRow> res = [];
     for (var task in tasks) {
       res.add(
@@ -219,115 +195,22 @@ class _AdminContestPageState extends State<AdminContestPage> {
     );
   }
 
-  List<Widget> _wrongNumber() {
-    return [const Text("Wrong contest number")];
-  }
-
   void _onDeleteTask(BuildContext context, int taskId) async {
-    if (_form2Key.currentState!.validate()) {
-      var user = RepositoryProvider.of<UserRepository>(context).user;
-      String token = user?.jwt ?? "";
-      try {
-        var newTasks = tasks.map((e) => e.id).toList();
-        var oldTask = taskId;
-        if (newTasks.contains(oldTask)) {
-          newTasks.remove(oldTask);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Task does not exist")));
-        }
-        int res = await RepositoryProvider.of<ContestRepository>(context)
-            .setTasksToContest(token, contest!.id, newTasks);
-        if (context.mounted) {
-          String value;
-          switch (res) {
-            case 200:
-              value = "Successfully removed task";
-              break;
-            default:
-              value = "Something went wrong";
-              break;
-          }
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(value)));
-          setState(() {
-            tasks.removeWhere((element) => element.id == oldTask);
-          });
-        }
-      } catch (e) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Error")));
-      }
-    }
+    setState(() => tasks.removeWhere((element) => element.id == taskId));
   }
 
   void _onAddTask(BuildContext context) async {
-    if (_form2Key.currentState!.validate()) {
-      var user = RepositoryProvider.of<UserRepository>(context).user;
-      String token = user?.jwt ?? "";
-      try {
-        var newTasks = tasks.map((e) => e.id).toList();
-        var newTask = int.parse(controllerTaskId.text);
-        newTasks.add(newTask);
-        int res = await RepositoryProvider.of<ContestRepository>(context)
-            .setTasksToContest(token, contest!.id, newTasks);
-        if (context.mounted) {
-          String value;
-          switch (res) {
-            case 200:
-              value = "Successfully added task";
-              break;
-            default:
-              value = "Something went wrong";
-              break;
-          }
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(value)));
-          var task = await RepositoryProvider.of<TaskRepository>(context)
-              .getTask(newTask);
-          setState(() {
-            tasks.add(task);
-          });
-        }
-      } catch (e) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Error")));
-      }
+    int newTask;
+    try {
+      newTask = int.parse(controllerTaskId.text);
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Wrong task format")));
+      return;
     }
-  }
+    var task =
+        await RepositoryProvider.of<TaskRepository>(context).getTask(newTask);
 
-  void _onChangeDataPress(BuildContext context) async {
-    if (_formKey.currentState!.validate()) {
-      var user = RepositoryProvider.of<UserRepository>(context).user;
-      String token = user?.jwt ?? "";
-      try {
-        int res = await RepositoryProvider.of<ContestRepository>(context)
-            .editContestNameAndDescription(
-          token,
-          contest!.id,
-          controllerName.text,
-          controllerDescription.text,
-        );
-        if (context.mounted) {
-          String value;
-          switch (res) {
-            case 200:
-              value = "Success";
-              break;
-            case 403:
-              value = "Forbidden";
-              break;
-            default:
-              value = "Something went wrong";
-              break;
-          }
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(value)));
-        }
-      } catch (e) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Error")));
-      }
-    }
+    setState(() => tasks.add(task));
   }
 }

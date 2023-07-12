@@ -44,39 +44,47 @@ class ContestRepository {
           tasks: d,
           tags: (json["tags"] as List<dynamic>)
               .map((tag) => Tag(tag["id"], tag["name"]))
-              .toList());
+              .toList(),
+          isClosed: json["is_closed"]);
     } else {
       throw Exception();
     }
   }
 
-  Future<int> editContestNameAndDescription(
-      String auth, int contestId, String name, String description) async {
+  Future<bool> editContest(String auth, int contestId,
+      {String? name,
+      String? description,
+      List<int>? tasks,
+      int? authorId,
+      bool? isClosed,
+      List<int>? tags}) async {
+    var dict = <String, dynamic>{"contest_id": contestId};
+    if (name != null) {
+      dict["contest_name"] = name;
+    }
+    if (description != null) {
+      dict["description"] = description;
+    }
+    if (tasks != null) {
+      dict["tasks_ids"] = tasks;
+    }
+    if (authorId != null) {
+      dict["author_id"] = authorId;
+    }
+    if (isClosed != null) {
+      dict["is_closed"] = isClosed;
+    }
+    if (tags != null) {
+      dict["tags"] = tags;
+    }
+    var json = jsonEncode(dict);
     var response = await http.post(Uri.parse("$host/edit_contest"),
         headers: <String, String>{
           "Authorization": auth,
           "Content-Type": "application/json"
         },
-        body: jsonEncode(<String, dynamic>{
-          "contest_id": contestId,
-          "contest_name": name,
-          "description": description,
-        }));
-    // var json = jsonDecode(response.body) as Map<String, dynamic>;
-
-    return response.statusCode;
-  }
-
-  Future<int> setTasksToContest(
-      String auth, int contestId, List<int> tasks) async {
-    var response = await http.post(Uri.parse("$host/edit_contest"),
-        headers: <String, String>{
-          "Authorization": auth,
-          "Content-Type": "application/json"
-        },
-        body: jsonEncode(
-            <String, dynamic>{"contest_id": contestId, "tasks_ids": tasks}));
-    return response.statusCode;
+        body: json);
+    return response.statusCode == 200;
   }
 
   Future<int?> addTag(String auth, String tagName) async {
@@ -100,35 +108,5 @@ class ContestRepository {
     return (json["tags_list"] as List<dynamic>)
         .map((tag) => Tag(tag["id"], tag["name"]))
         .toList();
-  }
-
-  Future<bool> addTagToContest(String auth, Contest contest, int tagId) async {
-    var response = await http.post(Uri.parse("$host/edit_contest"),
-        headers: <String, String>{
-          "Authorization": auth,
-          "Content-Type": "application/json"
-        },
-        body: jsonEncode(<String, dynamic>{
-          "contest_id": contest.id,
-          "tags": contest.tags.map((e) => e.id).followedBy({tagId}).toList()
-        }));
-    return response.statusCode == 200;
-  }
-
-  Future<bool> removeTagFromContest(
-      String auth, Contest contest, int tagId) async {
-    var response = await http.post(Uri.parse("$host/edit_contest"),
-        headers: <String, String>{
-          "Authorization": auth,
-          "Content-Type": "application/json"
-        },
-        body: jsonEncode(<String, dynamic>{
-          "contest_id": contest.id,
-          "tags": contest.tags
-              .map((e) => e.id)
-              .where((element) => element != tagId)
-              .toList()
-        }));
-    return response.statusCode == 200;
   }
 }

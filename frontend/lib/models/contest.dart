@@ -12,11 +12,13 @@ class Contest extends ContestSimple {
   String description;
   List<SimpleTask> tasks;
   List<Tag> tags;
+  bool isClosed;
 
   Contest(
       {required super.id,
       required super.name,
       required this.description,
       required this.tasks,
-      required this.tags});
+      required this.tags,
+      required this.isClosed});
 }
