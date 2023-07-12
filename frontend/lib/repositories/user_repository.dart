@@ -47,7 +47,7 @@ class UserRepository {
 
   Future<UserInfo> getUserInfo() async {
     if (user?.jwt == null) {
-      return UserInfo("guest", "Role.guest", "none", []);
+      return UserInfo(0, "guest", "Role.guest", "none", []);
     }
     var response = await http.get(
       Uri.parse("$host/current_user_info"),
@@ -56,7 +56,35 @@ class UserRepository {
       },
     );
     var resp = jsonDecode(response.body) as Map<String, dynamic>;
-    var tags = (resp["tags"] as List<dynamic>).map((tag) => Tag(tag["id"], tag["name"])).toList();
-    return UserInfo(resp["login"], resp["role"], resp["email"], tags);
+    var tags = (resp["tags"] as List<dynamic>)
+        .map((tag) => Tag(tag["id"], tag["name"]))
+        .toList();
+    return UserInfo(
+      resp["id"],
+      resp["login"],
+      resp["role"],
+      resp["email"],
+      tags,
+    );
+  }
+
+  Future<UserInfo?> searchUserInfo(String login) async {
+    var response = await http.get(
+      Uri.parse("$host/public_user_info_by_login/$login"),
+      headers: <String, String>{
+        "Authorization": _user!.jwt,
+      },
+    );
+    var resp = jsonDecode(response.body) as Map<String, dynamic>;
+    var tags = (resp["tags"] as List<dynamic>)
+        .map((tag) => Tag(tag["id"], tag["name"]))
+        .toList();
+    return UserInfo(
+      resp["id"],
+      resp["login"],
+      resp["role"],
+      resp["email"],
+      tags,
+    );
   }
 }
