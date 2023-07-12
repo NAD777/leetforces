@@ -1,11 +1,4 @@
-import 'package:frontend/pages/admin_contest_page.dart';
-import 'package:frontend/pages/admin_task_page.dart';
-import 'package:frontend/pages/contest_page.dart';
-import 'package:frontend/pages/home_page.dart';
-import 'package:frontend/pages/login_page.dart';
-import 'package:frontend/pages/profile_page.dart';
-import 'package:frontend/pages/registration_page.dart';
-import 'package:frontend/pages/task_page.dart';
+import 'package:frontend/pages/pages.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRouter {

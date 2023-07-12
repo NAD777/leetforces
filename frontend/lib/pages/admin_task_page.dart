@@ -33,6 +33,7 @@ class _AdminTaskPageState extends State<AdminTaskPage> {
 
   @override
   void initState() {
+    super.initState();
     if (widget.taskId == null) {
       task = Task(0, "", 0, 0, 0, "");
       return;

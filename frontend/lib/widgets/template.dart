@@ -20,6 +20,7 @@ class Template extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        surfaceTintColor: !scrollable ? Colors.transparent : null,
         title: GestureDetector(
             child: const Text('LeetForces'),
             onTap: () {
