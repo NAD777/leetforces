@@ -779,7 +779,7 @@ def public_user_info(user_id):
 
 @app.route('/public_user_info_by_login/<string:user_login>', methods=['GET'])
 @token_required(admin_required=True)
-def public_user_info(user_login):
+def public_user_info_by_login(user_login):
     session = create_session()
     user = session.query(User).filter(User.login == user_login).first()
     if user is None:
