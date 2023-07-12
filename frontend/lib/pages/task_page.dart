@@ -56,11 +56,14 @@ class _TaskPageState extends State<TaskPage> {
             )
           : Row(
               children: <Widget>[
-                TaskDescription(task: task!),
-                const SizedBox(width: 15),
-                TaskSubmission(
-                  task: task!,
-                  submissions: submissions,
+                Flexible(
+                  child: TaskDescription(task: task!),
+                ),
+                Flexible(
+                  child: TaskSubmission(
+                    task: task!,
+                    submissions: submissions,
+                  ),
                 ),
               ],
             ),
@@ -75,60 +78,64 @@ class TaskDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                task.name,
-                style: TextStyle(
-                  fontSize:
-                      Theme.of(context).textTheme.headlineMedium?.fontSize,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        child: CustomScrollView(
+          // crossAxisAlignment: CrossAxisAlignment.start,
+          slivers: <Widget>[
+            SliverList.list(
+              children: <Widget>[
+                Text(
+                  task.name,
+                  style: TextStyle(
+                    fontSize:
+                        Theme.of(context).textTheme.headlineMedium?.fontSize,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              Table(
-                border: TableBorder.all(),
-                columnWidths: const <int, TableColumnWidth>{
-                  0: IntrinsicColumnWidth(),
-                  1: IntrinsicColumnWidth(),
-                },
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                children: <TableRow>[
-                  TableRow(
-                    children: <Widget>[
+                const SizedBox(height: 10),
+                Table(
+                  border: TableBorder.all(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
+                  columnWidths: const <int, TableColumnWidth>{
+                    0: IntrinsicColumnWidth(),
+                    1: IntrinsicColumnWidth(),
+                  },
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  children: <TableRow>[
+                    TableRow(
+                      children: <Widget>[
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text('Time Limit'),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text('${task.timeLimit} seconds'),
+                        ),
+                      ],
+                    ),
+                    TableRow(children: <Widget>[
                       const Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: Text('Time Limit'),
+                        child: Text('Memory Limit'),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('${task.timeLimit} seconds'),
+                        child: Text('${task.memoryLimit} megabytes'),
                       ),
-                    ],
-                  ),
-                  TableRow(children: <Widget>[
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('Memory Limit'),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text('${task.memoryLimit} megabytes'),
-                    ),
-                  ]),
-                ],
-              ),
-              const SizedBox(height: 20),
-              MarkdownBody(
-                data: task.description,
-                selectable: true,
-              ),
-            ],
-          ),
+                    ]),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                MarkdownBody(
+                  data: task.description,
+                  selectable: true,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -166,93 +173,91 @@ class _TaskSubmissionState extends State<TaskSubmission> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          Card(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 15.0, horizontal: 15.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Upload solution',
-                      style: TextStyle(
-                        fontSize: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.fontSize,
-                      ),
+    return Column(
+      children: [
+        Card(
+          child: Center(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    'Upload solution',
+                    style: TextStyle(
+                      fontSize:
+                          Theme.of(context).textTheme.headlineMedium?.fontSize,
                     ),
-                    const SizedBox(height: 10),
-                    DropdownButton<String>(
-                      value: language,
-                      items: languages
-                          .map((e) => DropdownMenuItem(
-                                value: e,
-                                child: Text(e),
-                              ))
-                          .toList(),
-                      onChanged: (e) {
+                  ),
+                  const SizedBox(height: 10),
+                  DropdownButton<String>(
+                    value: language,
+                    items: languages
+                        .map((e) => DropdownMenuItem(
+                              value: e,
+                              child: Text(e),
+                            ))
+                        .toList(),
+                    onChanged: (e) {
+                      setState(() {
+                        language = e ?? "";
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 5),
+                  FilledButton(
+                    child: const Text('Choose File'),
+                    onPressed: () async {
+                      var result = await FilePicker.platform.pickFiles();
+                      if (result != null) {
                         setState(() {
-                          language = e ?? "";
+                          data = result.files.first.bytes ?? Uint8List(0);
+                          fileName = result.names.first;
                         });
-                      },
-                    ),
-                    const SizedBox(height: 5),
-                    FilledButton(
-                      child: const Text('Choose File'),
-                      onPressed: () async {
-                        var result = await FilePicker.platform.pickFiles();
-                        if (result != null) {
-                          setState(() {
-                            data = result.files.first.bytes ?? Uint8List(0);
-                            fileName = result.names.first;
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    Text(fileName ?? "No file selected"),
-                    const SizedBox(height: 10),
-                    FilledButton(
-                      onPressed: () async {
-                        if (language.isEmpty) {
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(const SnackBar(
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  Text(fileName ?? "No file selected"),
+                  const SizedBox(height: 10),
+                  FilledButton(
+                    onPressed: () async {
+                      if (language.isEmpty) {
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
+                            const SnackBar(
                               content: Text("Choose language first"),
-                            ));
-                          return;
-                        }
-                        if (context.mounted) {
-                          var user =
-                              RepositoryProvider.of<UserRepository>(context)
-                                  .user!;
-                          RepositoryProvider.of<TaskRepository>(context)
-                              .submitSolution(
-                            user.jwt,
-                            widget.task,
-                            data,
-                            language,
+                            ),
                           );
-                        }
-                      },
-                      child: const Text('Submit'),
-                    ),
-                  ],
-                ),
+                        return;
+                      }
+                      if (context.mounted) {
+                        var user =
+                            RepositoryProvider.of<UserRepository>(context)
+                                .user!;
+                        RepositoryProvider.of<TaskRepository>(context)
+                            .submitSolution(
+                          user.jwt,
+                          widget.task,
+                          data,
+                          language,
+                        );
+                      }
+                    },
+                    child: const Text('Submit'),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: Card(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8, horizontal: 18),
+        ),
+        Expanded(
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 18),
+              child: SingleChildScrollView(
                 child: Table(
                   columnWidths: isAdmin
                       ? const {
@@ -314,14 +319,14 @@ class _TaskSubmissionState extends State<TaskSubmission> {
                             ],
                           ),
                         )
-                        .toList()
+                        .toList(),
                   ],
                 ),
               ),
             ),
-          )
-        ],
-      ),
+          ),
+        )
+      ],
     );
   }
 }
