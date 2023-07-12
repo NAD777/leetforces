@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -36,7 +38,7 @@ class _TaskPageState extends State<TaskPage> {
       });
       if (userRepo.user != null) {
         RepositoryProvider.of<TaskRepository>(context)
-            .getSubmissions(userRepo.user!.jwt, value)
+            .getSubmissions(userRepo.user!.jwt, value.id)
             .then((value) => setState(() {
                   submissions = value;
                 }));
@@ -155,7 +157,7 @@ class TaskSubmission extends StatefulWidget {
 
 class _TaskSubmissionState extends State<TaskSubmission> {
   late String language;
-  late Uint8List data;
+  Uint8List? data;
   String? fileName;
   late bool isAdmin;
 
@@ -212,7 +214,7 @@ class _TaskSubmissionState extends State<TaskSubmission> {
                       var result = await FilePicker.platform.pickFiles();
                       if (result != null) {
                         setState(() {
-                          data = result.files.first.bytes ?? Uint8List(0);
+                          data = result.files.first.bytes;
                           fileName = result.names.first;
                         });
                       }
@@ -222,30 +224,34 @@ class _TaskSubmissionState extends State<TaskSubmission> {
                   Text(fileName ?? "No file selected"),
                   const SizedBox(height: 10),
                   FilledButton(
-                    onPressed: () async {
-                      if (language.isEmpty) {
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(
-                            const SnackBar(
-                              content: Text("Choose language first"),
-                            ),
-                          );
-                        return;
-                      }
-                      if (context.mounted) {
-                        var user =
-                            RepositoryProvider.of<UserRepository>(context)
-                                .user!;
-                        RepositoryProvider.of<TaskRepository>(context)
-                            .submitSolution(
-                          user.jwt,
-                          widget.task,
-                          data,
-                          language,
-                        );
-                      }
-                    },
+                    onPressed: data != null
+                        ? () async {
+                            if (language.isEmpty) {
+                              ScaffoldMessenger.of(context)
+                                ..hideCurrentSnackBar()
+                                ..showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Choose language first"),
+                                  ),
+                                );
+                              return;
+                            }
+
+                            if (context.mounted) {
+                              var user =
+                                  RepositoryProvider.of<UserRepository>(context)
+                                      .user!;
+                              log('Submit solution');
+                              RepositoryProvider.of<TaskRepository>(context)
+                                  .submitSolution(
+                                user.jwt,
+                                widget.task,
+                                data!,
+                                language,
+                              );
+                            }
+                          }
+                        : null,
                     child: const Text('Submit'),
                   ),
                 ],
@@ -274,7 +280,7 @@ class _TaskSubmissionState extends State<TaskSubmission> {
                   children: <TableRow>[
                     TableRow(
                       children: <TableCell>[
-                        if (isAdmin) const TableCell(child: Text("User")),
+                        if (isAdmin) const TableCell(child: Text("User ")),
                         const TableCell(
                           child: Row(
                             children: [
@@ -310,7 +316,7 @@ class _TaskSubmissionState extends State<TaskSubmission> {
                                 child: InkWell(
                                   child: Text(e.submissionId.toString()),
                                   onTap: () {
-                                    context.go("/submission/${e.submissionId}");
+                                    showSubmissionInfo(context, e);
                                   },
                                 ),
                               ),
@@ -327,6 +333,104 @@ class _TaskSubmissionState extends State<TaskSubmission> {
           ),
         )
       ],
+    );
+  }
+
+  void showSubmissionInfo(BuildContext context, Submission submission) {
+    var code = utf8.decode(base64Decode(submission.sourceCode));
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog.fullscreen(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Scaffold(
+            appBar: AppBar(
+              surfaceTintColor: Colors.transparent,
+              title: const Text('Submission info'),
+              centerTitle: false,
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => context.pop(),
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('Close'),
+                  onPressed: () => context.pop(),
+                ),
+              ],
+            ),
+            body: Center(
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 30,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Text>[
+                          Text(
+                            'Task Name: ${widget.task.name}',
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                          Text(
+                            'Submission time: ${submission.submissionTime}',
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                          Text(
+                            'Status: ${submission.status}',
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                          Text(
+                            'Language: ${submission.language}',
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                          Text(
+                            'Test Failed: ${submission.testNumber}',
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                          Text(
+                            'Time: ${submission.runtime}',
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                          Text(
+                            'Memory: ${submission.memory}',
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      'Your code:',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                  Flexible(
+                    child: Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: CustomScrollView(
+                          slivers: [
+                            SliverList.list(children: [Text(code)]),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
