@@ -397,7 +397,7 @@ def submit(current_user):
     )
     session.add(submission)
     session.commit()
-    
+
     # TODO: uncomment on merge
     Thread(target=lambda: requests.post(f"{ORCHESTRATOR_URL}/run", json={
         'submission_id': submission.id,
@@ -777,6 +777,19 @@ def public_user_info(user_id):
     return user.public_info()
 
 
+@app.route('/public_user_info_by_login/<string:user_login>', methods=['GET'])
+@token_required(admin_required=True)
+def public_user_info(user_login):
+    session = create_session()
+    user = session.query(User).filter(User.login == user_login).first()
+    if user is None:
+        return jsonify({
+            'status': 'Error',
+            'message': f'User with login {user_login} does not exists'
+        }), 404
+    return user.public_info()
+
+
 def retrieve_user_tags(user: User):
     session = create_session()
     return [relation.tag_id for relation in
@@ -873,7 +886,8 @@ def get_submission(current_user, task_id):
         }), 404
     res = []
     if current_user.role == Role.user:
-        for sub in session.query(Submission).filter(Submission.user_id == current_user.id, Submission.task_id == task_id):
+        for sub in session.query(Submission).filter(Submission.user_id == current_user.id,
+                                                    Submission.task_id == task_id):
             submission = sub.to_dict()
             submission["user_login"] = current_user.login
             res.append(submission)
@@ -884,7 +898,6 @@ def get_submission(current_user, task_id):
             submission["user_login"] = user.login
             res.append(submission)
     return jsonify(res), 200
-
 
 
 session = create_session()
