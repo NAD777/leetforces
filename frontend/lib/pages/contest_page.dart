@@ -46,6 +46,10 @@ class _ContestPageState extends State<ContestPage> {
   @override
   Widget build(BuildContext context) {
     return Template(
+      onFabPressed: () {
+        context.go('/admin/contest');
+      },
+      fabTooltip: 'Create contest',
       content: contest == null
           ? const Center(child: CircularProgressIndicator())
           : ConstrainedBox(

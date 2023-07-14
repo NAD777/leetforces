@@ -8,7 +8,7 @@ import 'package:frontend/repositories/task_repository.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
 import '../repositories/user_repository.dart';
-import '../widgets/admit_template.dart';
+import '../widgets/template.dart';
 
 class AdminTaskPage extends StatefulWidget {
   final int? taskId;
@@ -121,7 +121,8 @@ class _AdminTaskPageState extends State<AdminTaskPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AdminTemplate(
+    return Template(
+      isAdminPage: true,
       content: Column(
         children: [
           Form(
