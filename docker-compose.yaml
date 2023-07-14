@@ -13,41 +13,6 @@ services:
     ports:
       - "8081:5432"
 
-  # prometheus:
-  #   image: prom/prometheus:latest
-  #   volumes:
-  #     - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
-  #     - prometheus:/prometheus
-  #   command:
-  #     - '--config.file=/etc/prometheus/prometheus.yml'
-  #     - '--storage.tsdb.path=/prometheus'
-  #     - '--web.console.libraries=/etc/prometheus/console_libraries'
-  #     - '--web.console.templates=/etc/prometheus/consoles'
-  #     - '--web.enable-lifecycle'
-  #   ports:
-  #     - "9090:9090"
-  #   restart: unless-stopped
-  #   networks:
-  #     metrics:
-  #     bot_backend:
-  #     orchestrator_backend:
-
-  # grafana:
-  #   image: grafana/grafana-oss
-  #   volumes:
-  #     - grafana:/var/lib/grafana
-  #   environment:
-  #     - GF_SECURITY_ADMIN_USER=admin
-  #     - GF_SECURITY_ADMIN_PASSWORD=admin
-  #     - GF_USERS_ALLOW_SIGN_UP=false
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - prometheus
-  #   restart: unless-stopped
-  #   networks:
-  #     metrics:
-
   juggler:
     build:
       context: ./juggler
@@ -86,28 +51,18 @@ services:
       - NET_NAME=internal_net
     restart: unless-stopped
 
-  # bot:
-  #   build:
-  #     context: ./bot
-  #     dockerfile: ./Dockerfile
-  #   ports:
-  #     - "8081:8081"
-  #     - "8082:8082"
-  #   restart: unless-stopped
-  #   networks:
-  #     - bot_backend
-  #   depends_on:
-  #     - juggler
-  #   env_file:
-  #     - ./bot/env.properties
+  flutter:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    command: /root/.pub-cache/bin/dhttpd --host=0.0.0.0
+    ports:
+      - "8080:8080"
+    networks:
+      - bot_backend
 
 networks:
   internal_net:
   bot_backend:
     driver: bridge
   orchestrator_backend:
-  # metrics:
-
-# volumes:
-#   prometheus:
-#   grafana:
