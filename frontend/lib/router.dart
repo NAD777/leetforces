@@ -1,3 +1,4 @@
+import 'package:frontend/pages/admin_tag_list.dart';
 import 'package:frontend/pages/admin_tag_page.dart';
 import 'package:frontend/pages/pages.dart';
 import 'package:go_router/go_router.dart';
@@ -53,6 +54,10 @@ class AppRouter {
         builder: (context, state) =>
             AdminTagPage(tagId: int.parse(state.pathParameters["id"]!)),
       ),
+      GoRoute(
+        path: "/admin/tag",
+        builder: (context, state) => const AdminTagList(),
+      )
     ],
   );
 }

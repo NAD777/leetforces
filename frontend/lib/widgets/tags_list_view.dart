@@ -7,6 +7,7 @@ class TagsListView extends StatelessWidget {
     super.key,
     required this.tags,
     required this.isAdmin,
+    this.label = "Tags: ",
     this.onDelete,
     this.onCreate,
   });
@@ -15,12 +16,13 @@ class TagsListView extends StatelessWidget {
   final bool isAdmin;
   final Function(int)? onDelete;
   final Function(String)? onCreate;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     assert((isAdmin && onDelete != null && onCreate != null) || !isAdmin);
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      const Text('Tags: '),
+      Text(label),
       ...List<Widget>.generate(
         tags.length,
         (index) => Chip(
