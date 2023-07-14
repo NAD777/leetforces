@@ -24,6 +24,7 @@ class _RegistrationPage extends State<StatefulWidget> {
       decoration: InputDecoration(
         labelText: name,
       ),
+      obscureText: name == 'password',
       textInputAction: TextInputAction.next,
       controller: controller,
       validator: validator,
@@ -110,6 +111,12 @@ class _RegistrationPage extends State<StatefulWidget> {
                       }),
                       const SizedBox(height: 30),
                       registrationButton(context),
+                      ElevatedButton(
+                        onPressed: () {
+                          context.go('/login');
+                        },
+                        child: const Text('Back'),
+                      ),
                     ],
                   ),
                 ),
