@@ -85,6 +85,7 @@ class _TemplateState extends State<Template> {
                     onPressed: () {
                       context.go('/admin/tag');
                     },
+                    tooltip: 'Manage tags',
                     icon: const Icon(Icons.tag),
                   ),
                 ],
@@ -92,6 +93,7 @@ class _TemplateState extends State<Template> {
                   onPressed: () {
                     context.go("/profile");
                   },
+                  tooltip: 'Profile',
                   icon: const Icon(Icons.person_outline_rounded),
                 ),
                 IconButton(
@@ -99,6 +101,7 @@ class _TemplateState extends State<Template> {
                     RepositoryProvider.of<UserRepository>(context).setUser("");
                     context.go("/login");
                   },
+                  tooltip: 'Log out',
                   icon: const Icon(Icons.logout),
                 ),
               ]

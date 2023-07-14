@@ -39,6 +39,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Template(
+      onFabPressed: () {
+        context.go('/admin/contest');
+      },
+      fabTooltip: 'Create contest',
       content: Column(
         children: [
           for (var e in list)
