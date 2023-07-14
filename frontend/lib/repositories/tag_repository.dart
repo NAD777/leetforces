@@ -15,6 +15,21 @@ class TagRepository {
         .toList();
   }
 
+  Future<int?> addTag(String auth, String tagName) async {
+    var response = await http.post(Uri.parse("$host/add_tag"),
+        headers: <String, String>{
+          "Authorization": auth,
+          "Content-Type": "application/json"
+        },
+        body: jsonEncode(<String, dynamic>{"tag_name": tagName}));
+    if (response.statusCode == 200) {
+      var json = jsonDecode(response.body) as Map<String, dynamic>;
+      return json["tag_id"];
+    } else {
+      return null;
+    }
+  }
+
   Future<void> addUserTag(String jwt, int userId, int tagId) async {
     var response = await http.post(Uri.parse("$host/add_tag_to_user"),
         body: jsonEncode(<String, dynamic>{
@@ -30,12 +45,15 @@ class TagRepository {
       throw Exception(json['message']);
     }
   }
-  Future<void> removeUserTag(String jwt, UserInfo userInfo, int tagId) async {
 
+  Future<void> removeUserTag(String jwt, UserInfo userInfo, int tagId) async {
     var response = await http.post(Uri.parse("$host/edit_user"),
         body: jsonEncode(<String, dynamic>{
           "user_id": userInfo.id,
-          "tags": userInfo.tags.map((e) => e.id).where((element) => element !=tagId).toList(),
+          "tags": userInfo.tags
+              .map((e) => e.id)
+              .where((element) => element != tagId)
+              .toList(),
         }),
         headers: <String, String>{
           "Authorization": jwt,

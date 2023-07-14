@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/contest_repository.dart';
+import 'package:frontend/repositories/tag_repository.dart';
 import 'package:frontend/repositories/task_repository.dart';
 import 'package:frontend/widgets/tags_list_view.dart';
 
@@ -145,11 +146,11 @@ class _AdminContestPageState extends State<AdminContestPage> {
   void _onTagAdded(String name) async {
     var user = RepositoryProvider.of<UserRepository>(context).user;
     var tags =
-        await RepositoryProvider.of<ContestRepository>(context).getAllTags();
+        await RepositoryProvider.of<TagRepository>(context).getAllTags();
     int? tagsId;
     if (!tags.any((element) => element.name == name)) {
       if (context.mounted) {
-        tagsId = await RepositoryProvider.of<ContestRepository>(context)
+        tagsId = await RepositoryProvider.of<TagRepository>(context)
             .addTag(user!.jwt, name);
         if (tagsId == null) {
           if (context.mounted) {
