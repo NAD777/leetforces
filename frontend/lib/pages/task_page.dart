@@ -263,16 +263,17 @@ class _TaskSubmissionState extends State<TaskSubmission> {
                                     "${formatter.format(DateTime.now().toUtc())} GMT";
                                 setState(() {
                                   widget.submissions.add(Submission(
-                                      submissionId,
-                                      userInfo.id,
-                                      widget.task.id,
-                                      "",
-                                      language,
-                                      "Checking...",
-                                      1,
-                                      time,
-                                      0,
-                                      0));
+                                    submissionId,
+                                    userInfo.id,
+                                    widget.task.id,
+                                    "",
+                                    language,
+                                    "Checking...",
+                                    1,
+                                    time,
+                                    0,
+                                    0,
+                                  ));
                                 });
                               }
                             }

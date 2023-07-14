@@ -60,16 +60,16 @@ class _AdminTagList extends State<AdminTagList> {
                               RepositoryProvider.of<UserRepository>(context)
                                   .user;
                           int? tagsId;
-                          tagsId =
-                              await RepositoryProvider.of<TagRepository>(
-                                      context)
-                                  .addTag(user!.jwt, name);
+                          tagsId = await RepositoryProvider.of<TagRepository>(
+                                  context)
+                              .addTag(user!.jwt, name);
                           if (tagsId == null) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text("Could not create a new tag")));
+                                const SnackBar(
+                                  content: Text("Could not create a new tag"),
+                                ),
+                              );
                             }
                             return;
                           } else {
