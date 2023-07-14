@@ -57,6 +57,8 @@ class Runner:
         execution_string = lang_configs["execution_string"]
         default_memory = lang_configs["default_memory"]
 
+        time_limit *= lang_configs["runtime_coef"]
+
         if lang_configs["interpretable"] == 0:
             compiler_string = lang_configs["compiler_string"]
             prepared = split(f"{compiler_string} {executable}")

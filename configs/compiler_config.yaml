@@ -1,11 +1,13 @@
-py: 
+py:
   interpretable: 1
   execution_string: "/usr/bin/python -u"
   ce: "syntaxerror"
   default_memory: 20
+  runtime_coef: 1.5
 java:
   interpretable: 0
   compiler_string: "javac"
   execution_string: "java"
   ce: "compilation failed"
   default_memory: 50
+  runtime_coef: 1.5

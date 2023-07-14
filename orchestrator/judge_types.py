@@ -8,6 +8,7 @@ class CompilerDetails(TypedDict):
     execution_string: str
     ce: str
     default_memory: int
+    runtime_coef: float
 
 
 class GenDetails(TypedDict):
