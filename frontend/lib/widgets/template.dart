@@ -68,14 +68,26 @@ class _TemplateState extends State<Template> {
               context.go("/");
             }),
         actions: user != null
-            ? <IconButton>[
-                if (isAdmin)
+            ? <Widget>[
+                if (isAdmin) ...[
+                  TextButton(
+                    onPressed: () {
+                      context.go('/admin/task');
+                    },
+                    child: Text(
+                      'Create task',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
                   IconButton(
                     onPressed: () {
                       context.go('/admin/tag');
                     },
                     icon: const Icon(Icons.tag),
                   ),
+                ],
                 IconButton(
                   onPressed: () {
                     context.go("/profile");
