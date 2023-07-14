@@ -14,11 +14,21 @@ from test_runner import TestRunner
 from base64 import b64decode
 from os import environ
 from logging import basicConfig, debug, DEBUG
+from prometheus_flask_exporter import PrometheusMetrics
 
 JUGGLER = environ["JUGGLER"]
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+
+metrics = PrometheusMetrics(app, group_by='endpoint')
+
+metrics.register_default(
+    metrics.counter(
+        'by_path_counter', 'Request count by request paths',
+        labels={'path': lambda: request.path}
+    )
+)
 
 
 @app.route("/run", methods=["POST"])  # type: ignore

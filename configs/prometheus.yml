@@ -1,0 +1,23 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+
+  - job_name: bot
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ['bot:8082']
+
+  - job_name: juggler
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: [ 'juggler:5001' ]
+
+  - job_name: orchestrator
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: [ 'orchestrator:5000' ]
