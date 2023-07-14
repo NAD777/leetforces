@@ -37,11 +37,17 @@ class Orchestrator:
 
         Returns:
         None
+
+        Raises:
+        ValueError if cannot instantiate class
         """
 
         # TODO: correctly parse all responses
         JUGGLER = environ["JUGGLER"]
         resp = get(f"{JUGGLER}/get_task_info/{task_id}")
+
+        if resp.status_code == 404:
+            raise ValueError(resp.json()["message"])
 
         try:
             task_settings = resp.json()

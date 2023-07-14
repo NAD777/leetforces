@@ -1,8 +1,8 @@
-from flask import Flask, request
+from flask import Flask, jsonify, request
 from requests import post
 from base64 import b64decode
 from os import environ
-from logging import basicConfig, info
+from logging import basicConfig, error, info
 from logging import DEBUG as _DEBUG
 from prometheus_flask_exporter import PrometheusMetrics
 
@@ -39,12 +39,19 @@ def run():
     source_file = body['source_code']
     task_id = body['task_id']
     lang = body['language']
+
     # TODO: change this
     ext = ''
     if lang == "Python":
         ext = "py"
-    else:
+    elif lang == "Java":
         ext = "java"
+    else:
+        return {
+                   "message": "Wrong language",
+                   "data": None,
+                   "error": "Bad request"
+               }, 400
 
     filename = "Main"
 
@@ -60,11 +67,21 @@ def run():
         runner = Orchestrator(task_id, ext)
         report = runner.run(submission_id, filename, source_file_decoded)
     except RuntimeError as e:
-        print(e)
-        return 500
+        error(e)
+        return jsonify({
+           "error": "Something went wrong!",
+           "message": str(e)
+        }), 500
+
     except ValueError as e:
-        print(e)
-        return 500
+        error(e)
+        return jsonify({
+           "error": "Something went wrong!",
+           "message": str(e)
+        }), 500
 
     post(f"{JUGGLER}/report", json=report)
-    return "Done"
+
+    return jsonify({
+        "message": "Done"
+        }), 200
