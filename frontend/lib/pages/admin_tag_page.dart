@@ -8,9 +8,9 @@ import 'package:frontend/widgets/admit_template.dart';
 import 'package:go_router/go_router.dart';
 
 class AdminTagPage extends StatefulWidget {
-  int tagId;
+  final int tagId;
 
-  AdminTagPage({super.key, required this.tagId});
+  const AdminTagPage({super.key, required this.tagId});
 
   @override
   State<StatefulWidget> createState() => _TagPage();
@@ -35,7 +35,7 @@ class _TagPage extends State<AdminTagPage> {
   void initState() {
     super.initState();
     var tagRep = RepositoryProvider.of<TagRepository>(context);
-    var userRep = RepositoryProvider.of<UserRepository>(context);
+    var _ = RepositoryProvider.of<UserRepository>(context);
     tagRep.getAllTags().then((value) {
       for (var element in value) {
         if (element.id == widget.tagId) {

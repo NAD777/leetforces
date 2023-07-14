@@ -11,16 +11,14 @@ import '../models/task.dart';
 import '../repositories/user_repository.dart';
 import '../widgets/admit_template.dart';
 
-class AdminContestPage extends StatefulWidget {
-  const AdminContestPage({required this.contestId, super.key});
-
-  final int contestId;
+class AdminContestCreatePage extends StatefulWidget {
+  const AdminContestCreatePage({super.key});
 
   @override
-  State<AdminContestPage> createState() => _AdminContestPageState();
+  State<AdminContestCreatePage> createState() => _AdminContestCreatePageState();
 }
 
-class _AdminContestPageState extends State<AdminContestPage> {
+class _AdminContestCreatePageState extends State<AdminContestCreatePage> {
   Contest? contest;
   late List<Task> tasks;
 
@@ -32,26 +30,17 @@ class _AdminContestPageState extends State<AdminContestPage> {
 
   @override
   void initState() {
-    RepositoryProvider.of<ContestRepository>(context)
-        .getContestInfo(widget.contestId)
-        .then((value) {
-      setState(() {
-        contest = value;
-        RepositoryProvider.of<TaskRepository>(context)
-            .getTasks(contest!)
-            .then((value) {
-          setState(() {
-            tasks = value;
-            controllerName.text = contest!.name;
-            controllerDescription.text = contest!.description;
-          });
-        });
-      });
-    });
     controllerName.text = "";
     controllerDescription.text = "";
     controllerTaskId.text = "";
     tasks = [];
+    contest = Contest(
+        id: -1,
+        name: "",
+        description: "",
+        tasks: [],
+        tags: [Tag(1, "All")],
+        isClosed: false);
     super.initState();
   }
 
@@ -66,7 +55,7 @@ class _AdminContestPageState extends State<AdminContestPage> {
                 ? [const Text("Wrong contest number")]
                 : [
                     Text(contest!.name),
-                    const Text("Edit name of the contest:"),
+                    const Text("Enter name of the contest:"),
                     TextFormField(
                       controller: controllerName,
                       decoration: InputDecoration(
@@ -74,7 +63,7 @@ class _AdminContestPageState extends State<AdminContestPage> {
                         hintText: contest!.name,
                       ),
                     ),
-                    const Text("Edit description of the contest:"),
+                    const Text("Enter description of the contest:"),
                     TextFormField(
                       controller: controllerDescription,
                       decoration: InputDecoration(
@@ -109,8 +98,8 @@ class _AdminContestPageState extends State<AdminContestPage> {
                       ],
                     ),
                     ElevatedButton(
-                        onPressed: _onSaveChanges,
-                        child: const Text("Save changes")),
+                        onPressed: _onCreateContest,
+                        child: const Text("Create contest")),
                   ],
           ))
     ]));
@@ -122,31 +111,31 @@ class _AdminContestPageState extends State<AdminContestPage> {
     });
   }
 
-  void _onSaveChanges() async {
+  void _onCreateContest() async {
     var user = RepositoryProvider.of<UserRepository>(context).user;
-    if (await RepositoryProvider.of<ContestRepository>(context).editContest(
-        user!.jwt, contest!.id,
-        name: controllerName.text,
-        description: controllerDescription.text,
-        tasks: tasks.map((e) => e.id).toList(),
-        tags: contest!.tags.map((e) => e.id).toList(),
-        isClosed: contest!.isClosed)) {
+    if (await RepositoryProvider.of<ContestRepository>(context).createContest(
+      user!.jwt,
+      controllerName.text,
+      controllerDescription.text,
+      tasks: tasks.map((e) => e.id).toList(),
+      tags: contest!.tags.map((e) => e.id).toList(),
+      isClosed: contest!.isClosed,
+    )) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Successfully updated the contest")));
+            const SnackBar(content: Text("Successfully created the contest")));
       }
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Could not update contest")));
+            const SnackBar(content: Text("Could not create a contest")));
       }
     }
   }
 
   void _onTagAdded(String name) async {
     var user = RepositoryProvider.of<UserRepository>(context).user;
-    var tags =
-        await RepositoryProvider.of<TagRepository>(context).getAllTags();
+    var tags = await RepositoryProvider.of<TagRepository>(context).getAllTags();
     int? tagsId;
     if (!tags.any((element) => element.name == name)) {
       if (context.mounted) {

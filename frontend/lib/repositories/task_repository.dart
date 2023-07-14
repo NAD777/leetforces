@@ -35,7 +35,7 @@ class TaskRepository {
     }
   }
 
-  Future<void> submitSolution(
+  Future<int> submitSolution(
       String jwt, Task task, Uint8List submission, String language) async {
     var b64 = base64.encode(submission.toList());
     var response = await http.post(Uri.parse("$host/submit"),
@@ -52,6 +52,7 @@ class TaskRepository {
     if (response.statusCode != 200) {
       throw Exception(json['message']);
     }
+    return json["submission_id"];
   }
 
   Future<List<Submission>> getSubmissions(String jwt, int taskId) async {

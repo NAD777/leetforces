@@ -10,6 +10,7 @@ import 'package:frontend/repositories/task_repository.dart';
 import 'package:frontend/repositories/user_repository.dart';
 import 'package:frontend/widgets/template.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../env/config.dart';
 import '../models/submission.dart';
@@ -242,13 +243,38 @@ class _TaskSubmissionState extends State<TaskSubmission> {
                                   RepositoryProvider.of<UserRepository>(context)
                                       .user!;
                               log('Submit solution');
-                              RepositoryProvider.of<TaskRepository>(context)
-                                  .submitSolution(
+                              var submissionId =
+                                  await RepositoryProvider.of<TaskRepository>(
+                                          context)
+                                      .submitSolution(
                                 user.jwt,
                                 widget.task,
                                 data!,
                                 language,
                               );
+                              if (context.mounted) {
+                                var userInfo =
+                                    await RepositoryProvider.of<UserRepository>(
+                                            context)
+                                        .getUserInfo();
+                                var formatter =
+                                    DateFormat("E, d MMM y HH:mm:ss");
+                                var time =
+                                    "${formatter.format(DateTime.now().toUtc())} GMT";
+                                setState(() {
+                                  widget.submissions.add(Submission(
+                                      submissionId,
+                                      userInfo.id,
+                                      widget.task.id,
+                                      "",
+                                      language,
+                                      "Checking...",
+                                      1,
+                                      time,
+                                      0,
+                                      0));
+                                });
+                              }
                             }
                           }
                         : null,
