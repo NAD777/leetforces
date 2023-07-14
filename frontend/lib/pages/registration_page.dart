@@ -111,6 +111,7 @@ class _RegistrationPage extends State<StatefulWidget> {
                       }),
                       const SizedBox(height: 30),
                       registrationButton(context),
+                      const SizedBox(height: 25),
                       ElevatedButton(
                         onPressed: () {
                           context.go('/login');
