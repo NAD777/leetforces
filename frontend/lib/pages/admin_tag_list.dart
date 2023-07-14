@@ -60,7 +60,7 @@ class _AdminTagList extends State<AdminTagList> {
                                   .user;
                           int? tagsId;
                           tagsId =
-                              await RepositoryProvider.of<ContestRepository>(
+                              await RepositoryProvider.of<TagRepository>(
                                       context)
                                   .addTag(user!.jwt, name);
                           if (tagsId == null) {

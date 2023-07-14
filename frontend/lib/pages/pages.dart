@@ -6,3 +6,6 @@ export 'login_page.dart';
 export 'profile_page.dart';
 export 'registration_page.dart';
 export 'task_page.dart';
+export 'admin_contest_create_page.dart';
+export 'admin_tag_page.dart';
+export 'admin_tag_list.dart';
