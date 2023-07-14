@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/contest_repository.dart';
 import 'package:frontend/repositories/registration_repository.dart';
+import 'package:frontend/repositories/tag_repository.dart';
 import 'package:frontend/repositories/task_repository.dart';
 import 'package:frontend/router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,13 +20,15 @@ class CodetestApp extends StatelessWidget {
   final ContestRepository _contestRepository;
   final RegistrationRepository _registrationRepository;
   final TaskRepository _taskRepository;
+  final TagRepository _tagRepository;
 
   CodetestApp(this.pref, {super.key})
       : _authenticationRepository = AuthenticationRepository(),
         _userRepository = UserRepository(pref),
         _contestRepository = ContestRepository(),
         _registrationRepository = RegistrationRepository(),
-        _taskRepository = TaskRepository();
+        _taskRepository = TaskRepository(),
+        _tagRepository = TagRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +48,9 @@ class CodetestApp extends StatelessWidget {
         ),
         RepositoryProvider.value(
           value: _taskRepository,
+        ),
+        RepositoryProvider.value(
+          value: _tagRepository,
         ),
       ],
       child: MaterialApp.router(

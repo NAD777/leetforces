@@ -45,9 +45,9 @@ class UserRepository {
     return response.body;
   }
 
-  Future<UserInfo> getUserInfo() async {
+  Future<EmailedUserInfo> getUserInfo() async {
     if (user?.jwt == null) {
-      return UserInfo(0, "guest", "Role.guest", "none", []);
+      return EmailedUserInfo(0, "guest", "Role.guest", "none", []);
     }
     var response = await http.get(
       Uri.parse("$host/current_user_info"),
@@ -59,7 +59,7 @@ class UserRepository {
     var tags = (resp["tags"] as List<dynamic>)
         .map((tag) => Tag(tag["id"], tag["name"]))
         .toList();
-    return UserInfo(
+    return EmailedUserInfo(
       resp["id"],
       resp["login"],
       resp["role"],
@@ -83,7 +83,6 @@ class UserRepository {
       resp["id"],
       resp["login"],
       resp["role"],
-      resp["email"],
       tags,
     );
   }

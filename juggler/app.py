@@ -45,10 +45,10 @@ def token_required(admin_required=False, super_admin_required=False):
                 token = request.headers["Authorization"]
             if not token:
                 return {
-                           "message": "Authentication Token is missing!",
-                           "data": None,
-                           "error": "Unauthorized"
-                       }, 401
+                    "message": "Authentication Token is missing!",
+                    "data": None,
+                    "error": "Unauthorized"
+                }, 401
             try:
                 data = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
                 session = create_session()
@@ -56,28 +56,28 @@ def token_required(admin_required=False, super_admin_required=False):
 
                 if not current_user:
                     return {
-                               "message": "Invalid Authentication token!",
-                               "data": None,
-                               "error": "Unauthorized"
-                           }, 401
+                        "message": "Invalid Authentication token!",
+                        "data": None,
+                        "error": "Unauthorized"
+                    }, 401
                 if admin_required and not current_user.role in [Role.admin, Role.superAdmin]:
                     return {
-                               "message": "Access denied. Admin privileges required.",
-                               "data": None,
-                               "error": "Forbidden"
-                           }, 403
+                        "message": "Access denied. Admin privileges required.",
+                        "data": None,
+                        "error": "Forbidden"
+                    }, 403
                 if super_admin_required and current_user.role == Role.superAdmin:
                     return {
-                               "message": "Access denied. Super Admin privileges required.",
-                               "data": None,
-                               "error": "Forbidden"
-                           }, 403
+                        "message": "Access denied. Super Admin privileges required.",
+                        "data": None,
+                        "error": "Forbidden"
+                    }, 403
             except Exception as e:
                 return {
-                           "message": "Something went wrong",
-                           "data": None,
-                           "error": str(e)
-                       }, 500
+                    "message": "Something went wrong",
+                    "data": None,
+                    "error": str(e)
+                }, 500
             return f(current_user, *args, **kwargs)
 
         return decorated_function
@@ -134,10 +134,10 @@ def login_endpoint():
         data = request.json
         if not data:
             return {
-                       "message": "Please provide user details",
-                       "data": None,
-                       "error": "Bad request"
-                   }, 400
+                "message": "Please provide user details",
+                "data": None,
+                "error": "Bad request"
+            }, 400
         # validate input
         is_validated = validate_login_and_password(data.get('login'), data.get('password'))
         if is_validated is not True:
@@ -152,30 +152,30 @@ def login_endpoint():
                     algorithm="HS256"
                 )
                 return {
-                           "message": "Successfully fetched auth token",
-                           "data": token,
-                           'login': user.login,
-                           'role': str(user.role.name),
-                           'email': user.email,
-                           'chat_id': user.chat_id,
-                           'tags': get_user_tags(user_id=user.id)
-                       }, 200
+                    "message": "Successfully fetched auth token",
+                    "data": token,
+                    'login': user.login,
+                    'role': str(user.role.name),
+                    'email': user.email,
+                    'chat_id': user.chat_id,
+                    'tags': get_user_tags(user_id=user.id)
+                }, 200
             except Exception as e:
                 return {
-                           "error": "Something went wrong!",
-                           "message": str(e)
-                       }, 500
+                    "error": "Something went wrong!",
+                    "message": str(e)
+                }, 500
         return {
-                   "message": "Error fetching auth token!, invalid email or password",
-                   "data": None,
-                   "error": "Unauthorized"
-               }, 404
+            "message": "Error fetching auth token!, invalid email or password",
+            "data": None,
+            "error": "Unauthorized"
+        }, 404
     except Exception as e:
         return {
-                   "message": "Something went wrong!",
-                   "error": str(e),
-                   "data": None
-               }, 500
+            "message": "Something went wrong!",
+            "error": str(e),
+            "data": None
+        }, 500
 
 
 # BOT_URL = "http://localhost:8080"
@@ -230,6 +230,7 @@ def register():
 @token_required()
 def current_user_info(current_user):
     return jsonify({
+        'id': current_user.id,
         'login': current_user.login,
         'role': str(current_user.role),
         'email': current_user.email,
@@ -779,7 +780,7 @@ def public_user_info(user_id):
 
 @app.route('/public_user_info_by_login/<string:user_login>', methods=['GET'])
 @token_required(admin_required=True)
-def public_user_info_by_login(user_login):
+def public_user_info_by_login(current_user, user_login):
     session = create_session()
     user = session.query(User).filter(User.login == user_login).first()
     if user is None:
@@ -861,7 +862,7 @@ def edit_user(current_user):
         new_tags_ids = json_payload['tags']
         tags_ids = retrieve_user_tags(user)
         for tag_id in set(tags_ids) - set(new_tags_ids):
-            for relation_to_delete in session.query(UserTag).filter(UserTag.tag_id == tag_id):
+            for relation_to_delete in session.query(UserTag).filter(UserTag.tag_id == tag_id, UserTag.user_id == user_id):
                 session.delete(relation_to_delete)
         session.commit()
         for tag_id in set(new_tags_ids) - set(tags_ids):
@@ -873,6 +874,22 @@ def edit_user(current_user):
         'status': 'Accepted',
         'message': f'User was edited with id {user.id}'
     })
+
+
+@app.route('/get_users_by_tag/<int:tag_id>', methods=["GET"])
+@token_required(admin_required=True)
+def get_users_by_tag(current_user, tag_id):
+    session = create_session()
+    res = []
+    if session.query(Tag).filter(Tag.id == tag_id) is None:
+        return jsonify({
+            'status': 'Error',
+            'message': f'Tag {tag_id} does not exists'
+        }), 404
+    for user_tag in session.query(UserTag).filter(UserTag.tag_id == tag_id):
+        user = session.query(User).filter(User.id == user_tag.user_id).first()
+        res.append(user.public_info())
+    return jsonify(res), 200
 
 
 @app.route('/get_submission/<int:task_id>', methods=["GET"])

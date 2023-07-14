@@ -35,6 +35,7 @@ class User(SqlAlchemyBase):
 
     def public_info(self):
         return {
+            "id": self.id,
             'login': self.login,
             'role': str(self.role.name),
             "tags": [tag.to_dict() for tag in self.tags]
