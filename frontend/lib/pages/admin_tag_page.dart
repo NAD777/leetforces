@@ -4,7 +4,7 @@ import 'package:frontend/models/tag.dart';
 import 'package:frontend/models/userinfo.dart';
 import 'package:frontend/repositories/tag_repository.dart';
 import 'package:frontend/repositories/user_repository.dart';
-import 'package:frontend/widgets/admit_template.dart';
+import 'package:frontend/widgets/template.dart';
 import 'package:go_router/go_router.dart';
 
 class AdminTagPage extends StatefulWidget {
@@ -51,68 +51,76 @@ class _TagPage extends State<AdminTagPage> {
   }
 
   Widget mainBody(BuildContext context) {
-    return Column(children: [
-      Row(
-        children: [Text("Tag: ${tag!.name}")],
-      ),
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              "Add user by login:",
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SizedBox(
-              width: 200,
-              height: 40,
-              child: TextFormField(
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                ),
-                controller: controller,
+    return Column(
+      children: [
+        Row(
+          children: [Text("Tag: ${tag!.name}")],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                "Add user by login:",
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SizedBox(
+                width: 200,
+                height: 40,
+                child: TextFormField(
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                  ),
+                  controller: controller,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                  onPressed: () {
+                    var userRep =
+                        RepositoryProvider.of<UserRepository>(context);
+                    userRep.searchUserInfo(controller.text).then((value) {
+                      if (value != null) {
+                        var jwt = userRep.user!.jwt;
+                        RepositoryProvider.of<TagRepository>(context)
+                            .addUserTag(jwt, value.id, widget.tagId)
+                            .then((value) => updateUsers());
+                      }
+                    });
+                  },
+                  child: const Text("Add")),
+            )
+          ],
+        ),
+        ...users.map(
+          (e) => Row(
+            children: [
+              IconButton(
                 onPressed: () {
                   var userRep = RepositoryProvider.of<UserRepository>(context);
-                  userRep.searchUserInfo(controller.text).then((value) {
-                    if (value != null) {
-                      var jwt = userRep.user!.jwt;
-                      RepositoryProvider.of<TagRepository>(context)
-                          .addUserTag(jwt, value.id, widget.tagId)
-                          .then((value) => updateUsers());
-                    }
-                  });
+                  RepositoryProvider.of<TagRepository>(context)
+                      .removeUserTag(userRep.user!.jwt, e, widget.tagId)
+                      .then((value) => updateUsers());
                 },
-                child: const Text("Add")),
-          )
-        ],
-      ),
-      ...users.map((e) => Row(children: [
-            IconButton(
-              onPressed: () {
-                var userRep = RepositoryProvider.of<UserRepository>(context);
-                RepositoryProvider.of<TagRepository>(context)
-                    .removeUserTag(userRep.user!.jwt, e, widget.tagId)
-                    .then((value) => updateUsers());
-              },
-              icon: const Icon(Icons.close),
-            ),
-            Text(e.login),
-          ])),
-    ]);
+                icon: const Icon(Icons.close),
+              ),
+              Text(e.login),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return AdminTemplate(
+    return Template(
+        isAdminPage: true,
         content: tag == null
             ? const Column(children: [CircularProgressIndicator()])
             : mainBody(context));

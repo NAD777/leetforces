@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/repositories/tag_repository.dart';
-import 'package:frontend/widgets/admit_template.dart';
+import 'package:frontend/widgets/template.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/tag.dart';
-import '../repositories/contest_repository.dart';
 import '../repositories/user_repository.dart';
 import '../widgets/tags_list_view.dart';
 
@@ -31,12 +30,14 @@ class _AdminTagList extends State<AdminTagList> {
 
   @override
   void initState() {
+    super.initState();
     updateList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AdminTemplate(
+    return Template(
+      isAdminPage: true,
       content: ConstrainedBox(
         constraints: const BoxConstraints(
           maxWidth: 1000,

@@ -9,7 +9,7 @@ import '../models/contest.dart';
 import '../models/tag.dart';
 import '../models/task.dart';
 import '../repositories/user_repository.dart';
-import '../widgets/admit_template.dart';
+import '../widgets/template.dart';
 
 class AdminContestCreatePage extends StatefulWidget {
   const AdminContestCreatePage({super.key});
@@ -35,74 +35,80 @@ class _AdminContestCreatePageState extends State<AdminContestCreatePage> {
     controllerTaskId.text = "";
     tasks = [];
     contest = Contest(
-        id: -1,
-        name: "",
-        description: "",
-        tasks: [],
-        tags: [Tag(1, "All")],
-        isClosed: false);
+      id: -1,
+      name: "",
+      description: "",
+      tasks: [],
+      tags: [Tag(1, "All")],
+      isClosed: false,
+    );
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AdminTemplate(
-        content: Column(children: [
-      Form(
-          key: _formKey,
-          child: Column(
-            children: contest == null
-                ? [const Text("Wrong contest number")]
-                : [
-                    Text(contest!.name),
-                    const Text("Enter name of the contest:"),
-                    TextFormField(
-                      controller: controllerName,
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        hintText: contest!.name,
-                      ),
-                    ),
-                    const Text("Enter description of the contest:"),
-                    TextFormField(
-                      controller: controllerDescription,
-                      decoration: InputDecoration(
+    return Template(
+      isAdminPage: true,
+      content: Column(
+        children: [
+          Form(
+            key: _formKey,
+            child: Column(
+              children: contest == null
+                  ? [const Text("Wrong contest number")]
+                  : [
+                      Text(contest!.name),
+                      const Text("Enter name of the contest:"),
+                      TextFormField(
+                        controller: controllerName,
+                        decoration: InputDecoration(
                           border: const OutlineInputBorder(),
-                          hintText: contest!.description),
-                    ),
-                    CheckboxListTile(
-                      title: const Text("Is closed"),
-                      value: contest!.isClosed,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          contest!.isClosed = value!;
-                        });
-                      },
-                    ),
-                    TagsListView(
-                        tags: contest!.tags,
-                        isAdmin: true,
-                        onDelete: _onTagDeleted,
-                        onCreate: _onTagAdded),
-                    TextFormField(
-                      controller: controllerTaskId,
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(), hintText: "Task id"),
-                    ),
-                    Column(
-                      children: [
-                        ElevatedButton(
-                            onPressed: () => _onAddTask(context),
-                            child: const Text("Add task by id")),
-                        _tasksAsChildren(context)
-                      ],
-                    ),
-                    ElevatedButton(
-                        onPressed: _onCreateContest,
-                        child: const Text("Create contest")),
-                  ],
-          ))
-    ]));
+                          hintText: contest!.name,
+                        ),
+                      ),
+                      const Text("Enter description of the contest:"),
+                      TextFormField(
+                        controller: controllerDescription,
+                        decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            hintText: contest!.description),
+                      ),
+                      CheckboxListTile(
+                        title: const Text("Is closed"),
+                        value: contest!.isClosed,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            contest!.isClosed = value!;
+                          });
+                        },
+                      ),
+                      TagsListView(
+                          tags: contest!.tags,
+                          isAdmin: true,
+                          onDelete: _onTagDeleted,
+                          onCreate: _onTagAdded),
+                      TextFormField(
+                        controller: controllerTaskId,
+                        decoration: const InputDecoration(
+                            border: OutlineInputBorder(), hintText: "Task id"),
+                      ),
+                      Column(
+                        children: [
+                          ElevatedButton(
+                              onPressed: () => _onAddTask(context),
+                              child: const Text("Add task by id")),
+                          _tasksAsChildren(context)
+                        ],
+                      ),
+                      ElevatedButton(
+                          onPressed: _onCreateContest,
+                          child: const Text("Create contest")),
+                    ],
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   void _onTagDeleted(int id) async {

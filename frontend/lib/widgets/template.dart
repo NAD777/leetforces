@@ -10,12 +10,14 @@ class Template extends StatefulWidget {
     this.scrollable = true,
     this.isAdminPage = false,
     this.onFabPressed,
+    this.fabTooltip,
   });
 
   final Widget content;
   final bool scrollable;
   final bool isAdminPage;
   final Function()? onFabPressed;
+  final String? fabTooltip;
 
   @override
   State<Template> createState() => _TemplateState();
@@ -103,9 +105,10 @@ class _TemplateState extends State<Template> {
       body: widget.isAdminPage && inProgress
           ? const Center(child: CircularProgressIndicator())
           : body,
-      floatingActionButton: widget.onFabPressed != null
+      floatingActionButton: widget.onFabPressed != null && isAdmin
           ? FloatingActionButton(
               onPressed: widget.onFabPressed,
+              tooltip: widget.fabTooltip,
               child: const Icon(Icons.add),
             )
           : null,
