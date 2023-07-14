@@ -55,7 +55,7 @@ class CodetestApp extends StatelessWidget {
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
-        title: 'Codetest App',
+        title: 'LeetForces',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: _brandColor,

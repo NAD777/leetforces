@@ -5,6 +5,7 @@ import 'package:frontend/widgets/template.dart';
 import 'package:go_router/go_router.dart';
 
 class AdminTemplate extends StatefulWidget {
+  @deprecated
   const AdminTemplate({super.key, required this.content});
 
   final Widget content;

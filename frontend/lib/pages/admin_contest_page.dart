@@ -9,7 +9,7 @@ import '../models/contest.dart';
 import '../models/tag.dart';
 import '../models/task.dart';
 import '../repositories/user_repository.dart';
-import '../widgets/admit_template.dart';
+import '../widgets/template.dart';
 
 class AdminContestPage extends StatefulWidget {
   const AdminContestPage({required this.contestId, super.key});
@@ -23,8 +23,6 @@ class AdminContestPage extends StatefulWidget {
 class _AdminContestPageState extends State<AdminContestPage> {
   Contest? contest;
   late List<Task> tasks;
-
-  final _formKey = GlobalKey<FormState>();
 
   TextEditingController controllerName = TextEditingController();
   TextEditingController controllerDescription = TextEditingController();
@@ -57,63 +55,145 @@ class _AdminContestPageState extends State<AdminContestPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AdminTemplate(
-        content: Column(children: [
-      Form(
-          key: _formKey,
-          child: Column(
-            children: contest == null
-                ? [const Text("Wrong contest number")]
-                : [
-                    Text(contest!.name),
-                    const Text("Edit name of the contest:"),
-                    TextFormField(
-                      controller: controllerName,
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        hintText: contest!.name,
+    return Template(
+        isAdminPage: true,
+        content: Column(
+          children: contest == null
+              ? [const Text("Wrong contest number")]
+              : [
+                  Row(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          "Edit name of the contest:",
+                          style: TextStyle(fontSize: 20),
+                        ),
                       ),
-                    ),
-                    const Text("Edit description of the contest:"),
-                    TextFormField(
-                      controller: controllerDescription,
-                      decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          hintText: contest!.description),
-                    ),
-                    CheckboxListTile(
-                      title: const Text("Is closed"),
-                      value: contest!.isClosed,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          contest!.isClosed = value!;
-                        });
-                      },
-                    ),
-                    TagsListView(
-                        tags: contest!.tags,
-                        isAdmin: true,
-                        onDelete: _onTagDeleted,
-                        onCreate: _onTagAdded),
-                    TextFormField(
-                      controller: controllerTaskId,
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(), hintText: "Task id"),
-                    ),
-                    Column(
-                      children: [
-                        ElevatedButton(
-                            onPressed: () => _onAddTask(context),
-                            child: const Text("Add task by id")),
-                        _tasksAsChildren(context)
-                      ],
-                    ),
-                    ElevatedButton(
-                        onPressed: _onSaveChanges,
-                        child: const Text("Save changes")),
-                  ],
-          ))
-    ]));
+                      Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: SizedBox(
+                          width: 400,
+                          child: TextFormField(
+                            controller: controllerName,
+                            decoration: InputDecoration(
+                              border: const UnderlineInputBorder(),
+                              hintText: contest!.name,
+                            ),
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          "Edit description of the contest:",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SizedBox(
+                          width: 400,
+                          height: 40,
+                          child: TextFormField(
+                            controller: controllerDescription,
+                            decoration: InputDecoration(
+                                border: const UnderlineInputBorder(),
+                                hintText: contest!.description),
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          "Is closed",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 90,
+                        height: 50,
+                        child: CheckboxListTile(
+                          title: const Text(
+                            "",
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          value: contest!.isClosed,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              contest!.isClosed = value!;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 8, right: 8, top: 10, bottom: 50),
+                        child: TagsListView(
+                            tags: contest!.tags,
+                            isAdmin: true,
+                            onDelete: _onTagDeleted,
+                            onCreate: _onTagAdded),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: SizedBox(
+                          width: 200,
+                          height: 40,
+                          child: TextFormField(
+                            controller: controllerTaskId,
+                            decoration: const InputDecoration(
+                                border: UnderlineInputBorder(),
+                                hintText: "Task id"),
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                          onPressed: () => _onAddTask(context),
+                          child: const Text(
+                            "Add task by id",
+                            style: TextStyle(fontSize: 15),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      SizedBox(width: 500, child: _tasksAsChildren(context)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      ElevatedButton(
+                          onPressed: _onSaveChanges,
+                          child: const Text("Save changes")),
+                    ],
+                  ),
+                ],
+        ));
   }
 
   void _onTagDeleted(int id) async {
@@ -145,8 +225,7 @@ class _AdminContestPageState extends State<AdminContestPage> {
 
   void _onTagAdded(String name) async {
     var user = RepositoryProvider.of<UserRepository>(context).user;
-    var tags =
-        await RepositoryProvider.of<TagRepository>(context).getAllTags();
+    var tags = await RepositoryProvider.of<TagRepository>(context).getAllTags();
     int? tagsId;
     if (!tags.any((element) => element.name == name)) {
       if (context.mounted) {
