@@ -3,7 +3,7 @@ from os import chdir, getcwd, remove
 
 from docker import DockerClient, from_env
 from docker.client import APIClient
-from docker.errors import ImageNotFound
+from docker.errors import APIError, ImageNotFound
 from docker.models.containers import Container, Image
 from docker.models.networks import Network
 
@@ -89,9 +89,16 @@ class APIClass:
         tag         -- tag of image to pull
 
         Returns:
-        Image object"""
+        Image object
 
-        image = cast(Image, self.client.images.pull(repository, tag))
+        Raises:
+        ValueError if got an error while pulling image"""
+
+        try:
+            image = cast(Image, self.client.images.pull(repository, tag))
+        except APIError as e:
+            raise ValueError(e)
+
         return image
 
 

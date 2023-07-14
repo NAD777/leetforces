@@ -8,15 +8,14 @@ import dockerapi
 
 _runner_docker_image: Image | None = None
 
-PROJECT_NAME = environ["PROJECT_NAME"]
-# TODO: parse _CONTAINERS_MAX from config file somehow
-_CONTAINERS_MAX = 5
+_PROJECT_NAME = environ["PROJECT_NAME"]
+_CONTAINERS_MAX = int(environ["CONTAINERS_MAX"])
 _CURRENT_CONTAINERS = 0
 _WAIT_TIME = 1
-DEBUG = environ["DEBUG"]
-NET_NAME = environ["NET_NAME"]
+_NET_NAME = environ["NET_NAME"]
+_IMAGE_REGISRTY = environ["IMAGE_REGISRTY"]
+_USE_REMOTE_IMAGE = True if environ["USE_REMOTE_IMAGE"] == "True" else False
 
-#TODO: debug and run configurations
 def _create_image(instance: dockerapi.APIClass,
                   PROJECT_NAME: str
                   ) -> Image:
@@ -29,21 +28,21 @@ def _create_image(instance: dockerapi.APIClass,
     PROJECT_NAME    -- name of the project the main dockerfile is located
 
     Returns:
-    Image object"""
+    Image object
+
+    Raises:
+    ValueError if incorrect configuration for IMAGE_REGISRTY is provided"""
 
     global _runner_docker_image
-
-    #TODO: add master config parsing
-    # and/or these parse these configs from upper stack layers
 
     _runner_docker_image = dockerapi.APIClass() \
                                     .get_image(f"{PROJECT_NAME}-runner")
 
     # do not build/pull if object is already present
-    if not DEBUG and _runner_docker_image is not None:
+    if not _USE_REMOTE_IMAGE and _runner_docker_image is not None:
         return _runner_docker_image
 
-    if DEBUG:
+    if not _USE_REMOTE_IMAGE:
         # build the runner image if in debug mode, i.e. with assumption
         # that the runner source code might have changed
         _runner_docker_image = instance.build_image(
@@ -53,9 +52,12 @@ def _create_image(instance: dockerapi.APIClass,
         # pull the runner image from the DockerHub registry for faster
         # execution
         _runner_docker_image = instance.pull_image(
-                "ghcr.io/nad777/codetest_bot-runner", "latest")
+                _IMAGE_REGISRTY, "latest")
+
     assert _runner_docker_image is not None
+
     return _runner_docker_image
+
 
 # container_interactor accepts str with ip address and returns T
 def inside_container(_func=None, *,
@@ -76,7 +78,7 @@ def inside_container(_func=None, *,
             global _CURRENT_CONTAINERS
 
             instance = dockerapi.APIClass()
-            _create_image(instance, PROJECT_NAME)
+            _create_image(instance, _PROJECT_NAME)
 
             while _CONTAINERS_MAX <= _CURRENT_CONTAINERS:
                 info(f"Current container pool is full, waiting for " + \
@@ -84,15 +86,15 @@ def inside_container(_func=None, *,
                 sleep(_WAIT_TIME)
 
             _CURRENT_CONTAINERS += 1
-            container = instance.create_container(f"{PROJECT_NAME}-runner",
-               memory_limit, network_name=f"{PROJECT_NAME.lower()}_{NET_NAME}")
+            container = instance.create_container(f"{_PROJECT_NAME}-runner",
+             memory_limit, network_name=f"{_PROJECT_NAME.lower()}_{_NET_NAME}")
 
             dockerapi.APIClass.start_container(container)
 
             info(f"Started the container {container.name} with id " + \
                                                        f"{container.short_id}")
             ip = instance.resolve_ip(
-               cast(str, container.name), f"{PROJECT_NAME.lower()}_{NET_NAME}")
+             cast(str, container.name), f"{_PROJECT_NAME.lower()}_{_NET_NAME}")
             info(f"IP address for container {container.name} is {ip}")
 
             output = None
