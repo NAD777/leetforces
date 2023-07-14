@@ -1,3 +1,4 @@
+import 'package:frontend/pages/admin_contest_create_page.dart';
 import 'package:frontend/pages/admin_tag_page.dart';
 import 'package:frontend/pages/pages.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +34,10 @@ class AppRouter {
         builder: (context, state) => AdminContestPage(
           contestId: int.parse(state.pathParameters["id"]!),
         ),
+      ),
+      GoRoute(
+        path: "/admin/contest",
+        builder: (context, state) => const AdminContestCreatePage(),
       ),
       GoRoute(
         path: "/admin/task",
