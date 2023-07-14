@@ -178,7 +178,7 @@ class _AdminContestCreatePageState extends State<AdminContestCreatePage> {
               children: [
                 ElevatedButton(
                     onPressed: _onCreateContest,
-                    child: const Text("Save changes")),
+                    child: const Text("Create contest")),
               ],
             ),
           ],
