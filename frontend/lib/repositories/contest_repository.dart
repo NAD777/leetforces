@@ -88,10 +88,11 @@ class ContestRepository {
   }
 
   Future<bool> createContest(String auth, String name, String description,
-      {List<int>? tasks,
-      bool? isClosed,
-      List<int>? tags}) async {
-    var dict = <String, dynamic>{"contest_name": name, "description": description};
+      {List<int>? tasks, bool? isClosed, List<int>? tags}) async {
+    var dict = <String, dynamic>{
+      "contest_name": name,
+      "description": description
+    };
     if (tasks != null) {
       dict["tasks_ids"] = tasks;
     }

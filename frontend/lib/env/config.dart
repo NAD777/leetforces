@@ -1,4 +1,4 @@
-var host = "http://localhost:5001";
+var host = "/api";
 var languages = [
   "Java",
   "Python",
