@@ -12,8 +12,10 @@ on:
 
 
 env:
+  # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
-  IMAGE_NAME: nad777/codetest_bot-juggler
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}-runner
 
 jobs:
   build:
