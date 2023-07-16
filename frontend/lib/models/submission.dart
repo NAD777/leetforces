@@ -9,6 +9,7 @@ class Submission {
   String submissionTime;
   int? memory;
   int? runtime;
+  String login;
 
   Submission(
       this.submissionId,
@@ -20,5 +21,6 @@ class Submission {
       this.testNumber,
       this.submissionTime,
       this.memory,
-      this.runtime);
+      this.runtime,
+      this.login);
 }

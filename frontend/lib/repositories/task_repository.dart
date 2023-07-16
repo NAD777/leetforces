@@ -73,7 +73,8 @@ class TaskRepository {
             e["test_number"],
             e["submission_time"],
             e["memory"],
-            e["runtime"]);
+            e["runtime"],
+            e["user_login"]);
       }).toList();
     } else {
       var json = jsonDecode(response.body) as Map<String, dynamic>;

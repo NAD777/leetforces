@@ -272,7 +272,8 @@ class _TaskSubmissionState extends State<TaskSubmission> {
                                       1,
                                       time,
                                       0,
-                                      0));
+                                      0,
+                                      userInfo.login));
                                 });
                               }
                             }
@@ -336,7 +337,7 @@ class _TaskSubmissionState extends State<TaskSubmission> {
                             children: <TableCell>[
                               if (isAdmin)
                                 TableCell(
-                                  child: Text(e.userId.toString()),
+                                  child: SizedBox(width: e.login.length * 8, child: Text(e.login)),
                                 ),
                               TableCell(
                                 child: InkWell(
