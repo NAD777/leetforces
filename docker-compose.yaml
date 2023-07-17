@@ -5,13 +5,13 @@ services:
   postgres:
     image: postgres
     networks:
-      - bot_backend
+      - front_back
     environment:
       POSTGRES_DB: "backbase"
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
-    ports:
-      - "8081:5432"
+    # ports:
+    #   - "8081:5432"
 
   juggler:
     build:
@@ -19,17 +19,16 @@ services:
       dockerfile: ./Dockerfile
     networks:
       - orchestrator_backend
-      - bot_backend
+      - front_back
     command: python -u -m flask run -h 0.0.0.0 -p 5001
     depends_on:
       - postgres
       - orchestrator
-    ports:
-      - "5001:5001"
+    # ports:
+    #   - "5001:5001"
     restart: unless-stopped
     environment:
       - ORCHESTRATOR=http://orchestrator:5000
-      - BOT=http://bot:8081
       - PASSWORD=postgres
 
   orchestrator:
@@ -48,7 +47,10 @@ services:
       - JUGGLER=http://juggler:5001
       - PROJECT_NAME=leetforces
       - DEBUG=False
+      - USE_REMOTE_IMAGE=False
       - NET_NAME=internal_net
+      - IMAGE_REGISRTY=ghcr.io/nad777/codetest_bot-runner
+      - CONTAINERS_MAX=5
     restart: unless-stopped
 
   flutter:
@@ -59,10 +61,25 @@ services:
     ports:
       - "8080:8080"
     networks:
-      - bot_backend
+      - front_back
+
+  nginx:
+    image: nginx
+    ports:
+      - 8000:8080
+    networks:
+      - front_back
+    volumes:
+      - type: bind
+        source: ./configs/nginx.conf
+        target: /etc/nginx/nginx.conf
+    depends_on:
+      - juggler
+      - orchestrator
+
 
 networks:
   internal_net:
-  bot_backend:
+  front_back:
     driver: bridge
   orchestrator_backend:
