@@ -211,6 +211,9 @@ def register():
             login=login,
             password=password
         )
+        if session.query(User).filter(User.role == Role.superAdmin).count() == 0:
+            new_user.role = Role.superAdmin
+
         new_user.tags.append(session.query(Tag).filter(Tag.name == "All").first())
         session.add(new_user)
         session.commit()
