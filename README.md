@@ -76,8 +76,8 @@ user submission container isolation is made for the security and modularity
 reasons.
 
 ## Technology stack
-Docker, docker-compose, GitHub actions CI/CD, Prometheus, Grafana, PostgreSQL,
-Dart, Flutter, Python, XMLRPC, nginx.
+Docker, docker-compose, GitHub actions CI/CD, PostgreSQL, Dart, Flutter, 
+Python, XMLRPC, nginx.
 
 ## Deployment
 We have
@@ -89,21 +89,13 @@ of user convenience.
 - Install docker-compose and docker packages according to your operating
 systems guidelines first.
 - Clone the project GitHub repository
-<!-- - Flutter installation -->
 
 ## Usage
 To build & run the project run in the project root directory
 ```bash
 docker-compose up
 ```
-<!-- And then you can access -->
-
-## Metrics
-To access metrics, go to http://localhost:3000/ and log in to Grafana with
-credentials provided via `docker-compose.yaml`, and then add the Prometheus
-data source (Prometheus service is configured to run at port 9090) and import
-the dashboard (dashboard configuration file is located in
-`/configs/dashboard.json`).
+And then you can access the site on the `http://localhost:8080/`
 
 ## License
 Licensed under MIT open license.
