@@ -18,6 +18,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
@@ -38,16 +41,16 @@ jobs:
           channel: 'stable'
 
       - name: Install dependencies
-        run: dart pub get
+        run: cd frontend && dart pub get
 
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed .
+        run: cd frontend && dart format --output=none --set-exit-if-changed .
 
       - name: Analyze project source
-        run: dart analyze --fatal-infos
+        run: cd frontend && dart analyze --fatal-infos
       
       - name: Build Web
-        run: flutter build web --release
+        run: cd frontend && flutter build web --release
       
       - name: Log in to the Registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
