@@ -337,7 +337,9 @@ class _TaskSubmissionState extends State<TaskSubmission> {
                             children: <TableCell>[
                               if (isAdmin)
                                 TableCell(
-                                  child: SizedBox(width: e.login.length * 8, child: Text(e.login)),
+                                  child: SizedBox(
+                                      width: e.login.length * 8,
+                                      child: Text(e.login)),
                                 ),
                               TableCell(
                                 child: InkWell(
