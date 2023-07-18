@@ -10,6 +10,7 @@ RUN dart pub global activate dhttpd
 ENV PATH="${PATH}:/root/.pub-cache/bin"
 COPY frontend /app
 RUN git config --global --add safe.directory /app/flutter
+RUN dart pub get
 RUN flutter build web --release
 WORKDIR /app/build/web
 ENTRYPOINT ["/root/.pub-cache/bin/dhttpd", "--host=0.0.0.0"]
