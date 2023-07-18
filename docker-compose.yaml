@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.3"
 
 services:
 
@@ -10,8 +10,6 @@ services:
       POSTGRES_DB: "backbase"
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
-    # ports:
-    #   - "8081:5432"
 
   juggler:
     build:
@@ -24,8 +22,6 @@ services:
     depends_on:
       - postgres
       - orchestrator
-    # ports:
-    #   - "5001:5001"
     restart: unless-stopped
     environment:
       - ORCHESTRATOR=http://orchestrator:5000
@@ -55,11 +51,8 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: ./frontend/Dockerfile
-    command: /root/.pub-cache/bin/dhttpd --host=0.0.0.0
-    ports:
-      - "8080:8080"
+      context: ./frontend
+      dockerfile: ./Dockerfile
     networks:
       - front_back
 
