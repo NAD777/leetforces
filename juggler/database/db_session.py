@@ -1,10 +1,19 @@
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 from sqlalchemy.orm import Session
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import registry
+
 import sqlalchemy.ext.declarative as dec
 
-SqlAlchemyBase = dec.declarative_base()
-PASSWORD = "postgres"
+
+class SqlAlchemyBase(DeclarativeBase):
+    pass
+
+
+import os
+
+PASSWORD = os.environ['PASSWORD']
 __factory = None
 
 
@@ -24,7 +33,7 @@ def global_init(db_file):
 
     from time import sleep
     sleep(2)
-    engine = sa.create_engine(conn_str, echo=False)
+    engine = sa.create_engine(conn_str, echo=False, pool_size=50, max_overflow=1000)
     __factory = orm.sessionmaker(bind=engine)
 
     SqlAlchemyBase.metadata.create_all(engine)
