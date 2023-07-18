@@ -73,7 +73,7 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: frontend
           file: ./frontend/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
