@@ -95,7 +95,7 @@ To build & run the project run in the project root directory
 ```bash
 docker-compose up
 ```
-And then you can access the site on the `http://localhost:8080/`
+And then you can access the site on the `http://localhost:8000/`
 
 ## License
 Licensed under MIT open license.
