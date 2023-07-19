@@ -3,11 +3,11 @@ name: Build Runner
 on:
   push:
     paths:
-      - 'orchestrator/runnner.py'
+      - 'orchestrator/'
     branches: [ "main", "ci/cd" ]
   pull_request:
     paths:
-      - 'orchestrator/runnner.py'
+      - 'orchestrator/'
     branches: [ "main", "ci/cd" ]
 
 
