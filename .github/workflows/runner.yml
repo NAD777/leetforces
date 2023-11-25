@@ -1,6 +1,7 @@
 name: Build Runner
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'orchestrator/'
