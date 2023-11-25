@@ -6,10 +6,10 @@ RUN pip install pyyaml
 
 WORKDIR /app
 
-COPY ./runners/runner.py ./
-COPY ./runners/judge_types.py ./
-COPY ./runners/run.sh ./
-COPY ./runners/test.sh ./
+COPY ./runner.py ./
+COPY ./judge_types.py ./
+COPY ./run.sh ./
+COPY ./test.sh ./
 
 # RUN chmod +rw ../app
 # RUN mkdir submissions test_data
