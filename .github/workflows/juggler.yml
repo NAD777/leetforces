@@ -1,6 +1,7 @@
 name: Build Juggler
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'juggler/**'
