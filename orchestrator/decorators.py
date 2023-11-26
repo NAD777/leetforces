@@ -10,11 +10,12 @@ _runner_docker_image: Image | None = None
 
 PROJECT_NAME = environ["PROJECT_NAME"]
 # TODO: parse _CONTAINERS_MAX from config file somehow
-_CONTAINERS_MAX = 5
+_CONTAINERS_MAX = int(environ["CONTAINERS_MAX"])
 _CURRENT_CONTAINERS = 0
 _WAIT_TIME = 1
 DEBUG = environ["DEBUG"]
 NET_NAME = environ["NET_NAME"]
+_USE_REMOTE_IMAGE = environ["USE_REMOTE_IMAGE"]
 
 #TODO: debug and run configurations
 def _create_image(instance: dockerapi.APIClass,
@@ -40,20 +41,20 @@ def _create_image(instance: dockerapi.APIClass,
                                     .get_image(f"{PROJECT_NAME}-runner")
 
     # do not build/pull if object is already present
-    if not DEBUG and _runner_docker_image is not None:
+    if _USE_REMOTE_IMAGE != "True" and _runner_docker_image is not None:
         return _runner_docker_image
 
-    if DEBUG:
+    if _USE_REMOTE_IMAGE != "True":
         # build the runner image if in debug mode, i.e. with assumption
         # that the runner source code might have changed
         _runner_docker_image = instance.build_image(
                 f"{PROJECT_NAME}-runner", ".",
-                "./runners/runner.Dockerfile", False)
+                "./orchestrator/runner.Dockerfile", False)
     else:
         # pull the runner image from the DockerHub registry for faster
         # execution
         _runner_docker_image = instance.pull_image(
-                "ghcr.io/nad777/codetest_bot-runner", "latest")
+                "ghcr.io/nad777/leetforces-runner", "latest")
     assert _runner_docker_image is not None
     return _runner_docker_image
 

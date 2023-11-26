@@ -6,10 +6,11 @@ RUN pip install pyyaml
 
 WORKDIR /app
 
-COPY ./runners/runner.py ./
-COPY ./runners/judge_types.py ./
-COPY ./runners/run.sh ./
-COPY ./runners/test.sh ./
+COPY ./orchestrator/runner.py ./
+COPY ./orchestrator/judge_types.py ./
+COPY ./orchestrator/run.sh ./
+COPY ./orchestrator/test.sh ./
+COPY ./orchestrator/runner.Dockerfile ./
 
 # RUN chmod +rw ../app
 # RUN mkdir submissions test_data

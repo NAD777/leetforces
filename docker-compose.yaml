@@ -42,11 +42,11 @@ services:
     environment:
       - JUGGLER=http://juggler:5001
       - PROJECT_NAME=leetforces
-      - DEBUG=False
+      - DEBUG=True
       - USE_REMOTE_IMAGE=False
       - NET_NAME=internal_net
       - IMAGE_REGISRTY=ghcr.io/nad777/codetest_bot-runner
-      - CONTAINERS_MAX=5
+      - CONTAINERS_MAX=20
     restart: unless-stopped
 
   frontend:
