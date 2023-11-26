@@ -14,8 +14,8 @@ COPY ./orchestrator/decorators.py .
 COPY ./orchestrator/judge_types.py .
 COPY ./configs/ ./configs/
 
-COPY ./orchestrator/runner.py ./
-COPY ./orchestrator/judge_types.py ./
-COPY ./orchestrator/run.sh ./
-COPY ./orchestrator/test.sh ./
-COPY ./orchestrator/runner.Dockerfile ./
+COPY ./orchestrator/runner.py ./orchestrator/
+COPY ./orchestrator/judge_types.py ./orchestrator/
+COPY ./orchestrator/run.sh ./orchestrator/
+COPY ./orchestrator/test.sh ./orchestrator/
+COPY ./orchestrator/runner.Dockerfile ./orchestrator/
