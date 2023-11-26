@@ -48,7 +48,7 @@ def _create_image(instance: dockerapi.APIClass,
         # that the runner source code might have changed
         _runner_docker_image = instance.build_image(
                 f"{PROJECT_NAME}-runner", ".",
-                "./runners/runner.Dockerfile", False)
+                "./runner.Dockerfile", False)
     else:
         # pull the runner image from the DockerHub registry for faster
         # execution
